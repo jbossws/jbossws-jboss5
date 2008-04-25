@@ -2,28 +2,50 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   
-  <name>JBoss Web Services - Container JBoss-5.0.1</name>
+  <name>JBoss Web Services - Container JBoss-5.0.0</name>
   <groupId>org.jboss.ws</groupId>
-  <artifactId>jbossws-jboss501</artifactId>
+  <artifactId>jbossws-jboss500</artifactId>
   
   <version>3.0.0-SNAPSHOT</version>
   
   <!-- Parent -->
   <parent>
-    <groupId>org.jboss.jbossas</groupId>
-    <artifactId>jboss-as-component-matrix</artifactId>
-    <version>5.0.0-SNAPSHOT</version>
+    <groupId>org.jboss.ws</groupId>
+    <artifactId>jbossws-parent</artifactId>
+    <version>1.0-SNAPSHOT</version>
   </parent>
   
   <!-- Properties -->
   <properties>
+    <!-- Use this version and have a look at jbossws-jboss422 on how to declare the dependencies -->
+    <!--jboss.version>5.0.0.Beta4</jboss.version-->
     <jboss.version>5.0.0-SNAPSHOT</jboss.version>
     <jbossws.common.version>3.0.0-SNAPSHOT</jbossws.common.version>
     <jbossws.spi.version>3.0.0-SNAPSHOT</jbossws.spi.version>
   </properties>
   
+  <!-- DependencyManagement -->
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.jboss.jbossas</groupId>
+        <artifactId>jboss-as-component-matrix</artifactId>
+        <version>${jboss.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  
   <!-- Dependencies -->
   <dependencies>
+    
+    <!-- FIXME: Remove this dependency -->
+    <dependency>
+      <groupId>org.jboss.ws</groupId>
+      <artifactId>jbossws-framework</artifactId>
+      <version>3.0.2-SNAPSHOT</version>
+    </dependency>
     
     <!-- jbossws dependencies -->
     <dependency>
@@ -38,6 +60,13 @@
     </dependency>
     
     <!-- provided apis -->
+    
+    <!-- jboss dependencies -->
+      <dependency>
+        <groupId>org.jboss.jbossas</groupId>
+        <artifactId>jboss-as-server</artifactId>
+        <version>${jboss.version}</version>
+      </dependency>
     
     <!-- jboss thirdparty dependencies -->
     <dependency>
@@ -56,6 +85,14 @@
       <groupId>org.jboss.ejb3</groupId>
       <artifactId>jboss-ejb3-core</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.jboss.ejb3</groupId>
+      <artifactId>jboss-ejb3-ext-api</artifactId>
+    </dependency>
+      <dependency>
+        <groupId>org.jboss.security</groupId>
+        <artifactId>jboss-security-spi</artifactId>
+      </dependency>
   </dependencies>
   
   <!-- Plugins -->
@@ -65,9 +102,6 @@
         <targetPath>../etc</targetPath>
         <directory>src/main/etc</directory>
         <filtering>true</filtering>
-      </resource>
-      <resource>
-        <directory>src/main/resources/jbossws-jboss50.jar</directory>
       </resource>
     </resources>
     <plugins>
@@ -100,6 +134,7 @@
             </goals>
             <configuration>
               <descriptors>
+                <descriptor>src/main/scripts/assembly-container.xml</descriptor>
                 <descriptor>src/main/scripts/assembly-resources.xml</descriptor>
               </descriptors>
             </configuration>
