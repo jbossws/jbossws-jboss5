@@ -1,14 +1,14 @@
-<project name="jboss/jbossws-jboss501">
+<project name="jboss/jbossws-jboss500">
   
-  <component id="jboss/jbossws-jboss501"
+  <component id="jboss/jbossws-jboss500"
     description="JBossWS container integration layer" 
     version="${version}"
     licenseType="lgpl">
     
-    <artifact id="jbossws-jboss501.jar"/>
-    <artifact id="jbossws-jboss501-container.jar"/>
-    <artifact id="jbossws-jboss501-resources.zip"/>
-    <artifact id="jbossws-jboss501-src.jar"/>
+    <artifact id="jbossws-jboss500.jar"/>
+    <artifact id="jbossws-jboss500-container.jar"/>
+    <artifact id="jbossws-jboss500-resources.zip"/>
+    <artifact id="jbossws-jboss500-src.jar"/>
     
     <import componentref="jboss/jbossws-common">
       <compatible version="${jbossws.common.version}"/>
@@ -18,7 +18,7 @@
     </import>
     
     <export>
-      <include input="jbossws-jboss501.jar"/>
+      <include input="jbossws-jboss500.jar"/>
     </export>
     
   </component>
