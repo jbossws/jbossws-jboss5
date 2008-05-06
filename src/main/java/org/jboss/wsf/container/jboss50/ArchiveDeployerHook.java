@@ -31,7 +31,6 @@ import org.jboss.virtual.VirtualFile;
 import org.jboss.wsf.common.DOMUtils;
 import org.jboss.wsf.spi.deployment.Deployment;
 import org.jboss.wsf.spi.deployment.UnifiedVirtualFile;
-import org.jboss.wsf.spi.deployment.Deployment.DeploymentType;
 import org.jboss.wsf.spi.deployment.WSFDeploymentException;
 import org.jboss.wsf.spi.metadata.webservices.WebservicesFactory;
 import org.jboss.wsf.spi.metadata.webservices.WebservicesMetaData;
@@ -92,7 +91,7 @@ public abstract class ArchiveDeployerHook extends AbstractDeployerHook
             dep.addAttachment(DeploymentUnit.class, unit);
          }
 
-         getDeploymentAspectManager().deploy(dep);
+         getDeploymentAspectManager().create(dep, null);
          unit.addAttachment(Deployment.class, dep);
       }
    }
@@ -106,7 +105,8 @@ public abstract class ArchiveDeployerHook extends AbstractDeployerHook
       if (dep != null)
       {
          log.debug("undeploy: " + unit.getName());
-         getDeploymentAspectManager().undeploy(dep);
+         getDeploymentAspectManager().stop(dep, null);
+         getDeploymentAspectManager().destroy(dep, null);
       }
    }
 

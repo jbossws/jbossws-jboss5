@@ -27,6 +27,7 @@ import org.jboss.metadata.ejb.jboss.JBossMetaData;
 import org.jboss.metadata.web.jboss.JBossWebMetaData;
 import org.jboss.wsf.spi.deployment.Deployment;
 import org.jboss.wsf.spi.deployment.DeploymentAspect;
+import org.jboss.wsf.spi.WSFRuntime;
 import org.jboss.ejb3.Ejb3Deployment;
 
 /**
@@ -38,7 +39,7 @@ import org.jboss.ejb3.Ejb3Deployment;
 public class RuntimeLoaderDeploymentAspect extends DeploymentAspect
 {
 
-   public void create(Deployment dep)
+   public void start(Deployment dep, WSFRuntime runtime)
    {
 
       // JSE endpoints

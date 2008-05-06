@@ -19,7 +19,7 @@
    <properties>
       <!--
         JBoss component versions taken from
-        http://snapshots.jboss.org/maven2/org/jboss/jbossas/jboss-as-component-matrix/5.0.0-SNAPSHOT
+        https://svn.jboss.org/repos/jbossas/tags/JBoss_5_0_0_Beta4/webservices/pom.xml
       -->
 
    </properties>
@@ -27,7 +27,11 @@
    <!-- DependencyManagement -->
    <dependencyManagement>
       <dependencies>
-
+         <dependency>
+            <groupId>org.jboss.jbossas</groupId>
+            <artifactId>jboss-as-server</artifactId>
+            <version>5.0.0.Beta4</version>
+         </dependency>
          <dependency>
             <groupId>org.jboss.security</groupId>
             <artifactId>jboss-security-spi-bare</artifactId>
@@ -43,6 +47,7 @@
             <artifactId>jboss-common-core</artifactId>
             <version>2.2.3.GA</version>
          </dependency>
+
          <dependency>
             <groupId>org.jboss.jbossas</groupId>
             <artifactId>jboss-as-ejb3</artifactId>
@@ -53,6 +58,12 @@
             <artifactId>jboss-as-ejb3-ext-API</artifactId>
             <version>0.1.2.Beta1</version>
          </dependency>
+         <dependency>
+            <groupId>org.jboss.jbossas</groupId>
+            <artifactId>jboss-as-ejb3-core</artifactId>
+            <version>0.1.2.Beta1</version>
+         </dependency>
+
          <dependency>
             <groupId>org.jboss.aop</groupId>
             <artifactId>jboss-aop</artifactId>
@@ -78,6 +89,7 @@
             <artifactId>jboss-as-j2se</artifactId>
             <version>5.0.0.Beta4</version>
          </dependency>
+
          <dependency>
             <groupId>jboss.jbossws</groupId>
             <artifactId>jboss-jaxws</artifactId>
@@ -88,11 +100,23 @@
             <artifactId>jboss-saaj</artifactId>
             <version>2.0.3.GA</version>
          </dependency>
+
          <dependency>
-            <groupId>jboss</groupId>
-            <artifactId>jbossws-framework</artifactId>
-            <version>2.0.3.GA</version>
+            <groupId>org.jboss.ws</groupId>
+            <artifactId>jbossws-spi</artifactId>
+            <version>3.0.0-SNAPSHOT</version>
          </dependency>
+         <dependency>
+            <groupId>org.jboss.ws</groupId>
+            <artifactId>jbossws-common</artifactId>
+            <version>3.0.0-SNAPSHOT</version>
+         </dependency>
+         <dependency>
+            <groupId>org.jboss.ws</groupId>
+            <artifactId>jbossws-framework</artifactId>
+            <version>3.0.2-SNAPSHOT</version>
+         </dependency>
+
          <dependency>
             <groupId>org.jboss.microcontainer</groupId>
             <artifactId>jboss-deployers-spi</artifactId>
@@ -113,16 +137,7 @@
             <artifactId>jboss-deployers-core-spi</artifactId>
             <version>2.0.0.Beta10</version>
          </dependency>
-         <dependency>
-            <groupId>jboss</groupId>
-            <artifactId>jbossws-spi</artifactId>
-            <version>1.0.1.GA</version>
-         </dependency>
-         <dependency>
-            <groupId>jboss</groupId>
-            <artifactId>jbossws-common</artifactId>
-            <version>1.0.3.GA</version>
-         </dependency>
+
          <dependency>
             <groupId>org.jboss.security</groupId>
             <artifactId>jbosssx-client</artifactId>
@@ -133,11 +148,6 @@
             <artifactId>jboss-deployers-vfs-spi</artifactId>
             <version>2.0.0.Beta10</version>
          </dependency>
-         <dependency>
-            <groupId>org.jboss.jbossas</groupId>
-            <artifactId>jboss-as-server</artifactId>
-            <version>5.0.0.Beta4</version>
-         </dependency>
       </dependencies>
    </dependencyManagement>
 
@@ -146,11 +156,11 @@
 
       <!-- jbossws dependencies -->
       <dependency>
-         <groupId>jboss</groupId>
+         <groupId>org.jboss.ws</groupId>
          <artifactId>jbossws-common</artifactId>
       </dependency>
       <dependency>
-         <groupId>jboss</groupId>
+         <groupId>org.jboss.ws</groupId>
          <artifactId>jbossws-spi</artifactId>
       </dependency>
 
@@ -168,12 +178,14 @@
       <dependency>
          <groupId>org.jboss.jbossas</groupId>
          <artifactId>jboss-as-ejb3</artifactId>
-         <scope>provided</scope>
       </dependency>
       <dependency>
          <groupId>org.jboss.jbossas</groupId>
          <artifactId>jboss-as-ejb3-ext-API</artifactId>
-         <scope>provided</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.jboss.jbossas</groupId>
+         <artifactId>jboss-as-ejb3-core</artifactId>
       </dependency>
       <dependency>
          <groupId>org.jboss.security</groupId>
@@ -181,7 +193,7 @@
       </dependency>
 
       <dependency>
-         <groupId>jboss</groupId>
+         <groupId>org.jboss.ws</groupId>
          <artifactId>jbossws-framework</artifactId>
       </dependency>
 

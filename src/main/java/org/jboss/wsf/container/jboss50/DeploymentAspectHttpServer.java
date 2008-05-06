@@ -86,7 +86,8 @@ public class DeploymentAspectHttpServer extends AbstractExtensible implements Ht
          // Deploy using deployment aspects
          DeploymentAspectManagerFactory depManagerFactory = spiProvider.getSPI(DeploymentAspectManagerFactory.class);
          DeploymentAspectManager depManager = depManagerFactory.getDeploymentAspectManager("WSDeploymentAspectManagerEndpointAPI");
-         depManager.deploy(dep);
+         depManager.create(dep, null);
+         depManager.start(dep, null);
       }
       catch (RuntimeException rte)
       {

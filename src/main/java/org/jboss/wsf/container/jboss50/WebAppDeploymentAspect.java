@@ -36,6 +36,7 @@ import org.jboss.virtual.VirtualFile;
 import org.jboss.wsf.spi.deployment.Deployment;
 import org.jboss.wsf.spi.deployment.DeploymentAspect;
 import org.jboss.wsf.spi.deployment.WSFDeploymentException;
+import org.jboss.wsf.spi.WSFRuntime;
 
 /**
  * Publish the HTTP service endpoint to Tomcat 
@@ -62,7 +63,7 @@ public class WebAppDeploymentAspect extends DeploymentAspect
       this.webXMLRewriter = serviceEndpointPublisher;
    }
 
-   public void create(Deployment dep)
+   public void create(Deployment dep, WSFRuntime runtime)
    {
       URL warURL = (URL)dep.getProperty(WebAppDesciptorModifier.PROPERTY_WEBAPP_URL);
       if (warURL == null)
@@ -88,7 +89,7 @@ public class WebAppDeploymentAspect extends DeploymentAspect
       }
    }
 
-   public void destroy(Deployment dep)
+   public void destroy(Deployment dep, WSFRuntime runtime)
    {
       URL warURL = (URL)dep.getProperty(WebAppDesciptorModifier.PROPERTY_WEBAPP_URL);
       if (warURL == null)

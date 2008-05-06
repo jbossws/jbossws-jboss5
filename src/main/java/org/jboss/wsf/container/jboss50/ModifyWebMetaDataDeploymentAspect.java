@@ -34,6 +34,7 @@ import org.jboss.metadata.web.spec.ServletMetaData;
 import org.jboss.wsf.spi.deployment.Deployment;
 import org.jboss.wsf.spi.deployment.DeploymentAspect;
 import org.jboss.wsf.spi.deployment.Endpoint;
+import org.jboss.wsf.spi.WSFRuntime;
 
 /**
  * A deployer that modifies the web.xml meta data 
@@ -44,7 +45,7 @@ import org.jboss.wsf.spi.deployment.Endpoint;
 public class ModifyWebMetaDataDeploymentAspect extends DeploymentAspect
 {
    @Override
-   public void create(Deployment dep)
+   public void create(Deployment dep, WSFRuntime runtime)
    {
       String servletClass = (String)dep.getProperty(WebAppDesciptorModifier.PROPERTY_WEBAPP_SERVLET_CLASS);
       if (servletClass == null)
