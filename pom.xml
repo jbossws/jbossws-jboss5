@@ -1,263 +1,242 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-   <modelVersion>4.0.0</modelVersion>
-
-   <name>JBoss Web Services - Container JBoss-5.0.0</name>
-   <groupId>org.jboss.ws</groupId>
-   <artifactId>jbossws-jboss500</artifactId>
-
-   <version>3.0.0-SNAPSHOT</version>
-
-   <!-- Parent -->
-   <parent>
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  
+  <name>JBoss Web Services - Container JBoss-5.0.0</name>
+  <groupId>org.jboss.ws</groupId>
+  <artifactId>jbossws-jboss500</artifactId>
+  
+  <version>3.0.0-SNAPSHOT</version>
+  
+  <!-- Parent -->
+  <parent>
+    <groupId>org.jboss.ws</groupId>
+    <artifactId>jbossws-parent</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+  
+  <!-- Properties -->
+  <properties>
+    <!--
+    JBoss component versions taken from
+    https://svn.jboss.org/repos/jbossas/tags/JBoss_5_0_0_Beta4/webservices/pom.xml
+    -->
+    
+  </properties>
+  
+  <!-- DependencyManagement -->
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.jboss.jbossas</groupId>
+        <artifactId>jboss-as-server</artifactId>
+        <version>5.0.0.Beta4</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.jbossas</groupId>
+        <artifactId>jboss-metadata</artifactId>
+        <version>5.0.0.Beta4</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.security</groupId>
+        <artifactId>jboss-security-spi-bare</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss</groupId>
+        <artifactId>jboss-vfs</artifactId>
+        <version>2.0.0.Beta9</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss</groupId>
+        <artifactId>jboss-common-core</artifactId>
+        <version>2.2.3.GA</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>org.jboss.jbossas</groupId>
+        <artifactId>jboss-as-ejb3</artifactId>
+        <version>0.1.2.Beta1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.jbossas</groupId>
+        <artifactId>jboss-as-ejb3-ext-API</artifactId>
+        <version>0.1.2.Beta1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.jbossas</groupId>
+        <artifactId>jboss-as-ejb3-core</artifactId>
+        <version>0.1.2.Beta1</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>org.jboss.aop</groupId>
+        <artifactId>jboss-aop</artifactId>
+        <version>2.0.0.CR7</version>
+      </dependency>
+      <dependency>
+        <groupId>jboss</groupId>
+        <artifactId>jboss-common-logging-spi</artifactId>
+        <version>2.0.2.GA</version>
+      </dependency>
+      <dependency>
+        <groupId>dom4j</groupId>
+        <artifactId>dom4j</artifactId>
+        <version>1.6.1-brew</version>
+      </dependency>
+      <dependency>
+        <groupId>jboss.jbossws</groupId>
+        <artifactId>jboss-jaxrpc</artifactId>
+        <version>2.0.3.GA</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.jbossas</groupId>
+        <artifactId>jboss-as-j2se</artifactId>
+        <version>5.0.0.Beta4</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>jboss.jbossws</groupId>
+        <artifactId>jboss-jaxws</artifactId>
+        <version>2.0.3.GA</version>
+      </dependency>
+      <dependency>
+        <groupId>jboss.jbossws</groupId>
+        <artifactId>jboss-saaj</artifactId>
+        <version>2.0.3.GA</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>org.jboss.ws</groupId>
+        <artifactId>jbossws-spi</artifactId>
+        <version>3.0.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.ws</groupId>
+        <artifactId>jbossws-common</artifactId>
+        <version>3.0.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.ws</groupId>
+        <artifactId>jbossws-framework</artifactId>
+        <version>3.0.2-SNAPSHOT</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>org.jboss.microcontainer</groupId>
+        <artifactId>jboss-deployers-spi</artifactId>
+        <version>2.0.0.Beta10</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.microcontainer</groupId>
+        <artifactId>jboss-deployers-structure-spi</artifactId>
+        <version>2.0.0.Beta10</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.microcontainer</groupId>
+        <artifactId>jboss-deployers-client-spi</artifactId>
+        <version>2.0.0.Beta10</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.microcontainer</groupId>
+        <artifactId>jboss-deployers-core-spi</artifactId>
+        <version>2.0.0.Beta10</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>org.jboss.security</groupId>
+        <artifactId>jbosssx-client</artifactId>
+        <version>2.0.2.Beta4</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.microcontainer</groupId>
+        <artifactId>jboss-deployers-vfs-spi</artifactId>
+        <version>2.0.0.Beta10</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  
+  <!-- Dependencies -->
+  <dependencies>
+    
+    <!-- jbossws dependencies -->
+    <dependency>
       <groupId>org.jboss.ws</groupId>
-      <artifactId>jbossws-parent</artifactId>
-      <version>1.0-SNAPSHOT</version>
-   </parent>
-
-   <!-- Properties -->
-   <properties>
-      <!--
-        JBoss component versions taken from
-        https://svn.jboss.org/repos/jbossas/tags/JBoss_5_0_0_Beta4/webservices/pom.xml
-      -->
-
-   </properties>
-
-   <!-- DependencyManagement -->
-   <dependencyManagement>
-      <dependencies>
-         <dependency>
-            <groupId>org.jboss.jbossas</groupId>
-            <artifactId>jboss-as-server</artifactId>
-            <version>5.0.0.Beta4</version>
-         </dependency>
-         <dependency>
-            <groupId>org.jboss.jbossas</groupId>
-            <artifactId>jboss-metadata</artifactId>
-            <version>5.0.0.Beta4</version>
-         </dependency>
-         <dependency>
-            <groupId>org.jboss.security</groupId>
-            <artifactId>jboss-security-spi-bare</artifactId>
-            <version></version>
-         </dependency>
-         <dependency>
-            <groupId>org.jboss</groupId>
-            <artifactId>jboss-vfs</artifactId>
-            <version>2.0.0.Beta9</version>
-         </dependency>
-         <dependency>
-            <groupId>org.jboss</groupId>
-            <artifactId>jboss-common-core</artifactId>
-            <version>2.2.3.GA</version>
-         </dependency>
-
-         <dependency>
-            <groupId>org.jboss.jbossas</groupId>
-            <artifactId>jboss-as-ejb3</artifactId>
-            <version>0.1.2.Beta1</version>
-         </dependency>
-         <dependency>
-            <groupId>org.jboss.jbossas</groupId>
-            <artifactId>jboss-as-ejb3-ext-API</artifactId>
-            <version>0.1.2.Beta1</version>
-         </dependency>
-         <dependency>
-            <groupId>org.jboss.jbossas</groupId>
-            <artifactId>jboss-as-ejb3-core</artifactId>
-            <version>0.1.2.Beta1</version>
-         </dependency>
-
-         <dependency>
-            <groupId>org.jboss.aop</groupId>
-            <artifactId>jboss-aop</artifactId>
-            <version>2.0.0.CR7</version>
-         </dependency>
-         <dependency>
-            <groupId>jboss</groupId>
-            <artifactId>jboss-common-logging-spi</artifactId>
-            <version>2.0.2.GA</version>
-         </dependency>
-         <dependency>
-            <groupId>dom4j</groupId>
-            <artifactId>dom4j</artifactId>
-            <version>1.6.1-brew</version>
-         </dependency>
-         <dependency>
-            <groupId>jboss.jbossws</groupId>
-            <artifactId>jboss-jaxrpc</artifactId>
-            <version>2.0.3.GA</version>
-         </dependency>
-         <dependency>
-            <groupId>org.jboss.jbossas</groupId>
-            <artifactId>jboss-as-j2se</artifactId>
-            <version>5.0.0.Beta4</version>
-         </dependency>
-
-         <dependency>
-            <groupId>jboss.jbossws</groupId>
-            <artifactId>jboss-jaxws</artifactId>
-            <version>2.0.3.GA</version>
-         </dependency>
-         <dependency>
-            <groupId>jboss.jbossws</groupId>
-            <artifactId>jboss-saaj</artifactId>
-            <version>2.0.3.GA</version>
-         </dependency>
-
-         <dependency>
-            <groupId>org.jboss.ws</groupId>
-            <artifactId>jbossws-spi</artifactId>
-            <version>3.0.0-SNAPSHOT</version>
-         </dependency>
-         <dependency>
-            <groupId>org.jboss.ws</groupId>
-            <artifactId>jbossws-common</artifactId>
-            <version>3.0.0-SNAPSHOT</version>
-         </dependency>
-         <dependency>
-            <groupId>org.jboss.ws</groupId>
-            <artifactId>jbossws-framework</artifactId>
-            <version>3.0.2-SNAPSHOT</version>
-         </dependency>
-
-         <dependency>
-            <groupId>org.jboss.microcontainer</groupId>
-            <artifactId>jboss-deployers-spi</artifactId>
-            <version>2.0.0.Beta10</version>
-         </dependency>
-         <dependency>
-            <groupId>org.jboss.microcontainer</groupId>
-            <artifactId>jboss-deployers-structure-spi</artifactId>
-            <version>2.0.0.Beta10</version>
-         </dependency>
-         <dependency>
-            <groupId>org.jboss.microcontainer</groupId>
-            <artifactId>jboss-deployers-client-spi</artifactId>
-            <version>2.0.0.Beta10</version>
-         </dependency>
-         <dependency>
-            <groupId>org.jboss.microcontainer</groupId>
-            <artifactId>jboss-deployers-core-spi</artifactId>
-            <version>2.0.0.Beta10</version>
-         </dependency>
-
-         <dependency>
-            <groupId>org.jboss.security</groupId>
-            <artifactId>jbosssx-client</artifactId>
-            <version>2.0.2.Beta4</version>
-         </dependency>
-         <dependency>
-            <groupId>org.jboss.microcontainer</groupId>
-            <artifactId>jboss-deployers-vfs-spi</artifactId>
-            <version>2.0.0.Beta10</version>
-         </dependency>
-      </dependencies>
-   </dependencyManagement>
-
-   <!-- Dependencies -->
-   <dependencies>
-
-      <!-- jbossws dependencies -->
-      <dependency>
-         <groupId>org.jboss.ws</groupId>
-         <artifactId>jbossws-common</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.jboss.ws</groupId>
-         <artifactId>jbossws-spi</artifactId>
-      </dependency>
-                                                                                          
-      <!-- jboss provided dependencies -->
-      <dependency>
-         <groupId>org.jboss.jbossas</groupId>
-         <artifactId>jboss-as-server</artifactId>
-         <scope>provided</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.jboss.jbossas</groupId>
-         <artifactId>jboss-metadata</artifactId>         
-      </dependency>
-      <dependency>
-         <groupId>org.jboss.microcontainer</groupId>
-         <artifactId>jboss-deployers-structure-spi</artifactId>
-         <scope>provided</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.jboss.jbossas</groupId>
-         <artifactId>jboss-as-ejb3</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.jboss.jbossas</groupId>
-         <artifactId>jboss-as-ejb3-ext-API</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.jboss.jbossas</groupId>
-         <artifactId>jboss-as-ejb3-core</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.jboss.security</groupId>
-         <artifactId>jbosssx-client</artifactId>
-      </dependency>
-
-      <dependency>
-         <groupId>org.jboss.ws</groupId>
-         <artifactId>jbossws-framework</artifactId>
-      </dependency>
-
-   </dependencies>
-
-   <!-- Plugins -->
-   <build>
-      <resources>
-         <resource>
-            <targetPath>../etc</targetPath>
-            <directory>src/main/etc</directory>
-            <filtering>true</filtering>
-         </resource>
-         <resource>
-            <directory>src/main/resources/jbossws-jboss50.jar</directory>
-         </resource>
-      </resources>
-      <plugins>
-         <plugin>
-            <artifactId>maven-antrun-plugin</artifactId>
-            <executions>
-               <execution>
-                  <phase>install</phase>
-                  <goals>
-                     <goal>run</goal>
-                  </goals>
-                  <configuration>
-                     <tasks>
-                        <property name="artifact.id" value="${project.artifactId}"/>
-                        <property name="version.id" value="${project.version}"/>
-                        <property name="jboss.local.repository" value="${jboss.local.repository}"/>
-                        <ant antfile="src/main/scripts/antrun-install.xml" target="install"/>
-                     </tasks>
-                  </configuration>
-               </execution>
-            </executions>
-         </plugin>
-         <plugin>
-            <artifactId>maven-assembly-plugin</artifactId>
-            <executions>
-               <execution>
-                  <phase>package</phase>
-                  <goals>
-                     <goal>single</goal>
-                  </goals>
-                  <configuration>
-                     <descriptors>
-                        <!--descriptor>src/main/scripts/assembly-container.xml</descriptor-->
-                        <descriptor>src/main/scripts/assembly-resources.xml</descriptor>
-                     </descriptors>
-                  </configuration>
-               </execution>
-            </executions>
-         </plugin>
-      </plugins>
-   </build>
-
+      <artifactId>jbossws-common</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.ws</groupId>
+      <artifactId>jbossws-spi</artifactId>
+    </dependency>
+    
+    <!-- jboss provided dependencies -->
+    <dependency>
+      <groupId>org.jboss.jbossas</groupId>
+      <artifactId>jboss-as-server</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.jbossas</groupId>
+      <artifactId>jboss-metadata</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.microcontainer</groupId>
+      <artifactId>jboss-deployers-structure-spi</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.jbossas</groupId>
+      <artifactId>jboss-as-ejb3</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.jbossas</groupId>
+      <artifactId>jboss-as-ejb3-ext-API</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.jbossas</groupId>
+      <artifactId>jboss-as-ejb3-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.security</groupId>
+      <artifactId>jbosssx-client</artifactId>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.jboss.ws</groupId>
+      <artifactId>jbossws-framework</artifactId>
+    </dependency>
+    
+  </dependencies>
+  
+  <!-- Plugins -->
+  <build>
+    <resources>
+      <resource>
+        <targetPath>../etc</targetPath>
+        <directory>src/main/etc</directory>
+        <filtering>true</filtering>
+      </resource>
+      <resource>
+        <directory>src/main/resources/jbossws-jboss50.jar</directory>
+      </resource>
+    </resources>
+    <plugins>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>src/main/scripts/assembly-resources.xml</descriptor>
+              </descriptors>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+  
 </project>
