@@ -24,6 +24,7 @@ package org.jboss.wsf.container.jboss50;
 // $Id$
 
 import org.jboss.deployers.structure.spi.DeploymentUnit;
+import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.wsf.spi.deployment.Deployment;
 import org.jboss.wsf.spi.metadata.webservices.WebservicesMetaData;
 
@@ -33,6 +34,25 @@ import org.jboss.wsf.spi.metadata.webservices.WebservicesMetaData;
  */
 public class JAXWSDeployerHookPostJSE extends DeployerHookPostJSE
 {
+   /**
+    * Expects the 'create' step to be executed in
+    * {@link org.jboss.wsf.container.jboss50.JAXWSDeployerHookPreJSE} and
+    * executes the 'start' step.
+    *
+    */
+   public void deploy(DeploymentUnit unit) throws DeploymentException
+   {
+      if (!ignoreDeployment(unit) && isWebServiceDeployment(unit))
+      {
+         Deployment dep = getDeployment(unit);
+         if (null == dep || Deployment.DeploymentState.CREATED != dep.getState())
+            throw new DeploymentException("Create step failed");
+
+         // execute the 'start' step
+         getWsfRuntime().start(dep);
+      }
+   }
+   
    /** Get the deployment type this deployer can handle
     */
    public Deployment.DeploymentType getDeploymentType()

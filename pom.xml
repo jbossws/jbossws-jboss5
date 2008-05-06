@@ -33,6 +33,11 @@
             <version>5.0.0.Beta4</version>
          </dependency>
          <dependency>
+            <groupId>org.jboss.jbossas</groupId>
+            <artifactId>jboss-metadata</artifactId>
+            <version>5.0.0.Beta4</version>
+         </dependency>
+         <dependency>
             <groupId>org.jboss.security</groupId>
             <artifactId>jboss-security-spi-bare</artifactId>
             <version></version>
@@ -163,12 +168,16 @@
          <groupId>org.jboss.ws</groupId>
          <artifactId>jbossws-spi</artifactId>
       </dependency>
-
+                                                                                          
       <!-- jboss provided dependencies -->
       <dependency>
          <groupId>org.jboss.jbossas</groupId>
          <artifactId>jboss-as-server</artifactId>
          <scope>provided</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.jboss.jbossas</groupId>
+         <artifactId>jboss-metadata</artifactId>         
       </dependency>
       <dependency>
          <groupId>org.jboss.microcontainer</groupId>

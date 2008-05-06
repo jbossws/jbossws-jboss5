@@ -21,6 +21,10 @@
  */
 package org.jboss.wsf.container.jboss50;
 
+import org.jboss.deployers.structure.spi.DeploymentUnit;
+import org.jboss.deployers.spi.DeploymentException;
+import org.jboss.wsf.spi.deployment.Deployment;
+
 //$Id$
 
 /**
@@ -31,4 +35,20 @@ package org.jboss.wsf.container.jboss50;
  */
 public abstract class AbstractDeployerHookEJB extends ArchiveDeployerHook
 {
+   public void deploy(DeploymentUnit unit) throws DeploymentException
+   {
+      if(!ignoreDeployment(unit) && isWebServiceDeployment(unit))
+      {
+         super.deploy(unit); // Calls create
+
+         Deployment dep = unit.getAttachment(Deployment.class);
+         if(null==dep || Deployment.DeploymentState.CREATED != dep.getState())
+            throw new DeploymentException("Create step failed");
+
+         // execute the 'start' step
+         getWsfRuntime().start(dep);
+
+      }
+
+   }
 }
