@@ -31,10 +31,10 @@ import org.jboss.metadata.javaee.spec.ParamValueMetaData;
 import org.jboss.metadata.web.jboss.JBossWebMetaData;
 import org.jboss.metadata.web.spec.ListenerMetaData;
 import org.jboss.metadata.web.spec.ServletMetaData;
-import org.jboss.wsf.container.jboss50.WebAppDesciptorModifier;
 import org.jboss.wsf.spi.deployment.Deployment;
 import org.jboss.wsf.spi.deployment.DeploymentAspect;
 import org.jboss.wsf.spi.deployment.Endpoint;
+import org.jboss.wsf.spi.transport.HttpSpec;
 import org.jboss.wsf.spi.WSFRuntime;
 
 /**
@@ -48,17 +48,17 @@ public class ModifyWebMetaDataDeploymentAspect extends DeploymentAspect
    @Override
    public void create(Deployment dep, WSFRuntime runtime)
    {
-      String servletClass = (String)dep.getProperty(WebAppDesciptorModifier.PROPERTY_WEBAPP_SERVLET_CLASS);
+      String servletClass = (String)dep.getProperty(HttpSpec.PROPERTY_WEBAPP_SERVLET_CLASS);
       if (servletClass == null)
-         throw new IllegalStateException("Cannot obtain context property: " + WebAppDesciptorModifier.PROPERTY_WEBAPP_SERVLET_CLASS);
+         throw new IllegalStateException("Cannot obtain context property: " + HttpSpec.PROPERTY_WEBAPP_SERVLET_CLASS);
 
       modifyServletClass(dep, servletClass);
 
-      String listenerClass = (String)dep.getProperty(WebAppDesciptorModifier.PROPERTY_WEBAPP_SERVLET_CONTEXT_LISTENER);
+      String listenerClass = (String)dep.getProperty(HttpSpec.PROPERTY_WEBAPP_SERVLET_CONTEXT_LISTENER);
       if (listenerClass != null)
          modifyListener(dep, listenerClass);
       
-      Map<String, String> contextParams = (Map<String, String>)dep.getProperty(WebAppDesciptorModifier.PROPERTY_WEBAPP_CONTEXT_PARAMETERS);
+      Map<String, String> contextParams = (Map<String, String>)dep.getProperty(HttpSpec.PROPERTY_WEBAPP_CONTEXT_PARAMETERS);
       if (contextParams != null)
          modifyContextParams(dep, contextParams);
    }

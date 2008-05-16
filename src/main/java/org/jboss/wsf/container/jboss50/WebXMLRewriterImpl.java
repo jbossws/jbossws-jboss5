@@ -22,6 +22,7 @@
 package org.jboss.wsf.container.jboss50;
 
 import org.jboss.wsf.spi.deployment.Deployment;
+import org.jboss.wsf.spi.transport.HttpSpec;
 import org.jboss.wsf.common.IOUtils;
 import org.jboss.wsf.container.jboss50.deployment.tomcat.RewriteResults;
 import org.dom4j.io.SAXReader;
@@ -33,7 +34,6 @@ import javax.xml.ws.WebServiceException;
 import java.net.URL;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStream;
 import java.io.FileOutputStream;
 
 /**
@@ -63,7 +63,7 @@ public class WebXMLRewriterImpl
 
    public RewriteResults rewriteWebXml(Deployment dep)
    {
-      URL warURL = (URL)dep.getProperty(WebAppDesciptorModifier.PROPERTY_WEBAPP_URL);
+      URL warURL = (URL)dep.getProperty(HttpSpec.PROPERTY_WEBAPP_URL);
       File warFile = new File(warURL.getFile());
       if (warFile.isDirectory() == false)
          throw new WebServiceException("Expected a war directory: " + warURL);

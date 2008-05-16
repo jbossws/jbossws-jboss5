@@ -36,6 +36,7 @@ import org.jboss.virtual.VirtualFile;
 import org.jboss.wsf.spi.deployment.Deployment;
 import org.jboss.wsf.spi.deployment.DeploymentAspect;
 import org.jboss.wsf.spi.deployment.WSFDeploymentException;
+import org.jboss.wsf.spi.transport.HttpSpec;
 import org.jboss.wsf.spi.WSFRuntime;
 
 /**
@@ -65,7 +66,7 @@ public class WebAppDeploymentAspect extends DeploymentAspect
 
    public void create(Deployment dep, WSFRuntime runtime)
    {
-      URL warURL = (URL)dep.getProperty(WebAppDesciptorModifier.PROPERTY_WEBAPP_URL);
+      URL warURL = (URL)dep.getProperty(HttpSpec.PROPERTY_WEBAPP_URL);
       if (warURL == null)
          throw new IllegalStateException("Cannot obtain generated webapp URL");
 
@@ -77,7 +78,7 @@ public class WebAppDeploymentAspect extends DeploymentAspect
          
          // Mark the deployment as generated web app so the JSE deployer hook can ignore it 
          MutableAttachments attach = (MutableAttachments)deployment.getPredeterminedManagedObjects();
-         attach.addAttachment(WebAppDesciptorModifier.PROPERTY_GENERATED_WEBAPP, Boolean.TRUE);
+         attach.addAttachment(HttpSpec.PROPERTY_GENERATED_WEBAPP, Boolean.TRUE);
 
          mainDeployer.deploy(deployment);
 
@@ -91,7 +92,7 @@ public class WebAppDeploymentAspect extends DeploymentAspect
 
    public void destroy(Deployment dep, WSFRuntime runtime)
    {
-      URL warURL = (URL)dep.getProperty(WebAppDesciptorModifier.PROPERTY_WEBAPP_URL);
+      URL warURL = (URL)dep.getProperty(HttpSpec.PROPERTY_WEBAPP_URL);
       if (warURL == null)
       {
          log.error("Cannot obtain generated webapp URL");

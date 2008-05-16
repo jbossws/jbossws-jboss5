@@ -30,6 +30,7 @@ import org.jboss.logging.Logger;
 import org.jboss.wsf.container.jboss50.deployment.tomcat.RewriteResults;
 import org.jboss.wsf.spi.deployment.Deployment;
 import org.jboss.wsf.spi.deployment.Endpoint;
+import org.jboss.wsf.spi.transport.HttpSpec;
 
 /**
  * Modifies web.xml for jbossws
@@ -47,11 +48,11 @@ public class DefaultWebAppDesciptorModifierImpl implements WebAppDesciptorModifi
       RewriteResults results = new RewriteResults();
       Element root = webXml.getRootElement();
 
-      String servletClass = (String)dep.getProperty(PROPERTY_WEBAPP_SERVLET_CLASS);
+      String servletClass = (String)dep.getProperty(HttpSpec.PROPERTY_WEBAPP_SERVLET_CLASS);
       if (servletClass == null)
-         throw new IllegalStateException("Cannot obtain context property: " + PROPERTY_WEBAPP_SERVLET_CLASS);
+         throw new IllegalStateException("Cannot obtain context property: " + HttpSpec.PROPERTY_WEBAPP_SERVLET_CLASS);
 
-      Map<String, String> contextParams = (Map<String, String>)dep.getProperty(PROPERTY_WEBAPP_CONTEXT_PARAMETERS);
+      Map<String, String> contextParams = (Map<String, String>)dep.getProperty(HttpSpec.PROPERTY_WEBAPP_CONTEXT_PARAMETERS);
       if (contextParams != null)
       {
          for (Map.Entry<String, String> entry : contextParams.entrySet())
@@ -69,7 +70,7 @@ public class DefaultWebAppDesciptorModifierImpl implements WebAppDesciptorModifi
          }
       }
 
-      String listenerClass = (String)dep.getProperty(PROPERTY_WEBAPP_SERVLET_CONTEXT_LISTENER);
+      String listenerClass = (String)dep.getProperty(HttpSpec.PROPERTY_WEBAPP_SERVLET_CONTEXT_LISTENER);
       if (listenerClass != null)
       {
          Element listener = root.addElement("listener");
