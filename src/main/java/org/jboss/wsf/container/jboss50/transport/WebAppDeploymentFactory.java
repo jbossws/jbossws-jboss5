@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.wsf.container.jboss50;
+package org.jboss.wsf.container.jboss50.transport;
 
 // $Id$
 
@@ -46,10 +46,10 @@ import org.jboss.wsf.spi.WSFRuntime;
  * @author Thomas.Diesler@jboss.org
  * @since 12-May-2006
  */
-public class WebAppDeploymentAspect extends DeploymentAspect
+public class WebAppDeploymentFactory
 {
    // provide logging
-   private static Logger log = Logger.getLogger(WebAppDeploymentAspect.class);
+   private static Logger log = Logger.getLogger(WebAppDeploymentFactory.class);
 
    private DeployerClient mainDeployer;
    private WebXMLRewriterImpl webXMLRewriter;
@@ -65,17 +65,17 @@ public class WebAppDeploymentAspect extends DeploymentAspect
       this.webXMLRewriter = serviceEndpointPublisher;
    }
 
-   public void create(Deployment dep, WSFRuntime runtime)
+   public void create(Deployment dep, URL webAppURL)
    {
-      URL warURL = (URL)dep.getProperty(HttpSpec.PROPERTY_WEBAPP_URL);
-      if (warURL == null)
-         throw new IllegalStateException("Cannot obtain generated webapp URL");
-
-      log.debug("publishServiceEndpoint: " + warURL);
+      if (webAppURL == null)
+         throw new IllegalArgumentException("Web meta data URL cannot be null");
+         
+      log.debug("publishServiceEndpoint: " + webAppURL);
       try
       {
          webXMLRewriter.rewriteWebXml(dep);
-         org.jboss.deployers.client.spi.Deployment deployment = createDeploymentContext(warURL);
+         dep.setProperty(HttpSpec.PROPERTY_WEBAPP_URL, webAppURL);
+         org.jboss.deployers.client.spi.Deployment deployment = createDeploymentContext(webAppURL);
          
          // Mark the deployment as generated web app so the JSE deployer hook can ignore it 
          MutableAttachments attach = (MutableAttachments)deployment.getPredeterminedManagedObjects();
@@ -83,7 +83,7 @@ public class WebAppDeploymentAspect extends DeploymentAspect
 
          mainDeployer.deploy(deployment);
 
-         deploymentMap.put(warURL.toExternalForm(), deployment);
+         deploymentMap.put(webAppURL.toExternalForm(), deployment);
       }
       catch (Exception ex)
       {
@@ -91,7 +91,7 @@ public class WebAppDeploymentAspect extends DeploymentAspect
       }
    }
 
-   public void destroy(Deployment dep, WSFRuntime runtime)
+   public void destroy(Deployment dep)
    {
       URL warURL = (URL)dep.getProperty(HttpSpec.PROPERTY_WEBAPP_URL);
       if (warURL == null)
