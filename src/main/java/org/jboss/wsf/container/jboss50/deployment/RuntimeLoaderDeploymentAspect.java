@@ -38,30 +38,25 @@ import org.jboss.ejb3.Ejb3Deployment;
  */
 public class RuntimeLoaderDeploymentAspect extends DeploymentAspect
 {
-
    public void start(Deployment dep, WSFRuntime runtime)
    {
-
-      // JSE endpoints
-      if (dep.getAttachment(JBossWebMetaData.class) != null)
-      {
-         JBossWebMetaData webMetaData = dep.getAttachment(JBossWebMetaData.class);
-         ClassLoader classLoader = webMetaData.getContextLoader();
-         dep.setRuntimeClassLoader(classLoader);
-      }
-
       // EJB3 endpoints
-      else if (dep.getAttachment(Ejb3Deployment.class) != null)
+      if (dep.getAttachment(Ejb3Deployment.class) != null)
       {
          dep.setRuntimeClassLoader(dep.getInitialClassLoader());
       }
-
       // EJB21 endpoints
       else if (dep.getAttachment(JBossMetaData.class) != null)
       {
          dep.setRuntimeClassLoader(dep.getInitialClassLoader());
       }
-
+      // JSE endpoints
+      else if (dep.getAttachment(JBossWebMetaData.class) != null)
+      {
+         JBossWebMetaData webMetaData = dep.getAttachment(JBossWebMetaData.class);
+         ClassLoader classLoader = webMetaData.getContextLoader();
+         dep.setRuntimeClassLoader(classLoader);
+      }
       else
       {
          throw new IllegalArgumentException("Unable to determine runtime loader");
