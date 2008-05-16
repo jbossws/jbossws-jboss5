@@ -19,25 +19,22 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.wsf.container.jboss50;
+package org.jboss.wsf.container.jboss50.deployer;
 
-import org.jboss.wsf.container.jboss50.deployment.tomcat.RewriteResults;
-import org.jboss.wsf.spi.deployment.Deployment;
-import org.dom4j.Document;
+//$Id$
+
+import org.jboss.deployers.spi.DeploymentException;
+import org.jboss.deployers.structure.spi.DeploymentUnit;
 
 /**
- * Modifies the web app according to the stack requirements.
- *
+ * An interface for all web service deployer hooks 
+ * 
  * @author Thomas.Diesler@jboss.org
- * @since 19-May-2007
+ * @since 24-Apr-2007
  */
-public interface WebAppDesciptorModifier
+public interface DeployerHook
 {
-   static final String PROPERTY_GENERATED_WEBAPP = "org.jboss.ws.generated.webapp";
-   static final String PROPERTY_WEBAPP_CONTEXT_PARAMETERS = "org.jboss.ws.webapp.ContextParameterMap";
-   static final String PROPERTY_WEBAPP_SERVLET_CLASS = "org.jboss.ws.webapp.ServletClass";
-   static final String PROPERTY_WEBAPP_SERVLET_CONTEXT_LISTENER = "org.jboss.ws.webapp.ServletContextListener";
-   static final String PROPERTY_WEBAPP_URL = "org.jboss.ws.webapp.url";
+   void deploy(DeploymentUnit unit) throws DeploymentException;
 
-   RewriteResults modifyDescriptor(Deployment dep, Document webXml) throws ClassNotFoundException;
+   void undeploy(DeploymentUnit unit);
 }

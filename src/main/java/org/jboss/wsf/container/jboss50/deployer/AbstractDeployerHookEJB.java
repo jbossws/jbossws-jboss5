@@ -19,25 +19,36 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.wsf.container.jboss50;
+package org.jboss.wsf.container.jboss50.deployer;
 
-import org.jboss.wsf.container.jboss50.deployment.tomcat.RewriteResults;
+import org.jboss.deployers.structure.spi.DeploymentUnit;
+import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.wsf.spi.deployment.Deployment;
-import org.dom4j.Document;
+
+//$Id$
 
 /**
- * Modifies the web app according to the stack requirements.
+ * An abstract deployer for EJB Endpoints
  *
  * @author Thomas.Diesler@jboss.org
- * @since 19-May-2007
+ * @since 25-Apr-2007
  */
-public interface WebAppDesciptorModifier
+public abstract class AbstractDeployerHookEJB extends ArchiveDeployerHook
 {
-   static final String PROPERTY_GENERATED_WEBAPP = "org.jboss.ws.generated.webapp";
-   static final String PROPERTY_WEBAPP_CONTEXT_PARAMETERS = "org.jboss.ws.webapp.ContextParameterMap";
-   static final String PROPERTY_WEBAPP_SERVLET_CLASS = "org.jboss.ws.webapp.ServletClass";
-   static final String PROPERTY_WEBAPP_SERVLET_CONTEXT_LISTENER = "org.jboss.ws.webapp.ServletContextListener";
-   static final String PROPERTY_WEBAPP_URL = "org.jboss.ws.webapp.url";
+   public void deploy(DeploymentUnit unit) throws DeploymentException
+   {
+      if(!ignoreDeployment(unit) && isWebServiceDeployment(unit))
+      {
+         super.deploy(unit); // Calls create
 
-   RewriteResults modifyDescriptor(Deployment dep, Document webXml) throws ClassNotFoundException;
+         Deployment dep = unit.getAttachment(Deployment.class);
+         if(null==dep || Deployment.DeploymentState.CREATED != dep.getState())
+            throw new DeploymentException("Create step failed");
+
+         // execute the 'start' step
+         getWsfRuntime().start(dep);
+
+      }
+
+   }
 }

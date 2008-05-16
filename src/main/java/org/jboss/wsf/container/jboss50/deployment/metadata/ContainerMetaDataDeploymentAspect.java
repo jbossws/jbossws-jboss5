@@ -19,25 +19,37 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.wsf.container.jboss50;
+package org.jboss.wsf.container.jboss50.deployment.metadata;
 
-import org.jboss.wsf.container.jboss50.deployment.tomcat.RewriteResults;
+//$Id$
+
+import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.wsf.spi.deployment.Deployment;
-import org.dom4j.Document;
+import org.jboss.wsf.spi.deployment.DeploymentAspect;
+import org.jboss.wsf.spi.WSFRuntime;
 
 /**
- * Modifies the web app according to the stack requirements.
+ * A deployer that builds the UnifiedDeploymentInfo 
  *
  * @author Thomas.Diesler@jboss.org
- * @since 19-May-2007
+ * @since 25-Apr-2007
  */
-public interface WebAppDesciptorModifier
+public class ContainerMetaDataDeploymentAspect extends DeploymentAspect
 {
-   static final String PROPERTY_GENERATED_WEBAPP = "org.jboss.ws.generated.webapp";
-   static final String PROPERTY_WEBAPP_CONTEXT_PARAMETERS = "org.jboss.ws.webapp.ContextParameterMap";
-   static final String PROPERTY_WEBAPP_SERVLET_CLASS = "org.jboss.ws.webapp.ServletClass";
-   static final String PROPERTY_WEBAPP_SERVLET_CONTEXT_LISTENER = "org.jboss.ws.webapp.ServletContextListener";
-   static final String PROPERTY_WEBAPP_URL = "org.jboss.ws.webapp.url";
+   private ContainerMetaDataAdapter metaDataAdapter = new ContainerMetaDataAdapter();
 
-   RewriteResults modifyDescriptor(Deployment dep, Document webXml) throws ClassNotFoundException;
+   public void setMetaDataAdapter(ContainerMetaDataAdapter adapter)
+   {
+      this.metaDataAdapter = adapter;
+   }
+
+   @Override
+   public void create(Deployment dep, WSFRuntime runtime)
+   {
+      DeploymentUnit unit = dep.getAttachment(DeploymentUnit.class);
+      if (unit == null)
+         throw new IllegalStateException("Cannot obtain deployment unit");
+
+      metaDataAdapter.buildContainerMetaData(dep, unit);
+   }
 }

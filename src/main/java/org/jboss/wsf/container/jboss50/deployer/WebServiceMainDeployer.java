@@ -19,25 +19,35 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.wsf.container.jboss50;
+package org.jboss.wsf.container.jboss50.deployer;
 
-import org.jboss.wsf.container.jboss50.deployment.tomcat.RewriteResults;
-import org.jboss.wsf.spi.deployment.Deployment;
-import org.dom4j.Document;
+
+//$Id$
 
 /**
- * Modifies the web app according to the stack requirements.
- *
+ * The main web service deployer
+ * 
  * @author Thomas.Diesler@jboss.org
- * @since 19-May-2007
+ * @since 24-Apr-2007
  */
-public interface WebAppDesciptorModifier
+public class WebServiceMainDeployer extends AbstractWebServiceDeployer
 {
-   static final String PROPERTY_GENERATED_WEBAPP = "org.jboss.ws.generated.webapp";
-   static final String PROPERTY_WEBAPP_CONTEXT_PARAMETERS = "org.jboss.ws.webapp.ContextParameterMap";
-   static final String PROPERTY_WEBAPP_SERVLET_CLASS = "org.jboss.ws.webapp.ServletClass";
-   static final String PROPERTY_WEBAPP_SERVLET_CONTEXT_LISTENER = "org.jboss.ws.webapp.ServletContextListener";
-   static final String PROPERTY_WEBAPP_URL = "org.jboss.ws.webapp.url";
-
-   RewriteResults modifyDescriptor(Deployment dep, Document webXml) throws ClassNotFoundException;
+   private int relOrderJSE;
+   private int relOrderEJB;
+   
+   public void setRelOrderEJB(int relOrderEJB)
+   {
+      this.relOrderEJB = relOrderEJB;
+   }
+   
+   public void setRelOrderJSE(int relOrderJSE)
+   {
+      this.relOrderJSE = relOrderJSE;
+   }
+   
+   @Override
+   public int getRelativeOrder()
+   {
+      return Math.max(relOrderEJB, relOrderJSE) + 1;
+   }
 }

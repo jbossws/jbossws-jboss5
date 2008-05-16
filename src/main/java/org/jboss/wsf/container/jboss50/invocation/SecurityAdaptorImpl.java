@@ -19,25 +19,44 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.wsf.container.jboss50;
+package org.jboss.wsf.container.jboss50.invocation;
 
-import org.jboss.wsf.container.jboss50.deployment.tomcat.RewriteResults;
-import org.jboss.wsf.spi.deployment.Deployment;
-import org.dom4j.Document;
+// $Id$
+
+import org.jboss.security.SecurityAssociation;
+import org.jboss.wsf.spi.invocation.SecurityAdaptor;
+
+import java.security.Principal;
 
 /**
- * Modifies the web app according to the stack requirements.
+ * A JBoss specific SecurityAssociationAdaptor 
  *
  * @author Thomas.Diesler@jboss.org
- * @since 19-May-2007
+ * @since 05-May-2006
  */
-public interface WebAppDesciptorModifier
+public class SecurityAdaptorImpl implements SecurityAdaptor
 {
-   static final String PROPERTY_GENERATED_WEBAPP = "org.jboss.ws.generated.webapp";
-   static final String PROPERTY_WEBAPP_CONTEXT_PARAMETERS = "org.jboss.ws.webapp.ContextParameterMap";
-   static final String PROPERTY_WEBAPP_SERVLET_CLASS = "org.jboss.ws.webapp.ServletClass";
-   static final String PROPERTY_WEBAPP_SERVLET_CONTEXT_LISTENER = "org.jboss.ws.webapp.ServletContextListener";
-   static final String PROPERTY_WEBAPP_URL = "org.jboss.ws.webapp.url";
+   SecurityAdaptorImpl()
+   {
+   }
 
-   RewriteResults modifyDescriptor(Deployment dep, Document webXml) throws ClassNotFoundException;
+   public Principal getPrincipal()
+   {
+      return SecurityAssociation.getPrincipal();
+   }
+   
+   public void setPrincipal(Principal pricipal)
+   {
+      SecurityAssociation.setPrincipal(pricipal);
+   }
+
+   public Object getCredential()
+   {
+      return SecurityAssociation.getCredential();
+   }
+
+   public void setCredential(Object credential)
+   {
+      SecurityAssociation.setCredential(credential);
+   }
 }

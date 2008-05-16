@@ -23,6 +23,7 @@ package org.jboss.wsf.container.jboss50;
 
 import org.jboss.wsf.spi.deployment.Deployment;
 import org.jboss.wsf.common.IOUtils;
+import org.jboss.wsf.container.jboss50.deployment.tomcat.RewriteResults;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
