@@ -52,12 +52,13 @@ public class EJBHttpTransportManager implements TransportManager
    
    public ListenerRef createListener(Endpoint endpoint, TransportSpec transportSpec)
    {
-      assert deploymentFactory!=null;
-      assert generator!=null;
+      assert deploymentFactory != null;
+      assert generator != null;
 
       // Resolve the endpoint address
       if(! (transportSpec instanceof HttpSpec))
          throw new IllegalArgumentException("Unknown TransportSpec " + transportSpec);
+      
       HttpSpec httpSpec = (HttpSpec)transportSpec;
 
       // Create JBossWebMetaData and attach it to the DeploymentUnit

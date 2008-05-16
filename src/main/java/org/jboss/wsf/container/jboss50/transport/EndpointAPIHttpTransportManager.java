@@ -21,7 +21,6 @@
  */
 package org.jboss.wsf.container.jboss50.transport;
 
-import org.jboss.logging.Logger;
 import org.jboss.wsf.framework.transport.HttpListenerRef;
 import org.jboss.wsf.spi.SPIProvider;
 import org.jboss.wsf.spi.SPIProviderResolver;
@@ -44,10 +43,7 @@ import java.util.HashMap;
  */
 public class EndpointAPIHttpTransportManager implements TransportManager
 {
-   private static Logger log = Logger.getLogger(EndpointAPIHttpTransportManager.class);
-
    private WebAppGenerator generator;
-
    private Map<String, Deployment> deploymentRegistry = new HashMap<String, Deployment>();
    
    public ListenerRef createListener(Endpoint endpoint, TransportSpec transportSpec)
@@ -77,7 +73,6 @@ public class EndpointAPIHttpTransportManager implements TransportManager
          String ctx = httpSpec.getWebContext();
          String pattern = httpSpec.getUrlPattern();
          listenerRef =  new HttpListenerRef( ctx, pattern, new URI("http://"+hostAndPort+ctx+pattern) );
-
       }
       catch (URISyntaxException e)
       {
@@ -103,5 +98,4 @@ public class EndpointAPIHttpTransportManager implements TransportManager
    {
       this.generator = generator;
    }
-   
 }
