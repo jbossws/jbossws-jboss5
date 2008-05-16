@@ -19,12 +19,12 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.wsf.container.jboss50;
+package org.jboss.wsf.container.jboss50.deployment.tomcat;
 
 import org.jboss.wsf.spi.deployment.Deployment;
 import org.jboss.wsf.spi.transport.HttpSpec;
 import org.jboss.wsf.common.IOUtils;
-import org.jboss.wsf.container.jboss50.deployment.tomcat.RewriteResults;
+import org.jboss.wsf.container.jboss50.DefaultWebAppDesciptorModifierImpl;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
