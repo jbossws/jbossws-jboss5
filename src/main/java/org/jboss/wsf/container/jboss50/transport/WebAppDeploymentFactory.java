@@ -35,10 +35,8 @@ import org.jboss.virtual.VFS;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.wsf.container.jboss50.deployment.tomcat.WebXMLRewriterImpl;
 import org.jboss.wsf.spi.deployment.Deployment;
-import org.jboss.wsf.spi.deployment.DeploymentAspect;
 import org.jboss.wsf.spi.deployment.WSFDeploymentException;
 import org.jboss.wsf.spi.transport.HttpSpec;
-import org.jboss.wsf.spi.WSFRuntime;
 
 /**
  * Publish the HTTP service endpoint to Tomcat 
@@ -60,9 +58,9 @@ public class WebAppDeploymentFactory
       this.mainDeployer = mainDeployer;
    }
 
-   public void setWebXMLRewriter(WebXMLRewriterImpl serviceEndpointPublisher)
+   public void setWebXMLRewriter(WebXMLRewriterImpl webXMLRewriter)
    {
-      this.webXMLRewriter = serviceEndpointPublisher;
+      this.webXMLRewriter = webXMLRewriter;
    }
 
    public void create(Deployment dep, URL webAppURL)
