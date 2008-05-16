@@ -24,7 +24,6 @@ package org.jboss.wsf.container.jboss50.deployment.tomcat;
 import org.jboss.wsf.spi.deployment.Deployment;
 import org.jboss.wsf.spi.transport.HttpSpec;
 import org.jboss.wsf.common.IOUtils;
-import org.jboss.wsf.container.jboss50.DefaultWebAppDesciptorModifierImpl;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;

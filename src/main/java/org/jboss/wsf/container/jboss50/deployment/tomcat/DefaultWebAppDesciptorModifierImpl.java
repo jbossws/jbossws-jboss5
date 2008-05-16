@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.wsf.container.jboss50;
+package org.jboss.wsf.container.jboss50.deployment.tomcat;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -27,8 +27,6 @@ import java.util.Map;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.jboss.logging.Logger;
-import org.jboss.wsf.container.jboss50.deployment.tomcat.RewriteResults;
-import org.jboss.wsf.container.jboss50.deployment.tomcat.WebAppDesciptorModifier;
 import org.jboss.wsf.spi.deployment.Deployment;
 import org.jboss.wsf.spi.deployment.Endpoint;
 import org.jboss.wsf.spi.transport.HttpSpec;
