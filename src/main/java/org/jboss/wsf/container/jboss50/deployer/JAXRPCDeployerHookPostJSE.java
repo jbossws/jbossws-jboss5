@@ -23,9 +23,11 @@ package org.jboss.wsf.container.jboss50.deployer;
 
 // $Id$
 
+import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.wsf.spi.deployment.Deployment;
 import org.jboss.wsf.spi.metadata.webservices.WebservicesMetaData;
+import static org.jboss.wsf.spi.deployment.Deployment.DeploymentState;
 
 /**
  * A deployer JAXRPC JSE Endpoints
@@ -35,13 +37,33 @@ import org.jboss.wsf.spi.metadata.webservices.WebservicesMetaData;
  */
 public class JAXRPCDeployerHookPostJSE extends DeployerHookPostJSE
 {
-   /** Get the deployment type this deployer can handle
+   
+   /**
+    * Expects the 'create' step to be executed in
+    * {@link org.jboss.wsf.container.jboss50.deployer.JAXRPCDeployerHookPreJSE}
+    * and executes the 'start' step.
+    *
+    */
+   public void deploy(DeploymentUnit unit) throws DeploymentException
+   {
+      if (!ignoreDeployment(unit) && isWebServiceDeployment(unit))
+      {
+         Deployment dep = getDeployment(unit);
+         if(null==dep || DeploymentState.CREATED != dep.getState())
+            throw new DeploymentException("Create step is missing");
+
+         // execute the 'start' step
+         getWsfRuntime().start(dep);          
+      }
+   }
+
+   /**
+    * Get the deployment type this deployer can handle
     */
    public Deployment.DeploymentType getDeploymentType()
    {
       return Deployment.DeploymentType.JAXRPC_JSE;
    }
-
 
    @Override
    public boolean isWebServiceDeployment(DeploymentUnit unit)
@@ -49,4 +71,5 @@ public class JAXRPCDeployerHookPostJSE extends DeployerHookPostJSE
       WebservicesMetaData wsMetaData = getWebservicesMetaData(unit);
       return (wsMetaData!=null && super.isWebServiceDeployment(unit));    
    }
+   
 }

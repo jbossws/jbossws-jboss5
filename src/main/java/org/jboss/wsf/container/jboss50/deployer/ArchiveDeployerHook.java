@@ -23,6 +23,8 @@ package org.jboss.wsf.container.jboss50.deployer;
 
 //$Id$
 
+import java.net.URL;
+
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.deployers.vfs.spi.structure.VFSDeploymentUnit;
@@ -39,25 +41,75 @@ import org.jboss.xb.binding.Unmarshaller;
 import org.jboss.xb.binding.UnmarshallerFactory;
 import org.w3c.dom.Element;
 
-import java.net.URL;
-
 /**
  * An abstract web service deployer.
- * 
- *    deploy(unit) 
+ * <pre>
+ *    deploy(unit)
  *      if(isWebServiceDeployment)
  *        dep = createDeployment(unit)
- *        deploy(dep)
+ *        create(dep)
+ *        start(dep)
  *
  *    undeploy(unit)
  *      dep = getDeployment(unit) 
- *      undeploy(dep)
+ *      stop(dep)
+ *      destroy(dep)
+ * </pre>
  *
  * @author Thomas.Diesler@jboss.org
+ * @author Heiko.Braun@jboss.com
+ * 
  * @since 25-Apr-2007
  */
 public abstract class ArchiveDeployerHook extends AbstractDeployerHook
 {
+
+   /**
+    * Executes the 'create' step only. <br/>
+    * Subclasses need to take care that the 'start' step is executed as well.          
+    */
+   public void deploy(DeploymentUnit unit) throws DeploymentException
+   {
+      if (!ignoreDeployment(unit) && isWebServiceDeployment(unit))
+      {
+         log.debug("deploy: " + unit.getName());
+         
+         Deployment dep = getDeployment(unit);
+         if (dep == null)
+         {
+            dep = createDeployment(unit);
+            dep.addAttachment(DeploymentUnit.class, unit);
+         }
+
+         if(Deployment.DeploymentState.UNDEFINED == dep.getState())
+         {
+            getWsfRuntime().create(dep); 
+            unit.addAttachment(Deployment.class, dep);
+         }
+         else
+         {
+            throw new IllegalArgumentException("Cannot process Deployment in state " + dep.getState() + ": " + dep);
+         }
+      }
+   }
+
+   /**
+    * Executes the stop() and destroy() lifecycles
+    * @param unit
+    */
+   public void undeploy(DeploymentUnit unit)
+   {
+      if (ignoreDeployment(unit))
+         return;
+
+      Deployment dep = getDeployment(unit);
+      if (dep != null)
+      {
+         log.debug("undeploy: " + unit.getName());
+         getWsfRuntime().stop(dep);
+         getWsfRuntime().destroy(dep);
+      }
+   }
 
    /** Depending on the type of deployment, this method should return true
     *  if the deployment contains web service endpoints.
@@ -74,40 +126,6 @@ public abstract class ArchiveDeployerHook extends AbstractDeployerHook
    {
       Deployment dep = unit.getAttachment(Deployment.class);
       return (dep != null && dep.getType() == getDeploymentType() ? dep : null);
-   }
-
-   public void deploy(DeploymentUnit unit) throws DeploymentException
-   {
-      if (ignoreDeployment(unit))
-         return;
-
-      if (isWebServiceDeployment(unit))
-      {
-         log.debug("deploy: " + unit.getName());
-         Deployment dep = getDeployment(unit);
-         if (dep == null)
-         {
-            dep = createDeployment(unit);
-            dep.addAttachment(DeploymentUnit.class, unit);
-         }
-
-         getWsfRuntime().create(dep);
-         unit.addAttachment(Deployment.class, dep);
-      }
-   }
-
-   public void undeploy(DeploymentUnit unit)
-   {
-      if (ignoreDeployment(unit))
-         return;
-
-      Deployment dep = getDeployment(unit);
-      if (dep != null)
-      {
-         log.debug("undeploy: " + unit.getName());
-         getWsfRuntime().stop(dep);
-         getWsfRuntime().destroy(dep);
-      }
    }
 
    /** Unmrashall the webservices.xml if there is one

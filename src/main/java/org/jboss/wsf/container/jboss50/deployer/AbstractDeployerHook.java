@@ -50,16 +50,6 @@ public abstract class AbstractDeployerHook implements DeployerHook
 
    private DeploymentModelFactory deploymentModelFactory;
 
-   public String getRuntimeName()
-   {
-      return runtimeName;
-   }
-
-   public void setRuntimeName(String runtimeName)
-   {
-      this.runtimeName = runtimeName;
-   }
-
    public WSFRuntime getWsfRuntime()
    {
       if(null == wsfRuntime)
@@ -74,6 +64,11 @@ public abstract class AbstractDeployerHook implements DeployerHook
    public void setWsfRuntime(WSFRuntime wsfRuntime)
    {
       this.wsfRuntime = wsfRuntime;
+   }
+
+   public void setRuntimeName(String runtimeName)
+   {
+      this.runtimeName = runtimeName;
    }
 
    public DeploymentModelFactory getDeploymentModelFactory()

@@ -27,6 +27,7 @@ import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.wsf.spi.deployment.Deployment;
 import org.jboss.wsf.spi.metadata.webservices.WebservicesMetaData;
+import static org.jboss.wsf.spi.deployment.Deployment.DeploymentState;
 
 /**
  * @author Heiko.Braun@jboss.com
@@ -34,6 +35,7 @@ import org.jboss.wsf.spi.metadata.webservices.WebservicesMetaData;
  */
 public class JAXWSDeployerHookPostJSE extends DeployerHookPostJSE
 {
+   
    /**
     * Expects the 'create' step to be executed in
     * {@link org.jboss.wsf.container.jboss50.deployer.JAXWSDeployerHookPreJSE} and
@@ -45,7 +47,7 @@ public class JAXWSDeployerHookPostJSE extends DeployerHookPostJSE
       if (!ignoreDeployment(unit) && isWebServiceDeployment(unit))
       {
          Deployment dep = getDeployment(unit);
-         if (null == dep || Deployment.DeploymentState.CREATED != dep.getState())
+         if (null == dep || DeploymentState.CREATED != dep.getState())
             throw new DeploymentException("Create step failed");
 
          // execute the 'start' step

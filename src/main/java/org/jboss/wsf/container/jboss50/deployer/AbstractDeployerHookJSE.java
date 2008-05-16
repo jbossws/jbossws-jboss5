@@ -29,8 +29,8 @@ import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.metadata.javaee.spec.ParamValueMetaData;
 import org.jboss.metadata.web.jboss.JBossWebMetaData;
 import org.jboss.metadata.web.spec.ServletMetaData;
-import org.jboss.wsf.container.jboss50.WebAppDesciptorModifier;
 import org.jboss.wsf.spi.deployment.Endpoint;
+import org.jboss.wsf.spi.transport.HttpSpec;
 
 /**
  * An abstract deployer for JSE Endpoints
@@ -43,7 +43,7 @@ public abstract class AbstractDeployerHookJSE extends ArchiveDeployerHook
    public boolean isWebServiceDeployment(DeploymentUnit unit)
    {
       JBossWebMetaData webMetaData = unit.getAttachment(JBossWebMetaData.class);
-      boolean isGenerated = Boolean.TRUE.equals(unit.getAttachment(WebAppDesciptorModifier.PROPERTY_GENERATED_WEBAPP));
+      boolean isGenerated = Boolean.TRUE.equals(unit.getAttachment(HttpSpec.PROPERTY_GENERATED_WEBAPP));
       return webMetaData != null && isGenerated == false;
    }
 
