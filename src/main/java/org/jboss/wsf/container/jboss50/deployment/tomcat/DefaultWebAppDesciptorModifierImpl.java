@@ -37,7 +37,7 @@ import org.jboss.wsf.spi.transport.HttpSpec;
  * @author Thomas.Diesler@jboss.org
  * @since 19-May-2006
  */
-public class DefaultWebAppDesciptorModifierImpl implements WebAppDesciptorModifier
+public class DefaultWebAppDesciptorModifierImpl implements WebAppDescriptorModifier
 {
    // logging support
    private static Logger log = Logger.getLogger(DefaultWebAppDesciptorModifierImpl.class);

@@ -43,19 +43,19 @@ import java.io.FileOutputStream;
  */
 public class WebXMLRewriterImpl
 {
-   private WebAppDesciptorModifier desciptorModifier;
+   private WebAppDescriptorModifier desciptorModifier;
 
    public WebXMLRewriterImpl()
    {
       this.desciptorModifier = new DefaultWebAppDesciptorModifierImpl();
    }
 
-   public WebAppDesciptorModifier getDesciptorModifier()
+   public WebAppDescriptorModifier getDesciptorModifier()
    {
       return desciptorModifier;
    }
 
-   public void setDesciptorModifier(WebAppDesciptorModifier desciptorModifier)
+   public void setDesciptorModifier(WebAppDescriptorModifier desciptorModifier)
    {
       this.desciptorModifier = desciptorModifier;
    }

@@ -30,7 +30,7 @@ import org.dom4j.Document;
  * @author Thomas.Diesler@jboss.org
  * @since 19-May-2007
  */
-public interface WebAppDesciptorModifier
+public interface WebAppDescriptorModifier
 {
    RewriteResults modifyDescriptor(Deployment dep, Document webXml) throws ClassNotFoundException;
 }
