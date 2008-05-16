@@ -60,7 +60,7 @@
    <!--
    The container deployment aspects
    -->
-   <bean name="WSContainerMetaDataDeploymentAspect" class="org.jboss.wsf.container.jboss50.ContainerMetaDataDeploymentAspect">
+   <bean name="WSContainerMetaDataDeploymentAspect" class="org.jboss.wsf.container.jboss50.deployment.metadata.ContainerMetaDataDeploymentAspect">
       <property name="provides">ContainerMetaData, VFSRoot</property>
    </bean>
 
@@ -101,11 +101,11 @@
       <property name="provides">RegisteredEndpoint</property>
    </bean>
 
-   <bean name="WSModifyWebMetaDataDeploymentAspect" class="org.jboss.wsf.container.jboss50.ModifyWebMetaDataDeploymentAspect">
+   <bean name="WSModifyWebMetaDataDeploymentAspect" class="org.jboss.wsf.container.jboss50.deployment.tomcat.ModifyWebMetaDataDeploymentAspect">
       <property name="requires">ContextProperties, StackDescriptor</property>
    </bean>
 
-   <bean name="WSRuntimeLoaderDeploymentAspect" class="org.jboss.wsf.container.jboss50.RuntimeLoaderDeploymentAspect">
+   <bean name="WSRuntimeLoaderDeploymentAspect" class="org.jboss.wsf.container.jboss50.deployment.RuntimeLoaderDeploymentAspect">
       <property name="requires">ContainerMetaData</property>
       <property name="provides">RuntimeLoader</property>
    </bean>
@@ -129,8 +129,8 @@
    </bean>
 
    <!-- Deployment aspect helper beans -->
-   <bean name="WSSecurityHandlerEJB21" class="org.jboss.wsf.container.jboss50.SecurityHandlerEJB21"/>
-   <bean name="WSSecurityHandlerEJB3" class="org.jboss.wsf.container.jboss50.SecurityHandlerEJB3"/>
+   <bean name="WSSecurityHandlerEJB21" class="org.jboss.wsf.container.jboss50.deployment.tomcat.SecurityHandlerEJB21"/>
+   <bean name="WSSecurityHandlerEJB3" class="org.jboss.wsf.container.jboss50.deployment.tomcat.SecurityHandlerEJB3"/>
    <bean name="WSWebAppDesciptorModifier" class="org.jboss.wsf.container.jboss50.DefaultWebAppDesciptorModifierImpl"/>
    <bean name="WSWebXMLRewriter" class="org.jboss.wsf.container.jboss50.WebXMLRewriterImpl">
       <property name="desciptorModifier"><inject bean="WSWebAppDesciptorModifier"/></property>
