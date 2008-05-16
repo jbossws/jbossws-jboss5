@@ -3,48 +3,48 @@
 <deployment xmlns="urn:jboss:bean-deployer:2.0">
 
    <!--
-     *********************************************************************************************************************
-     Web Service deployment
+   *********************************************************************************************************************
+   Web Service deployment
 
-     There are two deployers registered with the JBoss Main Deployer.
-     The order of which is important
+   There are two deployers registered with the JBoss Main Deployer.
+   The order of which is important
 
-     1) EJBDeployer < WebServiceDeployerEJB
-     2) WebServiceDeployerPreJSE < WarDeployer
-     3) WarDeployer < WebServiceDeployerPostJSE
+   1) EJBDeployer < WebServiceDeployerEJB
+   2) WebServiceDeployerPreJSE < WarDeployer
+   3) WarDeployer < WebServiceDeployerPostJSE
 
-     Each WebServiceDeployer has a number of DeployerHooks registered with it
+   Each WebServiceDeployer has a number of DeployerHooks registered with it
 
-     - WebServiceDeployerEJB
-       - WSDeployerHook_JAXRPC_EJB21
-       - WSDeployerHook_JAXWS_EJB3
+   - WebServiceDeployerEJB
+      - WSDeployerHook_JAXRPC_EJB21
+      - WSDeployerHook_JAXWS_EJB3
 
-     - WebServiceDeployerPreJSE
-       - WSDeployerHook_JAXRPC_JSE
-       - WSDeployerHook_JAXWS_JSE
+   - WebServiceDeployerPreJSE
+      - WSDeployerHook_JAXRPC_JSE
+      - WSDeployerHook_JAXWS_JSE
 
-     Conceptually, each of these hooks implements the following pattern:
+   Conceptually, each of these hooks implements the following pattern:
 
-     DeployerHook.deploy(unit)
-       if(isWebServiceDeployment)
+   DeployerHook.deploy(unit)
+      if(isWebServiceDeployment)
          Deployment dep = createDeployment(unit)
          DeploymentAspectManager.deploy(dep)
 
-     DeployerHook.undeploy(unit)
-       Deployment dep = getDeployment(unit)
-       DeploymentAspectManager.undeploy(dep)
+   DeployerHook.undeploy(unit)
+      Deployment dep = getDeployment(unit)
+      DeploymentAspectManager.undeploy(dep)
 
-     Each deployer hook has a web service DeploymentAspectManager injected into it.
-     A web service DeploymentAspectManager maintains a list of DeploymentAspects, each of which
-     handles a single aspect of web service deployment.
+   Each deployer hook has a web service DeploymentAspectManager injected into it.
+   A web service DeploymentAspectManager maintains a list of DeploymentAspects, each of which
+   handles a single aspect of web service deployment.
 
-     Finally, each Endpoint is registered with the EndpointRegistry.
+   Finally, each Endpoint is registered with the EndpointRegistry.
 
-     *********************************************************************************************************************
+   *********************************************************************************************************************
    -->
 
    <!--
-     A web service deployer that hooks in after the EJB deployers
+   A web service deployer that hooks in after the EJB deployers
    -->
    <bean name="WebServiceDeployerEJB" class="org.jboss.wsf.container.jboss50.WebServiceDeployerEJB">
       <property name="relOrderEJB2x"><inject bean="EJB2xDeployer" property="relativeOrder"/></property>
@@ -54,7 +54,7 @@
    </bean>
 
    <!--
-     A web service deployer that hooks in before the WAR deployer
+   A web service deployer that hooks in before the WAR deployer
    -->
    <bean name="WebServiceDeployerPreJSE" class="org.jboss.wsf.container.jboss50.WebServiceDeployerPreJSE">
       <property name="relOrderWar"><inject bean="WarDeployer" property="relativeOrder"/></property>
@@ -62,8 +62,8 @@
    </bean>
 
    <!--
-     A web service deployer that hooks in after the WAR deployer
-     This deployer depends on the RuntimeClassloader being available.
+   A web service deployer that hooks in after the WAR deployer
+   This deployer depends on the RuntimeClassloader being available.
    -->
    <bean name="WebServiceDeployerPostJSE" class="org.jboss.wsf.container.jboss50.WebServiceDeployerPostJSE">
       <property name="relOrderWar"><inject bean="WarDeployer" property="relativeOrder"/></property>
@@ -71,7 +71,7 @@
    </bean>
 
    <!--
-     Register DeployerHooks with JBoss deployers
+   Register DeployerHooks with JBoss deployers
    -->
 
    <!-- Phase 1 of JSE JAX-RPC -->
