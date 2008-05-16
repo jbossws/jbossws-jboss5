@@ -88,7 +88,6 @@ public class EndpointAPIHttpTransportManager implements TransportManager
       deploymentRegistry.put( listenerRef.getUUID(), topLevelDeployment );
 
       return listenerRef;
-
    }
 
    public void destroyListener(ListenerRef ref)

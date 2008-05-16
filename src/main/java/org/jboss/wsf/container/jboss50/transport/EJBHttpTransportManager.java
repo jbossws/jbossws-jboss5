@@ -36,6 +36,8 @@ import org.jboss.wsf.spi.transport.TransportSpec;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Creates a webapp dpeloyment and pushes it into the deployment framework
@@ -46,10 +48,10 @@ public class EJBHttpTransportManager implements TransportManager
 {
    private WebAppDeploymentFactory deploymentFactory;
    private WebAppGenerator generator;
-
+   private Map<String, Deployment> deploymentRegistry = new HashMap<String, Deployment>();
+   
    public ListenerRef createListener(Endpoint endpoint, TransportSpec transportSpec)
    {
-
       assert deploymentFactory!=null;
       assert generator!=null;
 
@@ -75,27 +77,38 @@ public class EJBHttpTransportManager implements TransportManager
       int port = serverConfig.getWebServicePort();
       String hostAndPort = host + (port > 0 ? ":" + port : "");
 
+      ListenerRef listenerRef = null;
       try
       {
          String ctx = httpSpec.getWebContext();
          String pattern = httpSpec.getUrlPattern();
-         ListenerRef ref =  new HttpListenerRef(
-           ctx, pattern,
-           new URI("http://"+hostAndPort+ctx+pattern)
-         );
-
-         return ref;
-
-      } catch (URISyntaxException e)
+         listenerRef =  new HttpListenerRef( ctx, pattern, new URI("http://"+hostAndPort+ctx+pattern) );
+      }
+      catch (URISyntaxException e)
       {
          throw new RuntimeException("Failed to create ListenerRef", e);
       }
-      
+
+      // Map listenerRef for destroy phase
+      deploymentRegistry.put( listenerRef.getUUID(), topLevelDeployment );
+
+      return listenerRef;
    }
 
    public void destroyListener(ListenerRef ref)
    {
-      // noop
+      Deployment dep = deploymentRegistry.get(ref.getUUID());
+      if(null==dep)
+         throw new IllegalArgumentException("Unknown ListenerRef " + ref);
+
+      try
+      {
+         deploymentFactory.destroy(dep);
+      }
+      finally
+      {
+         deploymentRegistry.remove(ref.getUUID());
+      }
    }
 
    public void setDeploymentFactory(WebAppDeploymentFactory deploymentFactory)
