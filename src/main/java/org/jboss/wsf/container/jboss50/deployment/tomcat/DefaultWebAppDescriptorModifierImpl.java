@@ -37,10 +37,10 @@ import org.jboss.wsf.spi.transport.HttpSpec;
  * @author Thomas.Diesler@jboss.org
  * @since 19-May-2006
  */
-public class DefaultWebAppDesciptorModifierImpl implements WebAppDescriptorModifier
+public class DefaultWebAppDescriptorModifierImpl implements WebAppDescriptorModifier
 {
    // logging support
-   private static Logger log = Logger.getLogger(DefaultWebAppDesciptorModifierImpl.class);
+   private static Logger log = Logger.getLogger(DefaultWebAppDescriptorModifierImpl.class);
 
    public RewriteResults modifyDescriptor(Deployment dep, Document webXml) throws ClassNotFoundException
    {

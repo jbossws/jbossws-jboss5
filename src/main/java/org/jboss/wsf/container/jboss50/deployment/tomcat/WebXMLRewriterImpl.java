@@ -43,21 +43,21 @@ import java.io.FileOutputStream;
  */
 public class WebXMLRewriterImpl
 {
-   private WebAppDescriptorModifier desciptorModifier;
+   private WebAppDescriptorModifier descriptorModifier;
 
    public WebXMLRewriterImpl()
    {
-      this.desciptorModifier = new DefaultWebAppDesciptorModifierImpl();
+      this.descriptorModifier = new DefaultWebAppDescriptorModifierImpl();
    }
 
-   public WebAppDescriptorModifier getDesciptorModifier()
+   public WebAppDescriptorModifier getDescriptorModifier()
    {
-      return desciptorModifier;
+      return descriptorModifier;
    }
 
-   public void setDesciptorModifier(WebAppDescriptorModifier desciptorModifier)
+   public void setDescriptorModifier(WebAppDescriptorModifier descriptorModifier)
    {
-      this.desciptorModifier = desciptorModifier;
+      this.descriptorModifier = descriptorModifier;
    }
 
    public RewriteResults rewriteWebXml(Deployment dep)
@@ -110,7 +110,7 @@ public class WebXMLRewriterImpl
          SAXReader reader = new SAXReader();
          Document document = reader.read(inputStream);
 
-         RewriteResults results = desciptorModifier.modifyDescriptor(dep, document);
+         RewriteResults results = descriptorModifier.modifyDescriptor(dep, document);
          results.webXML = destFile.toURL();
 
          outputStream = new FileOutputStream(destFile);
