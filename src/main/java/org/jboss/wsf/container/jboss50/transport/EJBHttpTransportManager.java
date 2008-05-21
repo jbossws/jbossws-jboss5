@@ -46,6 +46,7 @@ import java.util.Map;
  */
 public class EJBHttpTransportManager implements TransportManager
 {
+   private static final String PROCESSED_BY_DEPLOYMENT_FACTORY = "processed.by.deployment.factory";
    private WebAppDeploymentFactory deploymentFactory;
    private WebAppGenerator generator;
    private Map<String, Deployment> deploymentRegistry = new HashMap<String, Deployment>();
@@ -66,10 +67,17 @@ public class EJBHttpTransportManager implements TransportManager
 
       // TODO: Somehow the ServletClass and InitParameter need to go from TransportSpec into generator
       topLevelDeployment.setProperty(HttpSpec.PROPERTY_WEBAPP_SERVLET_CLASS, httpSpec.getServletClass());
-      topLevelDeployment.setProperty(HttpSpec.PROPERTY_WEBAPP_CONTEXT_PARAMETERS, httpSpec.getContextParameter());      
-      URL webAppURL = generator.create(topLevelDeployment);
-      deploymentFactory.create(topLevelDeployment, webAppURL);
-
+      topLevelDeployment.setProperty(HttpSpec.PROPERTY_WEBAPP_CONTEXT_PARAMETERS, httpSpec.getContextParameter());
+      
+      // TODO: JBWS-2188
+      Boolean alreadyDeployed = (Boolean)topLevelDeployment.getProperty(PROCESSED_BY_DEPLOYMENT_FACTORY); 
+      if ((alreadyDeployed == null) || (false == alreadyDeployed))
+      {
+         URL webAppURL = generator.create(topLevelDeployment);
+         deploymentFactory.create(topLevelDeployment, webAppURL);
+         topLevelDeployment.setProperty(PROCESSED_BY_DEPLOYMENT_FACTORY, Boolean.TRUE);
+      }
+      
       SPIProvider provider = SPIProviderResolver.getInstance().getProvider();
       ServerConfigFactory spi = provider.getSPI(ServerConfigFactory.class);
       ServerConfig serverConfig = spi.getServerConfig();
@@ -99,16 +107,22 @@ public class EJBHttpTransportManager implements TransportManager
    public void destroyListener(ListenerRef ref)
    {
       Deployment dep = deploymentRegistry.get(ref.getUUID());
-      if(null==dep)
-         throw new IllegalArgumentException("Unknown ListenerRef " + ref);
-
-      try
+      if (dep != null)
       {
-         deploymentFactory.destroy(dep);
-      }
-      finally
-      {
-         deploymentRegistry.remove(ref.getUUID());
+         // TODO: JBWS-2188
+         Boolean alreadyDeployed = (Boolean)dep.getProperty(PROCESSED_BY_DEPLOYMENT_FACTORY); 
+         if ((alreadyDeployed != null) && (true == alreadyDeployed))
+         {
+            try
+            {
+               deploymentFactory.destroy(dep);
+            }
+            finally
+            {
+               deploymentRegistry.remove(ref.getUUID());
+            }
+            dep.removeProperty(PROCESSED_BY_DEPLOYMENT_FACTORY);
+         }
       }
    }
 
