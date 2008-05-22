@@ -43,6 +43,7 @@ import java.util.HashMap;
  */
 public class EndpointAPIHttpTransportManager implements TransportManager
 {
+   private static final String PROCESSED_BY_DEPLOYMENT_FACTORY = "processed.by.deployment.factory";
    private WebAppGenerator generator;
    private Map<String, Deployment> deploymentRegistry = new HashMap<String, Deployment>();
    
@@ -57,7 +58,14 @@ public class EndpointAPIHttpTransportManager implements TransportManager
 
       // Create jboss web app data and attach it to the Deployment
       Deployment topLevelDeployment = endpoint.getService().getDeployment();
-      generator.create(topLevelDeployment);
+      
+      // TODO: JBWS-2188
+      Boolean alreadyDeployed = (Boolean)topLevelDeployment.getProperty(PROCESSED_BY_DEPLOYMENT_FACTORY); 
+      if ((alreadyDeployed == null) || (false == alreadyDeployed))
+      {
+         generator.create(topLevelDeployment);
+         topLevelDeployment.setProperty(PROCESSED_BY_DEPLOYMENT_FACTORY, Boolean.TRUE);
+      }
 
       // Server config
       SPIProvider provider = SPIProviderResolver.getInstance().getProvider();
@@ -88,10 +96,23 @@ public class EndpointAPIHttpTransportManager implements TransportManager
    public void destroyListener(ListenerRef ref)
    {
       Deployment dep = deploymentRegistry.get(ref.getUUID());
-      if(null==dep)
-         throw new IllegalArgumentException("Unknown ListenerRef " + ref);
-
-      deploymentRegistry.remove(ref.getUUID());
+      if (dep != null)
+      {
+         // TODO: JBWS-2188
+         Boolean alreadyDeployed = (Boolean)dep.getProperty(PROCESSED_BY_DEPLOYMENT_FACTORY); 
+         if ((alreadyDeployed != null) && (true == alreadyDeployed))
+         {
+            try
+            {
+               deploymentFactory.destroy(dep);
+            }
+            finally
+            {
+               deploymentRegistry.remove(ref.getUUID());
+            }
+            dep.removeProperty(PROCESSED_BY_DEPLOYMENT_FACTORY);
+         }
+      }
    }
 
    public void setGenerator(WebAppGenerator generator)
