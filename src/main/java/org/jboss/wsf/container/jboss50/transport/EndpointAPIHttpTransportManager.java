@@ -35,6 +35,7 @@ import org.jboss.wsf.spi.transport.TransportSpec;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -44,6 +45,7 @@ import java.util.HashMap;
 public class EndpointAPIHttpTransportManager implements TransportManager
 {
    private static final String PROCESSED_BY_DEPLOYMENT_FACTORY = "processed.by.deployment.factory";
+   private WebAppDeploymentFactory deploymentFactory;
    private WebAppGenerator generator;
    private Map<String, Deployment> deploymentRegistry = new HashMap<String, Deployment>();
    
@@ -63,7 +65,8 @@ public class EndpointAPIHttpTransportManager implements TransportManager
       Boolean alreadyDeployed = (Boolean)topLevelDeployment.getProperty(PROCESSED_BY_DEPLOYMENT_FACTORY); 
       if ((alreadyDeployed == null) || (false == alreadyDeployed))
       {
-         generator.create(topLevelDeployment);
+         URL webAppURL = generator.create(topLevelDeployment);
+         deploymentFactory.create(topLevelDeployment, webAppURL);
          topLevelDeployment.setProperty(PROCESSED_BY_DEPLOYMENT_FACTORY, Boolean.TRUE);
       }
 
@@ -102,10 +105,22 @@ public class EndpointAPIHttpTransportManager implements TransportManager
          Boolean alreadyDeployed = (Boolean)dep.getProperty(PROCESSED_BY_DEPLOYMENT_FACTORY); 
          if ((alreadyDeployed != null) && (true == alreadyDeployed))
          {
-            deploymentRegistry.remove(ref.getUUID());
+            try
+            {
+               deploymentFactory.destroy(dep);
+            }
+            finally
+            {
+               deploymentRegistry.remove(ref.getUUID());
+            }
             dep.removeProperty(PROCESSED_BY_DEPLOYMENT_FACTORY);
          }
       }
+   }
+
+   public void setDeploymentFactory(WebAppDeploymentFactory deploymentFactory)
+   {
+      this.deploymentFactory = deploymentFactory;
    }
 
    public void setGenerator(WebAppGenerator generator)
