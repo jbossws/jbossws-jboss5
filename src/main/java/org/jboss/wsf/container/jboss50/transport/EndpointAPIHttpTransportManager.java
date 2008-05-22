@@ -102,14 +102,7 @@ public class EndpointAPIHttpTransportManager implements TransportManager
          Boolean alreadyDeployed = (Boolean)dep.getProperty(PROCESSED_BY_DEPLOYMENT_FACTORY); 
          if ((alreadyDeployed != null) && (true == alreadyDeployed))
          {
-            try
-            {
-               deploymentFactory.destroy(dep);
-            }
-            finally
-            {
-               deploymentRegistry.remove(ref.getUUID());
-            }
+            deploymentRegistry.remove(ref.getUUID());
             dep.removeProperty(PROCESSED_BY_DEPLOYMENT_FACTORY);
          }
       }
