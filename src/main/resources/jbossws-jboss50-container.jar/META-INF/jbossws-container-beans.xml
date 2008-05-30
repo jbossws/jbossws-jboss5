@@ -123,7 +123,7 @@
    -->
 
    <bean name="WSContainerMetaDataDeploymentAspect" class="org.jboss.wsf.container.jboss50.deployment.metadata.ContainerMetaDataDeploymentAspect">
-      <property name="provides">ContainerMetaData, VFSRoot</property>
+      <property name="provides">ContainerMetaData,VFSRoot</property>
    </bean>
 
    <bean name="WSContextRootDeploymentAspect" class="org.jboss.wsf.framework.deployment.BackwardCompatibleContextRootDeploymentAspect">
@@ -133,11 +133,11 @@
    
    <bean name="WSHttpTransportDeploymentAspect" class="org.jboss.wsf.framework.deployment.HttpTransportDeploymentAspect">
       <property name="requires">URLPattern,ContextProperties</property>
-      <property name="provides">EndpointAddress</property>
+      <property name="provides">EndpointAddress,WebMetaData</property>
    </bean>
 
    <bean name="WSEndpointAPIDeploymentAspect" class="org.jboss.wsf.framework.deployment.EndpointAPIDeploymentAspect">
-      <property name="provides">ContainerMetaData, RuntimeLoader, URLPattern, VFSRoot</property>
+      <property name="provides">ContainerMetaData,RuntimeLoader,URLPattern,VFSRoot</property>
    </bean>
 
    <bean name="WSEndpointHandlerDeploymentAspect" class="org.jboss.wsf.framework.deployment.EndpointHandlerDeploymentAspect">
@@ -165,7 +165,7 @@
    </bean>
 
    <bean name="WSModifyWebMetaDataDeploymentAspect" class="org.jboss.wsf.container.jboss50.deployment.tomcat.ModifyWebMetaDataDeploymentAspect">
-      <property name="requires">ContextProperties, StackDescriptor</property>
+      <property name="requires">ContextProperties,StackDescriptor,WebMetaData</property>
    </bean>
 
    <bean name="WSRuntimeLoaderDeploymentAspect" class="org.jboss.wsf.container.jboss50.deployment.RuntimeLoaderDeploymentAspect">
@@ -174,7 +174,7 @@
    </bean>
 
    <bean name="WSURLPatternDeploymentAspect" class="org.jboss.wsf.framework.deployment.BackwardCompatibleURLPatternDeploymentAspect">
-      <property name="requires">ContextRoot, ContainerMetaData</property>
+      <property name="requires">ContextRoot,ContainerMetaData</property>
       <property name="provides">URLPattern</property>
    </bean>
 
