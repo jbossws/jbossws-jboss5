@@ -21,32 +21,26 @@
  */
 package org.jboss.wsf.container.jboss50.transport;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-
-import org.jboss.wsf.framework.deployment.WebAppGeneratorDeploymentAspect;
-import org.jboss.wsf.spi.SPIProvider;
-import org.jboss.wsf.spi.SPIProviderResolver;
-import org.jboss.wsf.spi.WSFRuntime;
-import org.jboss.wsf.spi.annotation.WebContext;
-import org.jboss.wsf.spi.deployment.ArchiveDeployment;
-import org.jboss.wsf.spi.deployment.Deployment;
-import org.jboss.wsf.spi.deployment.Endpoint;
-import org.jboss.wsf.spi.deployment.SecurityHandler;
-import org.jboss.wsf.spi.deployment.WSFDeploymentException;
-import org.jboss.wsf.spi.management.ServerConfig;
-import org.jboss.wsf.spi.management.ServerConfigFactory;
-import org.jboss.wsf.spi.metadata.j2ee.EJBArchiveMetaData;
-import org.jboss.wsf.spi.metadata.j2ee.EJBMetaData;
-import org.jboss.wsf.spi.metadata.j2ee.EJBSecurityMetaData;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
+import org.jboss.wsf.spi.SPIProvider;
+import org.jboss.wsf.spi.SPIProviderResolver;
+import org.jboss.wsf.spi.annotation.WebContext;
+import org.jboss.wsf.spi.deployment.*;
+import org.jboss.wsf.spi.management.ServerConfig;
+import org.jboss.wsf.spi.management.ServerConfigFactory;
+import org.jboss.wsf.spi.metadata.j2ee.EJBArchiveMetaData;
+import org.jboss.wsf.spi.metadata.j2ee.EJBMetaData;
+import org.jboss.wsf.spi.metadata.j2ee.EJBSecurityMetaData;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
 
 /**
  * A deployer that generates a webapp for an EJB endpoint 
