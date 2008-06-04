@@ -23,12 +23,15 @@ package org.jboss.wsf.container.jboss50;
 
 import org.jboss.logging.Logger;
 import org.jboss.wsf.spi.ComposableRuntime;
+import org.jboss.wsf.spi.SPIProvider;
+import org.jboss.wsf.spi.SPIProviderResolver;
 import org.jboss.wsf.spi.WSFRuntime;
 import org.jboss.wsf.spi.deployment.Deployment;
 import org.jboss.wsf.spi.deployment.DeploymentAspectManager;
 import org.jboss.wsf.spi.invocation.InvocationHandlerFactory;
 import org.jboss.wsf.spi.invocation.RequestHandlerFactory;
 import org.jboss.wsf.spi.management.EndpointRegistry;
+import org.jboss.wsf.spi.management.EndpointRegistryFactory;
 import org.jboss.wsf.spi.transport.TransportManagerFactory;
 
 /**
@@ -50,6 +53,8 @@ public class BareWSFRuntime implements WSFRuntime, ComposableRuntime
 
    private TransportManagerFactory transportManagerFactory;
 
+   boolean initialized;
+
    public String getRuntimeName()
    {
       return runtimeName;
@@ -65,21 +70,37 @@ public class BareWSFRuntime implements WSFRuntime, ComposableRuntime
 
    public void create(Deployment deployment)
    {
+      init();
       deploymentManager.create(deployment, this);
+   }
+
+   private void init()
+   {
+      if(!initialized)
+      {
+         SPIProvider spiProvider = SPIProviderResolver.getInstance().getProvider();
+         setEndpointRegistry( spiProvider.getSPI(EndpointRegistryFactory.class).getEndpointRegistry() );
+         setRequestHandlerFactory( spiProvider.getSPI(RequestHandlerFactory.class) );
+         setInvocationHandlerFactory( spiProvider.getSPI(InvocationHandlerFactory.class) );
+         initialized = true;
+      }
    }
 
    public void start(Deployment deployment)
    {
+      init();
       deploymentManager.start(deployment, this);
    }
 
    public void stop(Deployment deployment)
    {
+      init();
       deploymentManager.stop(deployment, this);
    }
 
    public void destroy(Deployment deployment)
    {
+      init();
       deploymentManager.destroy(deployment, this);
    }
 
@@ -89,7 +110,7 @@ public class BareWSFRuntime implements WSFRuntime, ComposableRuntime
    public void setTransportManagerFactory(TransportManagerFactory factory)
    {
       assert factory!=null;
-      log.debug(runtimeName + " -> TransportManagerFactory: " + factory);
+      log.info(runtimeName + " -> TransportManagerFactory: " + factory);
       this.transportManagerFactory = factory;
    }
 
@@ -101,7 +122,7 @@ public class BareWSFRuntime implements WSFRuntime, ComposableRuntime
    public void setEndpointRegistry(EndpointRegistry endpointRegistry)
    {
       assert endpointRegistry!=null;
-      log.debug(runtimeName + " -> EndpointRegistry: " + endpointRegistry);
+      log.info(runtimeName + " -> EndpointRegistry: " + endpointRegistry);
       this.endpointRegistry = endpointRegistry;
    }
 
@@ -113,7 +134,7 @@ public class BareWSFRuntime implements WSFRuntime, ComposableRuntime
    public void setDeploymentAspectManager(DeploymentAspectManager deploymentManager)
    {
       assert deploymentManager!=null;
-      log.debug(runtimeName + " -> DeploymentAspectManager: " + deploymentManager);
+      log.info(runtimeName + " -> DeploymentAspectManager: " + deploymentManager);
       this.deploymentManager = deploymentManager;
    }
 
@@ -125,7 +146,7 @@ public class BareWSFRuntime implements WSFRuntime, ComposableRuntime
    public void setRequestHandlerFactory(RequestHandlerFactory factory)
    {
       assert factory!=null;
-      log.debug(runtimeName + " -> RequestHandlerFactory: "+ factory);
+      log.info(runtimeName + " -> RequestHandlerFactory: "+ factory);
       this.requestHandlerFactory = factory;
    }
 
