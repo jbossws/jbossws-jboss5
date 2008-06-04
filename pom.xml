@@ -6,22 +6,25 @@
   <groupId>org.jboss.ws</groupId>
   <artifactId>jbossws-jboss500</artifactId>
   
-  <version>3.0.0-SNAPSHOT</version>
+  <version>3.0.2-SNAPSHOT</version>
   
   <!-- Parent -->
   <parent>
     <groupId>org.jboss.ws</groupId>
     <artifactId>jbossws-parent</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0.GA</version>
   </parent>
   
   <!-- Properties -->
   <properties>
-    <!--
-    JBoss component versions taken from
-    https://svn.jboss.org/repos/jbossas/tags/JBoss_5_0_0_Beta4/webservices/pom.xml
-    -->
+    <jbossws.common.version>1.0.5-SNAPSHOT</jbossws.common.version>
+    <jbossws.spi.version>1.0.4-SNAPSHOT</jbossws.spi.version>
+    <jboss.version>5.0.0.Beta4</jboss.version>
     
+    <jboss.ejb3.version>0.1.2.Beta1</jboss.ejb3.version>
+    <jboss.security.version>2.0.2.Beta4</jboss.security.version>
+    <jboss.jbossxb.version>2.0.0.CR5</jboss.jbossxb.version>
+    <jboss.microcontainer.version>2.0.0.Beta10</jboss.microcontainer.version>
   </properties>
   
   <!-- DependencyManagement -->
@@ -30,13 +33,15 @@
       <dependency>
         <groupId>org.jboss.ws</groupId>
         <artifactId>jbossws-spi</artifactId>
-        <version>3.0.0-SNAPSHOT</version>
+        <version>${jbossws.spi.version}</version>
       </dependency>
       <dependency>
         <groupId>org.jboss.ws</groupId>
         <artifactId>jbossws-common</artifactId>
-        <version>3.0.0-SNAPSHOT</version>
+        <version>${jbossws.common.version}</version>
       </dependency>
+      
+      <!-- remove this dependency -->
       <dependency>
         <groupId>org.jboss.ws</groupId>
         <artifactId>jbossws-framework</artifactId>
@@ -45,48 +50,43 @@
       
       <dependency>
         <groupId>org.jboss</groupId>
-        <artifactId>jboss-vfs</artifactId>
-        <version>2.0.0.Beta9</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jboss</groupId>
         <artifactId>jbossxb</artifactId>
-        <version>2.0.0.CR5</version>
+        <version>${jboss.jbossxb.version}</version>
       </dependency>
       <dependency>
         <groupId>org.jboss.jbossas</groupId>
         <artifactId>jboss-as-ejb3</artifactId>
-        <version>0.1.2.Beta1</version>
+        <version>${jboss.ejb3.version}</version>
       </dependency>
       <dependency>
         <groupId>org.jboss.jbossas</groupId>
         <artifactId>jboss-as-ejb3-ext-API</artifactId>
-        <version>0.1.2.Beta1</version>
+        <version>${jboss.ejb3.version}</version>
       </dependency>
       <dependency>
         <groupId>org.jboss.jbossas</groupId>
         <artifactId>jboss-as-ejb3-core</artifactId>
-        <version>0.1.2.Beta1</version>
+        <version>${jboss.ejb3.version}</version>
       </dependency>
       <dependency>
         <groupId>org.jboss.jbossas</groupId>
         <artifactId>jboss-as-server</artifactId>
-        <version>5.0.0.Beta4</version>
+        <version>${jboss.version}</version>
       </dependency>
       <dependency>
         <groupId>org.jboss.jbossas</groupId>
         <artifactId>jboss-metadata</artifactId>
-        <version>5.0.0.Beta4</version>
+        <version>${jboss.version}</version>
       </dependency>
       <dependency>
         <groupId>org.jboss.microcontainer</groupId>
         <artifactId>jboss-deployers-structure-spi</artifactId>
-        <version>2.0.0.Beta10</version>
+        <version>${jboss.microcontainer.version}</version>
       </dependency>
       <dependency>
         <groupId>org.jboss.security</groupId>
         <artifactId>jbosssx-client</artifactId>
-        <version>2.0.2.Beta4</version>
+        <version>${jboss.security.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -125,11 +125,6 @@
     </dependency>
     
     <!-- Transitive compile dependencies -->
-    <dependency>
-      <groupId>org.jboss</groupId>
-      <artifactId>jboss-vfs</artifactId>
-      <scope>compile</scope>
-    </dependency>
     <dependency>
       <groupId>org.jboss</groupId>
       <artifactId>jbossxb</artifactId>
