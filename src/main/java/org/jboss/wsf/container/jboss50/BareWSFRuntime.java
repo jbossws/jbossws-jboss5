@@ -22,7 +22,6 @@
 package org.jboss.wsf.container.jboss50;
 
 import org.jboss.logging.Logger;
-import org.jboss.wsf.spi.ComposableRuntime;
 import org.jboss.wsf.spi.SPIProvider;
 import org.jboss.wsf.spi.SPIProviderResolver;
 import org.jboss.wsf.spi.WSFRuntime;
@@ -103,7 +102,7 @@ public class BareWSFRuntime implements WSFRuntime
    public void setTransportManagerFactory(TransportManagerFactory factory)
    {
       assert factory!=null;
-      log.info(runtimeName + " -> TransportManagerFactory: " + factory);
+      log.debug(runtimeName + " -> TransportManagerFactory: " + factory);
       this.transportManagerFactory = factory;
    }
 
@@ -115,7 +114,7 @@ public class BareWSFRuntime implements WSFRuntime
    public void setEndpointRegistry(EndpointRegistry endpointRegistry)
    {
       assert endpointRegistry!=null;
-      log.info(runtimeName + " -> EndpointRegistry: " + endpointRegistry);
+      log.debug(runtimeName + " -> EndpointRegistry: " + endpointRegistry);
       this.endpointRegistry = endpointRegistry;
    }
 
@@ -127,7 +126,7 @@ public class BareWSFRuntime implements WSFRuntime
    public void setDeploymentAspectManager(DeploymentAspectManager deploymentManager)
    {
       assert deploymentManager!=null;
-      log.info(runtimeName + " -> DeploymentAspectManager: " + deploymentManager);
+      log.debug(runtimeName + " -> DeploymentAspectManager: " + deploymentManager);
       this.deploymentManager = deploymentManager;
    }
 
@@ -139,7 +138,7 @@ public class BareWSFRuntime implements WSFRuntime
    public void setRequestHandlerFactory(RequestHandlerFactory factory)
    {
       assert factory!=null;
-      log.info(runtimeName + " -> RequestHandlerFactory: "+ factory);
+      log.debug(runtimeName + " -> RequestHandlerFactory: "+ factory);
       this.requestHandlerFactory = factory;
    }
 
@@ -152,7 +151,7 @@ public class BareWSFRuntime implements WSFRuntime
    public void setInvocationHandlerFactory(InvocationHandlerFactory factory)
    {
       assert factory!=null;
-      log.info(runtimeName + " -> InvocationHandlerFactory: "+ factory);
+      log.debug(runtimeName + " -> InvocationHandlerFactory: "+ factory);
       this.invocationHandlerFactory = factory;
    }
 
