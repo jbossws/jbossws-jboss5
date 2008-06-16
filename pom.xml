@@ -6,7 +6,7 @@
   <groupId>org.jboss.ws</groupId>
   <artifactId>jbossws-jboss501</artifactId>
   
-  <version>3.0.2-SNAPSHOT</version>
+  <version>3.0.2.GA</version>
   
   <!-- Parent -->
   <parent>
@@ -24,8 +24,8 @@
   
   <!-- Properties -->
   <properties>
-    <jbossws.common.version>1.0.5-SNAPSHOT</jbossws.common.version>
-    <jbossws.spi.version>1.0.4-SNAPSHOT</jbossws.spi.version>
+    <jbossws.common.version>1.0.5.GA</jbossws.common.version>
+    <jbossws.spi.version>1.0.4.GA</jbossws.spi.version>
     
     <!--
       JBoss component versions taken from   
