@@ -4,7 +4,7 @@
   
   <name>JBoss Web Services - Container JBoss-5.0.1</name>
   <groupId>org.jboss.ws</groupId>
-  <artifactId>jbossws-jboss500Trunk</artifactId>
+  <artifactId>jbossws-jboss500x</artifactId>
   
   <version>3.0.2.GA</version>
   
