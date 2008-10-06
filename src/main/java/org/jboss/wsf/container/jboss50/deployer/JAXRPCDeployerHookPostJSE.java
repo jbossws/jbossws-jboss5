@@ -24,6 +24,7 @@ package org.jboss.wsf.container.jboss50.deployer;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.wsf.spi.deployment.Deployment;
+import org.jboss.wsf.spi.deployment.Deployment.DeploymentState;
 import org.jboss.wsf.spi.metadata.webservices.WebservicesMetaData;
 import static org.jboss.wsf.spi.deployment.Deployment.DeploymentState;
 
@@ -47,7 +48,8 @@ public class JAXRPCDeployerHookPostJSE extends DeployerHookPostJSE
       if (!ignoreDeployment(unit) && isWebServiceDeployment(unit))
       {
          Deployment dep = getDeployment(unit);
-         if(null==dep || DeploymentState.CREATED != dep.getState())
+         boolean expectedState = DeploymentState.CREATED == dep.getState() || DeploymentState.STARTED == dep.getState(); 
+         if (null == dep || !expectedState)
             throw new DeploymentException("Create step is missing");
 
          // execute the 'start' step

@@ -44,7 +44,8 @@ public class JAXWSDeployerHookPostJSE extends DeployerHookPostJSE
       if (!ignoreDeployment(unit) && isWebServiceDeployment(unit))
       {
          Deployment dep = getDeployment(unit);
-         if (null == dep || DeploymentState.CREATED != dep.getState())
+         boolean expectedState = DeploymentState.CREATED == dep.getState() || DeploymentState.STARTED == dep.getState(); 
+         if (null == dep || !expectedState)
             throw new DeploymentException("Create step failed");
 
          // execute the 'start' step

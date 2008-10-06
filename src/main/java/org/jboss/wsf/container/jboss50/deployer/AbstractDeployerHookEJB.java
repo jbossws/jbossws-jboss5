@@ -24,6 +24,8 @@ package org.jboss.wsf.container.jboss50.deployer;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.wsf.spi.deployment.Deployment;
+import org.jboss.wsf.spi.deployment.Deployment.DeploymentState;
+
 import static org.jboss.wsf.spi.deployment.Deployment.DeploymentState;
 
 /**
@@ -41,7 +43,8 @@ public abstract class AbstractDeployerHookEJB extends ArchiveDeployerHook
          super.deploy(unit); // Calls create 
 
          Deployment dep = unit.getAttachment(Deployment.class);
-         if(null==dep || DeploymentState.CREATED != dep.getState())
+         boolean expectedState = DeploymentState.CREATED == dep.getState() || DeploymentState.STARTED == dep.getState(); 
+         if (null == dep || !expectedState)
             throw new DeploymentException("Create step failed");
 
          // execute the 'start' step
