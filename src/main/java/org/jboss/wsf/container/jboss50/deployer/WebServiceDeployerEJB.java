@@ -46,7 +46,7 @@ import java.util.List;
 import javax.management.ObjectName;
 
 /**
- * This web service deployer for EJB. Adopts EJB deployments to
+ * This is the web service deployer for EJB. Adopts EJB deployments to
  * {@link org.jboss.wsf.spi.deployment.integration.WebServiceDeclaration} an passes it to a chain of
  * {@link org.jboss.wsf.container.jboss50.deployer.DeployerHook}'s.
  *
