@@ -21,23 +21,6 @@
  */
 package org.jboss.wsf.container.jboss50.deployer;
 
-import org.jboss.deployers.spi.DeploymentException;
-import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.ejb.deployers.EjbDeployment;
-import org.jboss.ejb.deployers.MergedJBossMetaDataDeployer;
-import org.jboss.ejb3.EJBContainer;
-import org.jboss.ejb3.Ejb3Deployment;
-import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeanMetaData;
-import org.jboss.metadata.ejb.jboss.JBossMetaData;
-import org.jboss.metadata.ejb.jboss.JBossSessionBeanMetaData;
-import org.jboss.metadata.javaee.spec.PortComponent;
-import org.jboss.metadata.web.jboss.JBossWebMetaData;
-import org.jboss.wsf.spi.deployment.integration.WebServiceDeclaration;
-import org.jboss.wsf.spi.deployment.integration.WebServiceDeployment;
-import org.jboss.wsf.spi.metadata.j2ee.PortComponentMD;
-import org.jboss.wsf.spi.metadata.j2ee.PortComponentSpec;
-import org.jboss.logging.Logger;
-
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -45,15 +28,28 @@ import java.util.List;
 
 import javax.management.ObjectName;
 
+import org.jboss.deployers.spi.DeploymentException;
+import org.jboss.deployers.structure.spi.DeploymentUnit;
+import org.jboss.ejb.deployers.EjbDeployment;
+import org.jboss.ejb.deployers.MergedJBossMetaDataDeployer;
+import org.jboss.ejb3.EJBContainer;
+import org.jboss.ejb3.Ejb3Deployment;
+import org.jboss.ejb3.javaee.JavaEEComponentHelper;
+import org.jboss.logging.Logger;
+import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeanMetaData;
+import org.jboss.metadata.ejb.jboss.JBossMetaData;
+import org.jboss.metadata.web.jboss.JBossWebMetaData;
+import org.jboss.wsf.spi.deployment.integration.WebServiceDeclaration;
+import org.jboss.wsf.spi.deployment.integration.WebServiceDeployment;
+
 /**
  * This web service deployer for EJB. Adopts EJB deployments to
  * {@link org.jboss.wsf.spi.deployment.integration.WebServiceDeclaration} an passes it to a chain of
  * {@link org.jboss.wsf.container.jboss50.deployer.DeployerHook}'s.
  *
+ * @author richard.opalka@jboss.com
  * @author Thomas.Diesler@jboss.org
  * @author Heiko.Braun@jboss.com
- *
- * @since 24-Apr-2007
  */
 public class WebServiceDeployerEJB extends AbstractWebServiceDeployer
 {
@@ -61,17 +57,12 @@ public class WebServiceDeployerEJB extends AbstractWebServiceDeployer
 
    public WebServiceDeployerEJB()
    {
+      // deployers ordering contract
       addInput(MergedJBossMetaDataDeployer.EJB_MERGED_ATTACHMENT_NAME);   
-   
       addInput(EjbDeployment.class);
-      
       addInput(Ejb3Deployment.class);
-
-      // Input for the TomcatDeployer
-      addOutput(JBossWebMetaData.class);
-      
-      addOutput(WebServiceDeployment.class);
-
+      addOutput(JBossWebMetaData.class); // we're creating web metadata - the input for tomcat deployer
+      addOutput(WebServiceDeployment.class); // we're providing webservice metadata
    }
 
    @Override
@@ -96,7 +87,14 @@ public class WebServiceDeployerEJB extends AbstractWebServiceDeployer
                ObjectName objName = null;
                try
                {
-                  objName = new ObjectName(ejb.determineContainerName());
+                  String containerName = ejb.determineContainerName();
+                  if(containerName == null)
+                  {
+                     log.warn("Container name is null in metadata of " + ejb + ", will generate one.");
+                     String ejbName = ejb.getEjbName();
+                     containerName = JavaEEComponentHelper.createObjectName(ejb3Deployment, ejbName);
+                  }
+                  objName = new ObjectName(containerName);
                }
                catch (Exception e)
                {
