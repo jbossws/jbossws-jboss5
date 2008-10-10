@@ -27,6 +27,7 @@ import org.jboss.ejb.deployers.EjbDeployment;
 import org.jboss.ejb.deployers.MergedJBossMetaDataDeployer;
 import org.jboss.ejb3.EJBContainer;
 import org.jboss.ejb3.Ejb3Deployment;
+import org.jboss.ejb3.javaee.JavaEEComponentHelper;
 import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeanMetaData;
 import org.jboss.metadata.ejb.jboss.JBossMetaData;
 import org.jboss.metadata.ejb.jboss.JBossSessionBeanMetaData;
@@ -96,7 +97,14 @@ public class WebServiceDeployerEJB extends AbstractWebServiceDeployer
                ObjectName objName = null;
                try
                {
-                  objName = new ObjectName(ejb.determineContainerName());
+                  String containerName = ejb.determineContainerName();
+                  if(containerName == null)
+                  {
+                     log.warn("Container name is null in metadata of " + ejb + ", will generate one.");
+                     String ejbName = ejb.getEjbName();
+                     containerName = JavaEEComponentHelper.createObjectName(ejb3Deployment, ejbName);
+                  }
+                  objName = new ObjectName(containerName);
                }
                catch (Exception e)
                {
