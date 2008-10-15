@@ -6,7 +6,7 @@
   <groupId>org.jboss.ws</groupId>
   <artifactId>jbossws-jboss500CR2</artifactId>
   
-  <version>3.0.4-SNAPSHOT</version>
+  <version>3.0.4.GA</version>
   
   <!-- Parent -->
   <parent>
@@ -17,9 +17,9 @@
   
   <!-- Source Control Management -->
   <scm>
-    <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossws/container/jboss50/branches/jbossws-jboss500CR2-3.0.4.GA</connection>
-    <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossws/container/jboss50/branches/jbossws-jboss500CR2-3.0.4.GA</developerConnection>
-    <url>http://fisheye.jboss.com/viewrep/JBossWS/container/jboss50/branches/jbossws-jboss500CR2-3.0.4.GA</url>
+    <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossws/container/jboss50/tags/jbossws-jboss500CR2-3.0.4.GA</connection>
+    <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossws/container/jboss50/tags/jbossws-jboss500CR2-3.0.4.GA</developerConnection>
+    <url>http://fisheye.jboss.com/viewrep/JBossWS/container/jboss50/tags/jbossws-jboss500CR2-3.0.4.GA</url>
   </scm>
   
   <!-- Properties -->
