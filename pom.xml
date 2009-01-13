@@ -25,7 +25,7 @@
   <!-- Properties -->
   <properties>
     <jbossws.common.version>1.0.8.GA</jbossws.common.version>
-    <jbossws.spi.version>1.0.7.GA</jbossws.spi.version>
+    <jbossws.spi.version>1.0.8-SNAPSHOT</jbossws.spi.version>
     <!--
       JBoss component versions taken from
       http://repository.jboss.org/maven2/org/jboss/jbossas/jboss-as-component-matrix/5.0.0.GA/jboss-as-component-matrix-5.0.0.GA.pom
