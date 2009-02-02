@@ -21,6 +21,9 @@
  */
 package org.jboss.wsf.container.jboss50.transport;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.xml.ws.Endpoint;
 import javax.xml.ws.WebServiceException;
 
@@ -44,6 +47,8 @@ import org.jboss.wsf.spi.http.HttpServer;
  */
 public class DeploymentAspectHttpServer extends AbstractExtensible implements HttpServer
 {
+   private Map<String,Deployment> deployments = new HashMap<String,Deployment>();
+   
    /** Start an instance of this HTTP server */
    public void start()
    {
@@ -61,6 +66,7 @@ public class DeploymentAspectHttpServer extends AbstractExtensible implements Ht
    /** Publish an JAXWS endpoint to the HTTP server */
    public void publish(HttpContext context, Endpoint endpoint)
    {
+      String contextRoot = context.getContextRoot();
       Class implClass = getImplementorClass(endpoint);
 
       try
@@ -70,21 +76,20 @@ public class DeploymentAspectHttpServer extends AbstractExtensible implements Ht
          DeploymentModelFactory depModelFactory = spiProvider.getSPI(DeploymentModelFactory.class);
 
          // Create/Setup the deployment
-         Deployment dep = depModelFactory.newDeployment("endpoint-deployment", implClass.getClassLoader());
-         dep.setRuntimeClassLoader(dep.getInitialClassLoader());
+         Deployment deployment = depModelFactory.newDeployment("endpoint-deployment", implClass.getClassLoader());
+         deployment.setRuntimeClassLoader(deployment.getInitialClassLoader());
 
          // Create/Setup the service
-         Service service = dep.getService();
-         service.setContextRoot(context.getContextRoot());
+         Service service = deployment.getService();
+         service.setContextRoot(contextRoot);
 
          // Create/Setup the endpoint
          org.jboss.wsf.spi.deployment.Endpoint ep = depModelFactory.newEndpoint(implClass.getName());
          service.addEndpoint(ep);
 
          // Deploy using deployment aspects
-         DeploymentAspectManagerFactory depManagerFactory = spiProvider.getSPI(DeploymentAspectManagerFactory.class);
-         DeploymentAspectManager depManager = depManagerFactory.getDeploymentAspectManager("WSDeploymentAspectManagerEndpointAPI");
-         depManager.deploy(dep);
+         getDeploymentAspectManager().deploy(deployment);
+         deployments.put(contextRoot, deployment);
       }
       catch (RuntimeException rte)
       {
@@ -99,8 +104,13 @@ public class DeploymentAspectHttpServer extends AbstractExtensible implements Ht
    /** Destroys an JAXWS endpoint on the HTTP server */
    public void destroy(HttpContext context, Endpoint endpoint)
    {
+      String contextRoot = context.getContextRoot();
+      
       try
       {
+         Deployment deployment = deployments.remove(contextRoot);
+         if (deployment != null)
+            getDeploymentAspectManager().undeploy(deployment);
       }
       catch (RuntimeException rte)
       {
@@ -110,6 +120,14 @@ public class DeploymentAspectHttpServer extends AbstractExtensible implements Ht
       {
          throw new WebServiceException(ex);
       }
+   }
+
+   private DeploymentAspectManager getDeploymentAspectManager()
+   {
+      SPIProvider spiProvider = SPIProviderResolver.getInstance().getProvider();
+      DeploymentAspectManagerFactory depManagerFactory = spiProvider.getSPI(DeploymentAspectManagerFactory.class);
+      DeploymentAspectManager depManager = depManagerFactory.getDeploymentAspectManager("WSDeploymentAspectManagerEndpointAPI");
+      return depManager;
    }
 
    private Class getImplementorClass(Endpoint endpoint)
