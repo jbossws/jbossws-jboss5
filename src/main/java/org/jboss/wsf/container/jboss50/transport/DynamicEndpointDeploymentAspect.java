@@ -21,6 +21,9 @@
  */
 package org.jboss.wsf.container.jboss50.transport;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.xml.ws.WebServiceException;
 
 import org.jboss.deployers.client.plugins.deployment.AbstractDeployment;
@@ -50,6 +53,8 @@ public class DynamicEndpointDeploymentAspect extends DeploymentAspect
    private DeploymentFactory factory = new DeploymentFactory();
    private WebMetaDataModifier webMetaDataModifier;
    private DeployerClient mainDeployer;
+   
+   private Map<String,AbstractDeployment> deployments = new HashMap<String,AbstractDeployment>();
 
    public void setWebMetaDataModifier(WebMetaDataModifier webMetaDataModifier)
    {
@@ -67,16 +72,22 @@ public class DynamicEndpointDeploymentAspect extends DeploymentAspect
       if (jbwmd == null)
          throw new WebServiceException("Cannot find web meta data");
 
+      ClassLoader epLoader = dep.getRuntimeClassLoader();
+      
       try
       {
          webMetaDataModifier.modifyMetaData(dep);
 
-         AbstractDeployment deployment = createSimpleDeployment(dep.getService().getContextRoot());
+         String contextRoot = dep.getService().getContextRoot();
+         AbstractDeployment deployment = createSimpleDeployment("http://jaxws-endpoint-api" + contextRoot);
          MutableAttachments mutableAttachments = (MutableAttachments)deployment.getPredeterminedManagedObjects();
          mutableAttachments.addAttachment(WebMetaDataModifier.PROPERTY_GENERATED_WEBAPP, Boolean.TRUE);
-         mutableAttachments.addAttachment(ClassLoaderFactory.class, new ContextClassLoaderFactory());
+         mutableAttachments.addAttachment("org.jboss.web.explicitDocBase", "/", String.class);
+         mutableAttachments.addAttachment(ClassLoaderFactory.class, new ContextClassLoaderFactory(epLoader));
          mutableAttachments.addAttachment(JBossWebMetaData.class, jbwmd);
          mainDeployer.deploy(deployment);
+         
+         deployments.put(contextRoot, deployment);
       }
       catch (Exception ex)
       {
@@ -88,8 +99,10 @@ public class DynamicEndpointDeploymentAspect extends DeploymentAspect
    {
       try
       {
-         AbstractDeployment deployment = createSimpleDeployment(dep.getService().getContextRoot());
-         mainDeployer.undeploy(deployment);
+         String contextRoot = dep.getService().getContextRoot();
+         AbstractDeployment deployment = deployments.remove(contextRoot);
+         if (deployment != null)
+            mainDeployer.undeploy(deployment);
       }
       catch (Exception ex)
       {
@@ -107,13 +120,21 @@ public class DynamicEndpointDeploymentAspect extends DeploymentAspect
 
    private static class ContextClassLoaderFactory implements ClassLoaderFactory
    {
+      private ClassLoader classloader;
+      
+      public ContextClassLoaderFactory(ClassLoader classloader)
+      {
+         this.classloader = classloader;
+      }
+
       public ClassLoader createClassLoader(DeploymentUnit unit) throws Exception
       {
-         return Thread.currentThread().getContextClassLoader();
+         return classloader;
       }
 
       public void removeClassLoader(DeploymentUnit unit) throws Exception
       {
+         classloader = null;
       }
    }
 }
