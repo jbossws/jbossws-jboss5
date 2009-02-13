@@ -33,13 +33,14 @@
     -->
     <jboss.version>5.0.1-SNAPSHOT</jboss.version>
     <jboss.ejb3.version>1.0.0</jboss.ejb3.version>
-    <jboss.deployers.version>2.0.3.GA</jboss.deployers.version>
+    <jboss.deployers.version>2.2.0-SNAPSHOT</jboss.deployers.version>
     <jboss.jbossxb.version>2.0.0.GA</jboss.jbossxb.version>
     <jboss.metadata.version>1.0.0.CR16</jboss.metadata.version>
-    <jboss.microcontainer.version>2.0.2.GA</jboss.microcontainer.version>
+    <jboss.microcontainer.version>2.2.0-SNAPSHOT</jboss.microcontainer.version>
     <jboss.reflect.version>2.0.2.GA</jboss.reflect.version>
-    <jboss.security.version>2.0.2.SP3</jboss.security.version>
-    <jboss.vfs.version>2.0.0.GA</jboss.vfs.version>
+    <jboss.security.version>2.0.2.SP6</jboss.security.version>
+    <jboss.vfs.version>2.2.0-SNAPSHOT</jboss.vfs.version>
+    <jboss.cl.version>2.0.3-SNAPSHOT</jboss.cl.version>
   </properties>
   
   <!-- DependencyManagement -->
@@ -54,6 +55,11 @@
         <groupId>org.jboss.ws</groupId>
         <artifactId>jbossws-spi</artifactId>
         <version>${jbossws.spi.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.cl</groupId>
+        <artifactId>jboss-classloading</artifactId>
+        <version>${jboss.cl.version}</version>
       </dependency>
       <dependency>
         <groupId>org.jboss</groupId>
@@ -179,6 +185,10 @@
     <dependency>
       <groupId>org.jboss</groupId>
       <artifactId>jboss-vfs</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.cl</groupId>
+      <artifactId>jboss-classloading</artifactId>
     </dependency>
     <dependency>
       <groupId>org.jboss</groupId>

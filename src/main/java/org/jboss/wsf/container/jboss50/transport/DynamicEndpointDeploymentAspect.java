@@ -26,6 +26,8 @@ import java.util.Map;
 
 import javax.xml.ws.WebServiceException;
 
+import org.jboss.classloading.spi.dependency.ClassLoading;
+import org.jboss.classloading.spi.dependency.Module;
 import org.jboss.deployers.client.plugins.deployment.AbstractDeployment;
 import org.jboss.deployers.client.spi.DeployerClient;
 import org.jboss.deployers.client.spi.DeploymentFactory;
@@ -85,6 +87,7 @@ public class DynamicEndpointDeploymentAspect extends DeploymentAspect
          mutableAttachments.addAttachment("org.jboss.web.explicitDocBase", "/", String.class);
          mutableAttachments.addAttachment(ClassLoaderFactory.class, new ContextClassLoaderFactory(epLoader));
          mutableAttachments.addAttachment(JBossWebMetaData.class, jbwmd);
+         mutableAttachments.addAttachment(Module.class, ClassLoading.getModuleForClassLoader(epLoader));
          mainDeployer.deploy(deployment);
          
          deployments.put(contextRoot, deployment);
