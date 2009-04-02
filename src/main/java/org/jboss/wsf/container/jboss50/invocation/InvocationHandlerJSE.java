@@ -36,6 +36,7 @@ import org.jboss.wsf.spi.invocation.InvocationContext;
 import org.jboss.wsf.spi.invocation.InvocationHandler;
 import org.jboss.wsf.spi.invocation.ResourceInjector;
 import org.jboss.wsf.spi.invocation.ResourceInjectorFactory;
+import org.jboss.wsf.spi.metadata.injection.InjectionsMetaData;
 
 /**
  * Handles invocations on JSE endpoints.
@@ -80,14 +81,15 @@ public class InvocationHandlerJSE extends InvocationHandler
          {
             throw new IllegalStateException("Cannot get target bean instance", ex);
          }
-         
-         JavaxAnnotationHelper.callPostConstructMethod(targetBean, targetBean.getClass().getClassLoader());
+
+         JavaxAnnotationHelper.injectResources(targetBean, ep.getService().getAttachment(InjectionsMetaData.class));
+         JavaxAnnotationHelper.callPostConstructMethod(targetBean);
          ep.addAttachment(PreDestroyHolder.class, new PreDestroyHolder(targetBean));
       }
-      
+
       return targetBean;
    }
-   
+
    public void invoke(Endpoint ep, Invocation epInv) throws Exception
    {
       try
