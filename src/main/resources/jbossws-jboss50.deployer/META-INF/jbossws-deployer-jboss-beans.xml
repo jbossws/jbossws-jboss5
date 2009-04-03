@@ -345,6 +345,7 @@
     <property name="aspects">
       <set class="java.util.HashSet" elementClass="org.jboss.wsf.spi.deployment.DeploymentAspect">
         <inject bean="WSDynamicEndpointDeploymentAspect"/>
+        <inject bean="WSInjectionMetaDataDeploymentAspect"/>
         <inject bean="WSEndpointAPIDeploymentAspect"/>
         <inject bean="WSVirtualHostDeploymentAspect"/>
         <inject bean="WSEndpointAddressDeploymentAspect"/>
