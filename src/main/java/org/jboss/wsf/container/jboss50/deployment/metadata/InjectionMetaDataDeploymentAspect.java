@@ -55,16 +55,15 @@ public final class InjectionMetaDataDeploymentAspect extends DeploymentAspect
    {
       super.create(dep);
 
-      DeploymentUnit unit = dep.getAttachment(DeploymentUnit.class);
-      if (unit == null)
-         throw new IllegalStateException();
+      JBossWebMetaData webMD = dep.getAttachment(JBossWebMetaData.class);
+      if (webMD == null)
+         throw new IllegalStateException("JBossWebMetaData not found");
       
       List<InjectionMetaData> injectionMD = new LinkedList<InjectionMetaData>();
       DeploymentType deploymentType = dep.getType();
 
       if (deploymentType == DeploymentType.JAXWS_JSE)
       {
-         JBossWebMetaData webMD = unit.getAttachment(JBossWebMetaData.class);
          injectionMD.addAll(buildInjectionMetaData(webMD.getEnvironmentEntries()));
       }
       else if (deploymentType == DeploymentType.JAXWS_EJB3)
