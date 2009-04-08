@@ -198,7 +198,7 @@
   </bean>
   
   <bean name="WSInjectionMetaDataDeploymentAspect" class="org.jboss.wsf.container.jboss50.deployment.metadata.InjectionMetaDataDeploymentAspect">
-    <property name="requires">ContainerMetaData</property>
+    <property name="requires">WebMetaData</property>
     <property name="provides">InjectionMetaData</property>
   </bean>  
 
@@ -252,6 +252,7 @@
   
   <bean name="WSModifyWebMetaDataDeploymentAspect" class="org.jboss.wsf.container.jboss50.deployment.tomcat.ModifyWebMetaDataDeploymentAspect">
     <property name="requires">ContextProperties, StackDescriptor</property>
+    <property name="provides">WebMetaData</property>
     <property name="webMetaDataModifier"><inject bean="WSWebMetaDataModifier"/></property>
   </bean>
   
@@ -345,6 +346,7 @@
     <property name="aspects">
       <set class="java.util.HashSet" elementClass="org.jboss.wsf.spi.deployment.DeploymentAspect">
         <inject bean="WSDynamicEndpointDeploymentAspect"/>
+        <inject bean="WSInjectionMetaDataDeploymentAspect"/>
         <inject bean="WSEndpointAPIDeploymentAspect"/>
         <inject bean="WSVirtualHostDeploymentAspect"/>
         <inject bean="WSEndpointAddressDeploymentAspect"/>
