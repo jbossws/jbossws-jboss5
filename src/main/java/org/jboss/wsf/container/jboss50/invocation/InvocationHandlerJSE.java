@@ -82,7 +82,7 @@ public class InvocationHandlerJSE extends InvocationHandler
             throw new IllegalStateException("Cannot get target bean instance", ex);
          }
 
-         JavaxAnnotationHelper.injectResources(targetBean, ep.getService().getAttachment(InjectionsMetaData.class));
+         JavaxAnnotationHelper.injectResources(targetBean, ep.getAttachment(InjectionsMetaData.class));
          JavaxAnnotationHelper.callPostConstructMethod(targetBean);
          ep.addAttachment(PreDestroyHolder.class, new PreDestroyHolder(targetBean));
       }
