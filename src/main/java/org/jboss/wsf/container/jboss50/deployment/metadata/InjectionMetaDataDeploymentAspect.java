@@ -28,17 +28,24 @@ import java.util.List;
 import java.util.Set;
 
 import javax.jws.WebService;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.xml.ws.WebServiceProvider;
 
 import org.jboss.deployers.structure.spi.DeploymentUnit;
+import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeansMetaData;
+import org.jboss.metadata.ejb.jboss.JBossMetaData;
 import org.jboss.metadata.javaee.spec.EnvironmentEntriesMetaData;
 import org.jboss.metadata.javaee.spec.EnvironmentEntryMetaData;
 import org.jboss.metadata.javaee.spec.ResourceInjectionTargetMetaData;
 import org.jboss.metadata.web.jboss.JBossWebMetaData;
 import org.jboss.wsf.spi.deployment.Deployment;
 import org.jboss.wsf.spi.deployment.DeploymentAspect;
+import org.jboss.wsf.spi.deployment.Endpoint;
 import org.jboss.wsf.spi.deployment.Deployment.DeploymentType;
 import org.jboss.wsf.spi.deployment.integration.WebServiceDeclaration;
+import org.jboss.wsf.spi.deployment.integration.WebServiceDeployment;
 import org.jboss.wsf.spi.metadata.injection.InjectionMetaData;
 import org.jboss.wsf.spi.metadata.injection.InjectionsMetaData;
 
@@ -50,6 +57,9 @@ import org.jboss.wsf.spi.metadata.injection.InjectionsMetaData;
 public final class InjectionMetaDataDeploymentAspect extends DeploymentAspect
 {
 
+   private static final String EJB3_JNDI_PREFIX = "java:env/";
+   private static final String POJO_JNDI_PREFIX = "java:comp/env/";
+   
    @Override
    public void create(Deployment dep)
    {
@@ -59,23 +69,36 @@ public final class InjectionMetaDataDeploymentAspect extends DeploymentAspect
       if (webMD == null)
          throw new IllegalStateException("JBossWebMetaData not found");
       
+      DeploymentUnit unit = dep.getAttachment(DeploymentUnit.class);
+      if (unit == null)
+         throw new IllegalStateException("DeploymentUnit not found");
+      
       List<InjectionMetaData> injectionMD = new LinkedList<InjectionMetaData>();
       DeploymentType deploymentType = dep.getType();
 
       if (deploymentType == DeploymentType.JAXWS_JSE)
       {
          injectionMD.addAll(buildInjectionMetaData(webMD.getEnvironmentEntries()));
+         try
+         {
+            final Context ctx = new InitialContext();
+            for (Endpoint endpoint : dep.getService().getEndpoints())
+            {
+               InjectionsMetaData injectionsMD = new InjectionsMetaData(injectionMD, ctx, POJO_JNDI_PREFIX);
+               endpoint.addAttachment(InjectionsMetaData.class, injectionsMD);
+            }
+         }
+         catch (NamingException ne)
+         {
+            throw new RuntimeException(ne);
+         }
       }
       else if (deploymentType == DeploymentType.JAXWS_EJB3)
       {
-         // [JBWS-2074] see comment in JIRA
-         log.warn("Both @Resource annotated methods/fields and descriptor specified injections don't work in handlers associated with EJB3 endpoints");
-         /*
          JBossMetaData jbossMD = unit.getAttachment(JBossMetaData.class);
          JBossEnterpriseBeansMetaData jebMDs = jbossMD.getEnterpriseBeans();
          
          WebServiceDeployment webServiceDeployment = unit.getAttachment(WebServiceDeployment.class);
-         EnvironmentEntriesMetaData attachment = new EnvironmentEntriesMetaData();
          
          Iterator<WebServiceDeclaration> it = webServiceDeployment.getServiceEndpoints().iterator();
          while (it.hasNext())
@@ -83,16 +106,16 @@ public final class InjectionMetaDataDeploymentAspect extends DeploymentAspect
             WebServiceDeclaration container = it.next();
             if (isWebServiceBean(container))
             {
+               Context ctx = container.getContext();
                String ejbName = container.getComponentName();
                EnvironmentEntriesMetaData ejbEnvEntries = jebMDs.get(ejbName).getEnvironmentEntries(); 
-               attachment.addAll(ejbEnvEntries);
                injectionMD.addAll(buildInjectionMetaData(ejbEnvEntries));
+               Endpoint endpoint = dep.getService().getEndpointByName(ejbName);
+               InjectionsMetaData injectionsMD = new InjectionsMetaData(injectionMD, ctx, EJB3_JNDI_PREFIX);
+               endpoint.addAttachment(InjectionsMetaData.class, injectionsMD);
             }
          }
-         */
       }
-
-      dep.getService().addAttachment(InjectionsMetaData.class, new InjectionsMetaData(injectionMD));
    }
 
    @Override
@@ -134,9 +157,7 @@ public final class InjectionMetaDataDeploymentAspect extends DeploymentAspect
                targetClass = ritMD.getInjectionTargetClass();
                targetName = ritMD.getInjectionTargetName();
                InjectionMetaData injectionMD = new InjectionMetaData(targetClass, targetName, valueClass, envEntryName, envEntryValue != null);
-               
                retVal.add(injectionMD);
-               log.debug(injectionMD);
             }
          }
       }

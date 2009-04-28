@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.management.ObjectName;
+import javax.naming.Context;
 
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
@@ -139,6 +140,11 @@ public class WebServiceDeployerEJB extends AbstractWebServiceDeployer
       public String getContainerName()
       {
          return ejbMetaData.determineContainerName();
+      }
+      
+      public Context getContext()
+      {
+         return ejbContainer.getEnc();
       }
 
       public String getComponentName()
