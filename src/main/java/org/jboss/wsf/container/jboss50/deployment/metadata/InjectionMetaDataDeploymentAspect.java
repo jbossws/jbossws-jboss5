@@ -29,7 +29,6 @@ import java.util.Set;
 
 import javax.jws.WebService;
 import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.xml.ws.WebServiceProvider;
 
@@ -58,63 +57,61 @@ public final class InjectionMetaDataDeploymentAspect extends DeploymentAspect
 {
 
    private static final String EJB3_JNDI_PREFIX = "java:env/";
-   private static final String POJO_JNDI_PREFIX = "java:comp/env/";
-   
+
    @Override
    public void create(Deployment dep)
    {
       super.create(dep);
 
-      JBossWebMetaData webMD = dep.getAttachment(JBossWebMetaData.class);
-      if (webMD == null)
-         throw new IllegalStateException("JBossWebMetaData not found");
-      
-      DeploymentUnit unit = dep.getAttachment(DeploymentUnit.class);
-      if (unit == null)
-         throw new IllegalStateException("DeploymentUnit not found");
-      
       List<InjectionMetaData> injectionMD = new LinkedList<InjectionMetaData>();
       DeploymentType deploymentType = dep.getType();
 
-      if (deploymentType == DeploymentType.JAXWS_JSE)
+      try
       {
-         injectionMD.addAll(buildInjectionMetaData(webMD.getEnvironmentEntries()));
-         try
+         if (deploymentType == DeploymentType.JAXWS_JSE)
          {
-            final Context ctx = new InitialContext();
+            JBossWebMetaData webMD = dep.getAttachment(JBossWebMetaData.class);
+            if (webMD == null)
+               throw new IllegalStateException("JBossWebMetaData not found");
+
+            injectionMD.addAll(buildInjectionMetaData(webMD.getEnvironmentEntries()));
             for (Endpoint endpoint : dep.getService().getEndpoints())
             {
-               InjectionsMetaData injectionsMD = new InjectionsMetaData(injectionMD, ctx, POJO_JNDI_PREFIX);
+               InjectionsMetaData injectionsMD = new InjectionsMetaData(injectionMD, null);
                endpoint.addAttachment(InjectionsMetaData.class, injectionsMD);
             }
          }
-         catch (NamingException ne)
+         else if (deploymentType == DeploymentType.JAXWS_EJB3)
          {
-            throw new RuntimeException(ne);
+            DeploymentUnit unit = dep.getAttachment(DeploymentUnit.class);
+            if (unit == null)
+               throw new IllegalStateException("DeploymentUnit not found");
+
+            JBossMetaData jbossMD = unit.getAttachment(JBossMetaData.class);
+            JBossEnterpriseBeansMetaData jebMDs = jbossMD.getEnterpriseBeans();
+
+            WebServiceDeployment webServiceDeployment = unit.getAttachment(WebServiceDeployment.class);
+
+            Iterator<WebServiceDeclaration> it = webServiceDeployment.getServiceEndpoints().iterator();
+            while (it.hasNext())
+            {
+               WebServiceDeclaration container = it.next();
+               if (isWebServiceBean(container))
+               {
+                  final Context ctx = (Context)container.getContext().lookup(EJB3_JNDI_PREFIX);
+                  String ejbName = container.getComponentName();
+                  EnvironmentEntriesMetaData ejbEnvEntries = jebMDs.get(ejbName).getEnvironmentEntries(); 
+                  injectionMD.addAll(buildInjectionMetaData(ejbEnvEntries));
+                  Endpoint endpoint = dep.getService().getEndpointByName(ejbName);
+                  InjectionsMetaData injectionsMD = new InjectionsMetaData(injectionMD, ctx);
+                  endpoint.addAttachment(InjectionsMetaData.class, injectionsMD);
+               }
+            }
          }
       }
-      else if (deploymentType == DeploymentType.JAXWS_EJB3)
+      catch (NamingException ne)
       {
-         JBossMetaData jbossMD = unit.getAttachment(JBossMetaData.class);
-         JBossEnterpriseBeansMetaData jebMDs = jbossMD.getEnterpriseBeans();
-         
-         WebServiceDeployment webServiceDeployment = unit.getAttachment(WebServiceDeployment.class);
-         
-         Iterator<WebServiceDeclaration> it = webServiceDeployment.getServiceEndpoints().iterator();
-         while (it.hasNext())
-         {
-            WebServiceDeclaration container = it.next();
-            if (isWebServiceBean(container))
-            {
-               Context ctx = container.getContext();
-               String ejbName = container.getComponentName();
-               EnvironmentEntriesMetaData ejbEnvEntries = jebMDs.get(ejbName).getEnvironmentEntries(); 
-               injectionMD.addAll(buildInjectionMetaData(ejbEnvEntries));
-               Endpoint endpoint = dep.getService().getEndpointByName(ejbName);
-               InjectionsMetaData injectionsMD = new InjectionsMetaData(injectionMD, ctx, EJB3_JNDI_PREFIX);
-               endpoint.addAttachment(InjectionsMetaData.class, injectionsMD);
-            }
-         }
+         throw new RuntimeException(ne);
       }
    }
 
@@ -125,14 +122,14 @@ public final class InjectionMetaDataDeploymentAspect extends DeploymentAspect
 
       super.destroy(dep);
    }
-   
+
    private List<InjectionMetaData> buildInjectionMetaData(EnvironmentEntriesMetaData envEntries)
    {
       if ((envEntries == null) || (envEntries.size() == 0))
       {
          return Collections.emptyList();
       }
-      
+
       EnvironmentEntryMetaData eeMD = null;
       LinkedList<InjectionMetaData> retVal = new LinkedList<InjectionMetaData>();
       String envEntryName = null;
@@ -140,7 +137,7 @@ public final class InjectionMetaDataDeploymentAspect extends DeploymentAspect
       String targetClass = null;
       String targetName = null;
       String valueClass = null;
-      
+
       for (Iterator<EnvironmentEntryMetaData> i = envEntries.iterator(); i.hasNext();)
       {
          eeMD = i.next();
@@ -161,7 +158,7 @@ public final class InjectionMetaDataDeploymentAspect extends DeploymentAspect
             }
          }
       }
-      
+
       return retVal;
    }
 
@@ -169,7 +166,7 @@ public final class InjectionMetaDataDeploymentAspect extends DeploymentAspect
    {
       boolean isWebService = container.getAnnotation(WebService.class) != null;
       boolean isWebServiceProvider = container.getAnnotation(WebServiceProvider.class) != null;
-      
+
       return isWebService || isWebServiceProvider;
    }
 
