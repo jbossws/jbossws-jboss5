@@ -26,8 +26,8 @@ import java.lang.reflect.Method;
 import javax.xml.ws.WebServiceContext;
 
 import org.jboss.wsf.common.JavaUtils;
-import org.jboss.wsf.common.javax.JavaxAnnotationHelper;
-import org.jboss.wsf.common.javax.PreDestroyHolder;
+import org.jboss.wsf.common.injection.InjectionHelper;
+import org.jboss.wsf.common.injection.PreDestroyHolder;
 import org.jboss.wsf.spi.SPIProvider;
 import org.jboss.wsf.spi.SPIProviderResolver;
 import org.jboss.wsf.spi.deployment.Endpoint;
@@ -82,8 +82,8 @@ public class InvocationHandlerJSE extends InvocationHandler
             throw new IllegalStateException("Cannot get target bean instance", ex);
          }
 
-         JavaxAnnotationHelper.injectResources(targetBean, ep.getAttachment(InjectionsMetaData.class));
-         JavaxAnnotationHelper.callPostConstructMethod(targetBean);
+         InjectionHelper.injectResources(targetBean, ep.getAttachment(InjectionsMetaData.class));
+         InjectionHelper.callPostConstructMethod(targetBean);
          ep.addAttachment(PreDestroyHolder.class, new PreDestroyHolder(targetBean));
       }
 

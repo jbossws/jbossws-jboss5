@@ -200,6 +200,7 @@
   <bean name="WSInjectionMetaDataDeploymentAspect" class="org.jboss.wsf.container.jboss50.deployment.metadata.InjectionMetaDataDeploymentAspect">
     <property name="requires">WebMetaData</property>
     <property name="provides">InjectionMetaData</property>
+    <property name="ejbReferenceResolver"><inject bean="org.jboss.ejb3.EjbReferenceResolver"/></property>
   </bean>  
 
   <bean name="WSContextRootDeploymentAspect" class="org.jboss.wsf.framework.deployment.BackwardCompatibleContextRootDeploymentAspect">
