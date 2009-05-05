@@ -67,7 +67,7 @@ public final class InjectionMetaDataDeploymentAspect extends DeploymentAspect
    private static final ReferenceResolver RESOURCE_REFERENCE_RESOLVER = new ResourceReferenceResolver(); 
    private static final String EJB3_JNDI_PREFIX = "java:env/";
    private EjbReferenceResolver ejbReferenceResolver;
-   
+
    @Override
    public void create(Deployment dep)
    {
@@ -136,7 +136,7 @@ public final class InjectionMetaDataDeploymentAspect extends DeploymentAspect
 
    /**
     * Builds reference resolvers container.
-    * 
+    *
     * @param unit deployment unit
     * @return reference resolvers
     */
@@ -150,7 +150,7 @@ public final class InjectionMetaDataDeploymentAspect extends DeploymentAspect
 
    /**
     * Builds JBossWS specific injection metadata from JBoss metadata.
-    * 
+    *
     * @param envEntries environment entries
     * @return JBossWS specific injection metadata
     */
@@ -195,7 +195,7 @@ public final class InjectionMetaDataDeploymentAspect extends DeploymentAspect
 
    /**
     * Returns true if EJB represents webservice endpoint, false otherwise.
-    * 
+    *
     * @param container to analyze
     * @return true if webservice endpoint, false otherwise
     */
@@ -209,17 +209,17 @@ public final class InjectionMetaDataDeploymentAspect extends DeploymentAspect
 
    /**
     * Sets ejb reference resolver. This method is invoked by MC.
-    * 
+    *
     * @param resolver ejb reference resolver
     */
    public void setEjbReferenceResolver(final EjbReferenceResolver resolver)
    {
       this.ejbReferenceResolver = resolver;
    }
-   
+
    /**
     * Gets ejb reference resolver.
-    * 
+    *
     * @return ejb reference resolver
     */
    public EjbReferenceResolver getEjbReferenceResolver()
@@ -231,5 +231,5 @@ public final class InjectionMetaDataDeploymentAspect extends DeploymentAspect
 
       return this.ejbReferenceResolver;
    }
-   
+
 }
