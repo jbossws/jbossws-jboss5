@@ -31,14 +31,12 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Resource;
-import javax.ejb.EJB;
 import javax.jws.WebService;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.xml.ws.WebServiceProvider;
 
 import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.ejb3.common.resolvers.spi.EjbReferenceResolver;
 import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeansMetaData;
 import org.jboss.metadata.ejb.jboss.JBossMetaData;
 import org.jboss.metadata.javaee.spec.EnvironmentEntriesMetaData;
@@ -66,7 +64,6 @@ public final class InjectionMetaDataDeploymentAspect extends DeploymentAspect
 
    private static final ReferenceResolver RESOURCE_REFERENCE_RESOLVER = new ResourceReferenceResolver(); 
    private static final String EJB3_JNDI_PREFIX = "java:env/";
-   private EjbReferenceResolver ejbReferenceResolver;
 
    @Override
    public void create(Deployment dep)
@@ -144,7 +141,6 @@ public final class InjectionMetaDataDeploymentAspect extends DeploymentAspect
    {
       final Map<Class<? extends Annotation>, ReferenceResolver> resolvers = new HashMap<Class<? extends Annotation>, ReferenceResolver>();
       resolvers.put(Resource.class, RESOURCE_REFERENCE_RESOLVER);
-      resolvers.put(EJB.class, new EJBBeanReferenceResolver(unit, getEjbReferenceResolver()));
       return resolvers;
    }
 
@@ -205,31 +201,6 @@ public final class InjectionMetaDataDeploymentAspect extends DeploymentAspect
       boolean isWebServiceProvider = container.getAnnotation(WebServiceProvider.class) != null;
 
       return isWebService || isWebServiceProvider;
-   }
-
-   /**
-    * Sets ejb reference resolver. This method is invoked by MC.
-    *
-    * @param resolver ejb reference resolver
-    */
-   public void setEjbReferenceResolver(final EjbReferenceResolver resolver)
-   {
-      this.ejbReferenceResolver = resolver;
-   }
-
-   /**
-    * Gets ejb reference resolver.
-    *
-    * @return ejb reference resolver
-    */
-   public EjbReferenceResolver getEjbReferenceResolver()
-   {
-      if (this.ejbReferenceResolver == null)
-      {
-         throw new IllegalStateException("No EjbReferenceResolver set by MC");
-      }
-
-      return this.ejbReferenceResolver;
    }
 
 }

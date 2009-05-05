@@ -172,8 +172,8 @@
     </uninstall>
     <depends>WebServiceDeployerEJB</depends>
   </bean>
-  
-  <!-- 
+
+  <!--
   Each DeploymentAspectManger maintains a list of DeploymentAspects
   -->
   <bean name="WSDeploymentAspectManagerPreJSE" class="org.jboss.wsf.framework.deployment.DeploymentAspectManagerImpl">
@@ -189,25 +189,24 @@
   <bean name="WSDeploymentAspectManagerEndpointAPI" class="org.jboss.wsf.framework.deployment.DeploymentAspectManagerImpl">
     <property name="name">WSDeploymentAspectManagerEndpointAPI</property>
   </bean>
-  
-  <!-- 
+
+  <!--
   The container deployment aspects
   -->
   <bean name="WSContainerMetaDataDeploymentAspect" class="org.jboss.wsf.container.jboss50.deployment.metadata.ContainerMetaDataDeploymentAspect">
     <property name="provides">ContainerMetaData, VFSRoot</property>
   </bean>
-  
+
   <bean name="WSInjectionMetaDataDeploymentAspect" class="org.jboss.wsf.container.jboss50.deployment.metadata.InjectionMetaDataDeploymentAspect">
     <property name="requires">WebMetaData</property>
     <property name="provides">InjectionMetaData</property>
-    <property name="ejbReferenceResolver"><inject bean="org.jboss.ejb3.EjbReferenceResolver"/></property>
-  </bean>  
+  </bean>
 
   <bean name="WSContextRootDeploymentAspect" class="org.jboss.wsf.framework.deployment.BackwardCompatibleContextRootDeploymentAspect">
     <property name="requires">ContainerMetaData</property>
     <property name="provides">ContextRoot</property>
   </bean>
-  
+
   <bean name="WSVirtualHostDeploymentAspect" class="org.jboss.wsf.framework.deployment.VirtualHostDeploymentAspect">
     <property name="requires">ContainerMetaData</property>
     <property name="provides">VirtualHosts</property>
