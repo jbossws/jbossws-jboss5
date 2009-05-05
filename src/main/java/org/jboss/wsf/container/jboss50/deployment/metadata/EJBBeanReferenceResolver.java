@@ -47,7 +47,7 @@ final class EJBBeanReferenceResolver extends AbstractReferenceResolver<EJB>
     * Delegate used to resolve JNDI names.
     */
    private final EjbReferenceResolver delegate;
-   
+
    /**
     * Constructor.
     */
@@ -63,13 +63,13 @@ final class EJBBeanReferenceResolver extends AbstractReferenceResolver<EJB>
       {
          throw new IllegalArgumentException("Ejb reference resolver cannot be null");
       }
-      
+
       this.unit = unit;
       this.delegate = delegate;
    }
-   
+
    /* (non-Javadoc)
-    * @see org.jboss.wsf.common.javax.resolvers.AbstractReferenceResolver#resolveField(java.lang.reflect.Field)
+    * @see org.jboss.wsf.common.injection.resolvers.AbstractReferenceResolver#resolveField(java.lang.reflect.Field)
     */
    @Override
    protected String resolveField(final Field field)
@@ -82,7 +82,7 @@ final class EJBBeanReferenceResolver extends AbstractReferenceResolver<EJB>
    }
 
    /* (non-Javadoc)
-    * @see org.jboss.wsf.common.javax.resolvers.AbstractReferenceResolver#resolveMethod(java.lang.reflect.Method)
+    * @see org.jboss.wsf.common.injection.resolvers.AbstractReferenceResolver#resolveMethod(java.lang.reflect.Method)
     */
    @Override
    protected String resolveMethod(final Method method)
@@ -93,10 +93,10 @@ final class EJBBeanReferenceResolver extends AbstractReferenceResolver<EJB>
 
       return this.delegate.resolveEjb(unit, reference);
    }
-   
+
    /**
     * Constructs EjbReference.
-    * 
+    *
     * @param ejbAnnotation ejb annotation
     * @param type fall back type
     * @return ejb reference instance
@@ -110,5 +110,5 @@ final class EJBBeanReferenceResolver extends AbstractReferenceResolver<EJB>
       }
       return new EjbReference(ejbAnnotation.beanName(), beanInterface, ejbAnnotation.mappedName());
    }
-   
+
 }
