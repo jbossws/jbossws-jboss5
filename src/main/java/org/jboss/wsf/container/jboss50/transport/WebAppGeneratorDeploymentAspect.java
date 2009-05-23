@@ -1,8 +1,8 @@
 /*
- * JBoss, Home of Professional Open Source
- * Copyright 2005, JBoss Inc., and individual contributors as indicated
- * by the @authors tag. See the copyright.txt in the distribution for a
- * full listing of individual contributors.
+ * JBoss, Home of Professional Open Source.
+ * Copyright 2006, Red Hat Middleware LLC, and individual contributors
+ * as indicated by the @author tags. See the copyright.txt file in the
+ * distribution for a full listing of individual contributors.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -20,8 +20,6 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 package org.jboss.wsf.container.jboss50.transport;
-
-// $Id$
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,6 +39,7 @@ import org.jboss.metadata.web.spec.WebResourceCollectionsMetaData;
 import org.jboss.wsf.spi.annotation.WebContext;
 import org.jboss.wsf.spi.deployment.ArchiveDeployment;
 import org.jboss.wsf.spi.deployment.Deployment;
+import org.jboss.wsf.spi.deployment.DeploymentAspect;
 import org.jboss.wsf.spi.deployment.Endpoint;
 import org.jboss.wsf.spi.deployment.WSFDeploymentException;
 import org.jboss.wsf.spi.metadata.j2ee.EJBArchiveMetaData;
@@ -49,15 +48,12 @@ import org.jboss.wsf.spi.metadata.j2ee.EJBSecurityMetaData;
 import org.jboss.wsf.container.jboss50.deployment.tomcat.SecurityHandler;
 
 /**
- * Generates a webapp for an EJB endpoint
- * which will be process by {@link org.jboss.wsf.container.jboss50.transport.WebAppDeploymentFactory}
+ * A deployment aspect that generates a webapp for an EJB endpoint 
  * 
  * @author Thomas.Diesler@jboss.org
- * @author Heiko.Braun@jboss.com
- * 
  * @since 13-Oct-2007
  */
-public class WebAppGenerator
+public class WebAppGeneratorDeploymentAspect extends DeploymentAspect
 {
    private SecurityHandler securityHandlerEJB21;
    private SecurityHandler securityHandlerEJB3;
@@ -72,28 +68,25 @@ public class WebAppGenerator
       this.securityHandlerEJB3 = handler;
    }
 
-   public JBossWebMetaData create(Deployment dep)
+   @Override
+   public void create(Deployment dep)
    {
-      JBossWebMetaData jbwmd = null;
-
       String typeStr = dep.getType().toString();
       if (typeStr.endsWith("EJB21"))
       {
-         jbwmd = generatWebDeployment((ArchiveDeployment)dep, securityHandlerEJB21);
+         JBossWebMetaData jbwmd = generatWebDeployment((ArchiveDeployment)dep, securityHandlerEJB21);
          dep.addAttachment(JBossWebMetaData.class, jbwmd);
       }
       else if (typeStr.endsWith("EJB3"))
       {
-         jbwmd = generatWebDeployment((ArchiveDeployment)dep, securityHandlerEJB3);
+         JBossWebMetaData jbwmd = generatWebDeployment((ArchiveDeployment)dep, securityHandlerEJB3);
          dep.addAttachment(JBossWebMetaData.class, jbwmd);
       }
       else
       {
-         jbwmd = generatWebDeployment((ArchiveDeployment)dep, null);
+         JBossWebMetaData jbwmd = generatWebDeployment((ArchiveDeployment)dep, null);
          dep.addAttachment(JBossWebMetaData.class, jbwmd);
       }
-
-      return jbwmd;
    }
 
    protected JBossWebMetaData generatWebDeployment(ArchiveDeployment dep, SecurityHandler securityHandler)
@@ -275,5 +268,10 @@ public class WebAppGenerator
          throw new WSFDeploymentException("Cannot obtain context root");
 
       jbwmd.setContextRoot(contextRoot);
+      String[] virtualHosts = dep.getService().getVirtualHosts();
+      if (virtualHosts != null && virtualHosts.length > 0)
+      {
+         jbwmd.setVirtualHosts(Arrays.asList(virtualHosts));
+      }
    }
 }

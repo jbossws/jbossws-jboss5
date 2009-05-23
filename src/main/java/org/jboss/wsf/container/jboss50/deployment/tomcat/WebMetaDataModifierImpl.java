@@ -1,8 +1,8 @@
 /*
- * JBoss, Home of Professional Open Source
- * Copyright 2005, JBoss Inc., and individual contributors as indicated
- * by the @authors tag. See the copyright.txt in the distribution for a
- * full listing of individual contributors.
+ * JBoss, Home of Professional Open Source.
+ * Copyright 2006, Red Hat Middleware LLC, and individual contributors
+ * as indicated by the @author tags. See the copyright.txt file in the
+ * distribution for a full listing of individual contributors.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -28,7 +28,6 @@ import org.jboss.metadata.web.jboss.JBossWebMetaData;
 import org.jboss.metadata.web.spec.ListenerMetaData;
 import org.jboss.wsf.spi.deployment.Deployment;
 import org.jboss.wsf.spi.deployment.Endpoint;
-import org.jboss.wsf.spi.transport.HttpSpec;
 
 import javax.xml.ws.WebServiceException;
 import java.util.ArrayList;
@@ -72,11 +71,11 @@ public class WebMetaDataModifierImpl implements WebMetaDataModifier
    {
       RewriteResults results = new RewriteResults();
 
-      String servletClass = (String)dep.getProperty(HttpSpec.PROPERTY_WEBAPP_SERVLET_CLASS);
+      String servletClass = (String)dep.getProperty(PROPERTY_WEBAPP_SERVLET_CLASS);
       if (servletClass == null)
-         throw new IllegalStateException("Cannot obtain context property: " + HttpSpec.PROPERTY_WEBAPP_SERVLET_CLASS);
+         throw new IllegalStateException("Cannot obtain context property: " + PROPERTY_WEBAPP_SERVLET_CLASS);
 
-      Map<String, String> depCtxParams = (Map<String, String>)dep.getProperty(HttpSpec.PROPERTY_WEBAPP_CONTEXT_PARAMETERS);
+      Map<String, String> depCtxParams = (Map<String, String>)dep.getProperty(PROPERTY_WEBAPP_CONTEXT_PARAMETERS);
       if (depCtxParams != null)
       {
          List<ParamValueMetaData> contextParams = jbwmd.getContextParams();
@@ -95,7 +94,7 @@ public class WebMetaDataModifierImpl implements WebMetaDataModifier
          }
       }
 
-      String listenerClass = (String)dep.getProperty(HttpSpec.PROPERTY_WEBAPP_SERVLET_CONTEXT_LISTENER);
+      String listenerClass = (String)dep.getProperty(PROPERTY_WEBAPP_SERVLET_CONTEXT_LISTENER);
       if (listenerClass != null)
       {
          List<ListenerMetaData> listeners = jbwmd.getListeners();
@@ -117,7 +116,7 @@ public class WebMetaDataModifierImpl implements WebMetaDataModifier
             initParams = new ArrayList<ParamValueMetaData>();
             servlet.setInitParam(initParams);
          }
-
+         
          String linkName = servlet.getServletName();
 
          // find the servlet-class
@@ -162,11 +161,14 @@ public class WebMetaDataModifierImpl implements WebMetaDataModifier
                log.info("Ignore servlet: " + orgServletClassName);
                continue;
             }
+            /*
+            Legacy code: This shouldn't be used in recent AS 5 versions
+            
             else if (orgServletClassName.endsWith("Servlet"))
             {
                log.info("Ignore <servlet-class> that ends with 'Servlet': " + orgServletClassName);
                continue;
-            }
+            }*/
 
             servlet.setServletClass(servletClass);
 

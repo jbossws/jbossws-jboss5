@@ -1,8 +1,8 @@
 /*
- * JBoss, Home of Professional Open Source
- * Copyright 2005, JBoss Inc., and individual contributors as indicated
- * by the @authors tag. See the copyright.txt in the distribution for a
- * full listing of individual contributors.
+ * JBoss, Home of Professional Open Source.
+ * Copyright 2006, Red Hat Middleware LLC, and individual contributors
+ * as indicated by the @author tags. See the copyright.txt file in the
+ * distribution for a full listing of individual contributors.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -20,8 +20,6 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 package org.jboss.wsf.container.jboss50.invocation;
-
-// $Id$
 
 import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.kernel.spi.dependency.KernelController;
@@ -49,7 +47,8 @@ public class InvocationHandlerEJB3 extends AbstractInvocationHandler
 
    private String containerName;
    private KernelController houston;
-   private ServiceEndpointContainer invocationTarget;
+   private ServiceEndpointContainer serviceEndpointContainer;
+
 
    InvocationHandlerEJB3()
    {
@@ -65,19 +64,30 @@ public class InvocationHandlerEJB3 extends AbstractInvocationHandler
    {
       containerName = (String)ep.getProperty(InvocationHandlerEJB3.CONTAINER_NAME);
       assert containerName!=null : "Target container name not set";
-      
-      ControllerContext context = houston.getInstalledContext(containerName);
-      if (context == null)
-         throw new WebServiceException("Cannot find service endpoint target: " + containerName);
-      
-      assert (context.getTarget() instanceof ServiceEndpointContainer) : "Invocation target mismatch";
-      this.invocationTarget = (ServiceEndpointContainer) context.getTarget();
+
+   }
+
+   private ServiceEndpointContainer lazyInitializeInvocationTarget()
+   {
+      if(null==this.serviceEndpointContainer)
+      {
+         ControllerContext context = houston.getInstalledContext(containerName);
+         if (context == null)
+            throw new WebServiceException("Cannot find service endpoint target: " + containerName);
+
+         assert (context.getTarget() instanceof ServiceEndpointContainer) : "Invocation target mismatch";
+         this.serviceEndpointContainer = (ServiceEndpointContainer) context.getTarget();
+      }
+
+      return this.serviceEndpointContainer;
    }
 
    public void invoke(Endpoint ep, Invocation wsInv) throws Exception
    {
       try
-      {         
+      {
+         ServiceEndpointContainer invocationTarget = lazyInitializeInvocationTarget();
+         
          Class beanClass = invocationTarget.getServiceImplementationClass();
          Method method = getImplMethod(beanClass, wsInv.getJavaMethod());
          Object[] args = wsInv.getArgs();

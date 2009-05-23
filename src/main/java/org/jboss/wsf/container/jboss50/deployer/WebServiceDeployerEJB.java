@@ -1,8 +1,8 @@
 /*
- * JBoss, Home of Professional Open Source
- * Copyright 2005, JBoss Inc., and individual contributors as indicated
- * by the @authors tag. See the copyright.txt in the distribution for a
- * full listing of individual contributors.
+ * JBoss, Home of Professional Open Source.
+ * Copyright 2006, Red Hat Middleware LLC, and individual contributors
+ * as indicated by the @author tags. See the copyright.txt file in the
+ * distribution for a full listing of individual contributors.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -21,26 +21,30 @@
  */
 package org.jboss.wsf.container.jboss50.deployer;
 
-import org.jboss.deployers.spi.DeploymentException;
-import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.ejb.deployers.EjbDeployment;
-import org.jboss.ejb.deployers.MergedJBossMetaDataDeployer;
-import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeanMetaData;
-import org.jboss.metadata.ejb.jboss.JBossMetaData;
-import org.jboss.metadata.web.jboss.JBossWebMetaData;
-import org.jboss.wsf.spi.deployment.integration.WebServiceDeclaration;
-import org.jboss.wsf.spi.deployment.integration.WebServiceDeployment;
-import org.jboss.logging.Logger;
-
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-//$Id$
+import javax.management.ObjectName;
+import javax.naming.Context;
+
+import org.jboss.deployers.spi.DeploymentException;
+import org.jboss.deployers.structure.spi.DeploymentUnit;
+import org.jboss.ejb.deployers.EjbDeployment;
+import org.jboss.ejb.deployers.MergedJBossMetaDataDeployer;
+import org.jboss.ejb3.EJBContainer;
+import org.jboss.ejb3.Ejb3Deployment;
+import org.jboss.ejb3.javaee.JavaEEComponentHelper;
+import org.jboss.logging.Logger;
+import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeanMetaData;
+import org.jboss.metadata.ejb.jboss.JBossMetaData;
+import org.jboss.metadata.web.jboss.JBossWebMetaData;
+import org.jboss.wsf.spi.deployment.integration.WebServiceDeclaration;
+import org.jboss.wsf.spi.deployment.integration.WebServiceDeployment;
 
 /**
- * This web service deployer for EJB. Adopts EJB deployments to
+ * This it the web service deployer for EJB. Adopts EJB deployments to
  * {@link org.jboss.wsf.spi.deployment.integration.WebServiceDeclaration} an passes it to a chain of
  * {@link org.jboss.wsf.container.jboss50.deployer.DeployerHook}'s.
  *
@@ -58,6 +62,8 @@ public class WebServiceDeployerEJB extends AbstractWebServiceDeployer
       addInput(MergedJBossMetaDataDeployer.EJB_MERGED_ATTACHMENT_NAME);   
    
       addInput(EjbDeployment.class);
+      
+      addInput(Ejb3Deployment.class);
 
       // Input for the TomcatDeployer
       addOutput(JBossWebMetaData.class);
@@ -72,16 +78,32 @@ public class WebServiceDeployerEJB extends AbstractWebServiceDeployer
       JBossMetaData beans = (JBossMetaData)unit.getAttachment(
         MergedJBossMetaDataDeployer.EJB_MERGED_ATTACHMENT_NAME
       );
-
+      Ejb3Deployment ejb3Deployment = unit.getAttachment(Ejb3Deployment.class);
+      
       if(beans!=null)
       {
-         WebServiceDeploymentAdapter wsDeployment = new WebServiceDeploymentAdapter();         
+         WebServiceDeploymentAdapter wsDeployment = new WebServiceDeploymentAdapter();   
+         
          Iterator<JBossEnterpriseBeanMetaData> iterator = beans.getEnterpriseBeans().iterator();
          while(iterator.hasNext())
          {
             JBossEnterpriseBeanMetaData ejb = iterator.next();
+            EJBContainer ejbContainer = null;
+            if (ejb3Deployment != null && !ejb.isEntity())
+            {
+               ObjectName objName = null;
+               try
+               {
+                  objName = new ObjectName(ejb.determineContainerName());
+               }
+               catch (Exception e)
+               {
+                  throw new DeploymentException(e);
+               }
+               ejbContainer = (EJBContainer)ejb3Deployment.getContainer(objName);
+            }
             if(ejb.getEjbClass()!=null)
-            	wsDeployment.getEndpoints().add( new WebServiceDeclarationAdapter(ejb, unit.getClassLoader()) );
+            	wsDeployment.getEndpoints().add( new WebServiceDeclarationAdapter(ejb, ejbContainer, unit.getClassLoader()) );
             else
                log.warn("Ingore ejb deployment with null classname: " + ejb);
          }
@@ -105,17 +127,24 @@ public class WebServiceDeployerEJB extends AbstractWebServiceDeployer
    {
 
       private JBossEnterpriseBeanMetaData ejbMetaData;
+      private EJBContainer ejbContainer;
       private ClassLoader loader;      
 
-      public WebServiceDeclarationAdapter(JBossEnterpriseBeanMetaData  ejbMetaData, ClassLoader loader)
+      public WebServiceDeclarationAdapter(JBossEnterpriseBeanMetaData ejbMetaData, EJBContainer ejbContainer, ClassLoader loader)
       {
          this.ejbMetaData = ejbMetaData;
+         this.ejbContainer = ejbContainer;
          this.loader = loader;
       }
 
       public String getContainerName()
       {
          return ejbMetaData.determineContainerName();
+      }
+      
+      public Context getContext()
+      {
+         return ejbContainer.getEnc();
       }
 
       public String getComponentName()
@@ -130,13 +159,15 @@ public class WebServiceDeployerEJB extends AbstractWebServiceDeployer
 
       public <T extends Annotation> T getAnnotation(Class<T> annotation)
       {
-         Class bean = getComponentClass();
-         T result = null;
-         if(bean.isAnnotationPresent(annotation))
+         T result = ejbContainer != null ? ejbContainer.getAnnotation(annotation) : null;
+         if (result == null)
          {
-            result = (T)bean.getAnnotation(annotation);
+            Class bean = getComponentClass();
+            if(bean.isAnnotationPresent(annotation))
+            {
+               result = (T)bean.getAnnotation(annotation);
+            }
          }
-
          return result;
       }
 

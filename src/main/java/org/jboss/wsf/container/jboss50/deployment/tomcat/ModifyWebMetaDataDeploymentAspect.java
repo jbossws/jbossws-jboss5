@@ -1,8 +1,8 @@
 /*
- * JBoss, Home of Professional Open Source
- * Copyright 2005, JBoss Inc., and individual contributors as indicated
- * by the @authors tag. See the copyright.txt in the distribution for a
- * full listing of individual contributors.
+ * JBoss, Home of Professional Open Source.
+ * Copyright 2006, Red Hat Middleware LLC, and individual contributors
+ * as indicated by the @author tags. See the copyright.txt file in the
+ * distribution for a full listing of individual contributors.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -21,12 +21,9 @@
  */
 package org.jboss.wsf.container.jboss50.deployment.tomcat;
 
-//$Id$
-
 import org.jboss.wsf.spi.deployment.Deployment;
 import org.jboss.wsf.spi.deployment.DeploymentAspect;
 import org.jboss.wsf.spi.deployment.WSFDeploymentException;
-import org.jboss.wsf.spi.WSFRuntime;
 
 /**
  * A deployer that modifies the web.xml meta data 
@@ -44,7 +41,7 @@ public class ModifyWebMetaDataDeploymentAspect extends DeploymentAspect
    }
 
    @Override
-   public void create(Deployment dep, WSFRuntime runtime)
+   public void create(Deployment dep)
    {
       try
       {

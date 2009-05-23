@@ -1,8 +1,8 @@
 /*
- * JBoss, Home of Professional Open Source
- * Copyright 2005, JBoss Inc., and individual contributors as indicated
- * by the @authors tag. See the copyright.txt in the distribution for a
- * full listing of individual contributors.
+ * JBoss, Home of Professional Open Source.
+ * Copyright 2006, Red Hat Middleware LLC, and individual contributors
+ * as indicated by the @author tags. See the copyright.txt file in the
+ * distribution for a full listing of individual contributors.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -21,11 +21,9 @@
  */
 package org.jboss.wsf.container.jboss50.deployment;
 
-// $Id$
-
 import org.jboss.metadata.ejb.jboss.JBossMetaData;
 import org.jboss.metadata.web.jboss.JBossWebMetaData;
-import org.jboss.wsf.spi.WSFRuntime;
+import org.jboss.wsf.spi.deployment.ArchiveDeployment;
 import org.jboss.wsf.spi.deployment.Deployment;
 import org.jboss.wsf.spi.deployment.DeploymentAspect;
 import org.jboss.wsf.spi.deployment.integration.WebServiceDeployment;
@@ -38,7 +36,7 @@ import org.jboss.wsf.spi.deployment.integration.WebServiceDeployment;
  */
 public class RuntimeLoaderDeploymentAspect extends DeploymentAspect
 {
-   public void start(Deployment dep, WSFRuntime runtime)
+   public void create(Deployment dep)
    {
       // EJB3 endpoints
       if (dep.getAttachment(WebServiceDeployment.class) != null)
@@ -55,6 +53,11 @@ public class RuntimeLoaderDeploymentAspect extends DeploymentAspect
       {
          JBossWebMetaData webMetaData = dep.getAttachment(JBossWebMetaData.class);
          ClassLoader classLoader = webMetaData.getContextLoader();
+         if (classLoader == null)
+         {
+            // [JBWS-2246] hack for .sar deployments incorporating web services deployments on AS bootstrap.
+            classLoader = dep.getInitialClassLoader();  
+         }
          dep.setRuntimeClassLoader(classLoader);
       }
       else

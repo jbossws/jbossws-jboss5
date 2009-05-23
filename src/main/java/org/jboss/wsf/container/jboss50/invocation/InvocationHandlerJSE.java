@@ -1,8 +1,8 @@
 /*
- * JBoss, Home of Professional Open Source
- * Copyright 2005, JBoss Inc., and individual contributors as indicated
- * by the @authors tag. See the copyright.txt in the distribution for a
- * full listing of individual contributors.
+ * JBoss, Home of Professional Open Source.
+ * Copyright 2006, Red Hat Middleware LLC, and individual contributors
+ * as indicated by the @author tags. See the copyright.txt file in the
+ * distribution for a full listing of individual contributors.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -21,13 +21,13 @@
  */
 package org.jboss.wsf.container.jboss50.invocation;
 
-// $Id$
-
 import java.lang.reflect.Method;
 
 import javax.xml.ws.WebServiceContext;
 
 import org.jboss.wsf.common.JavaUtils;
+import org.jboss.wsf.common.injection.InjectionHelper;
+import org.jboss.wsf.common.injection.PreDestroyHolder;
 import org.jboss.wsf.spi.SPIProvider;
 import org.jboss.wsf.spi.SPIProviderResolver;
 import org.jboss.wsf.spi.deployment.Endpoint;
@@ -36,11 +36,13 @@ import org.jboss.wsf.spi.invocation.InvocationContext;
 import org.jboss.wsf.spi.invocation.InvocationHandler;
 import org.jboss.wsf.spi.invocation.ResourceInjector;
 import org.jboss.wsf.spi.invocation.ResourceInjectorFactory;
+import org.jboss.wsf.spi.metadata.injection.InjectionsMetaData;
 
 /**
  * Handles invocations on JSE endpoints.
  *
  * @author Thomas.Diesler@jboss.org
+ * @author richard.opalka@jboss.com
  * @since 25-Apr-2007
  */
 public class InvocationHandlerJSE extends InvocationHandler
@@ -63,7 +65,7 @@ public class InvocationHandlerJSE extends InvocationHandler
    {
    }
 
-   protected Object getTargetBean(Endpoint ep, Invocation epInv)
+   protected Object getTargetBean(Endpoint ep, Invocation epInv) throws Exception
    {
       InvocationContext invCtx = epInv.getInvocationContext();
       Object targetBean = invCtx.getTargetBean();
@@ -71,7 +73,7 @@ public class InvocationHandlerJSE extends InvocationHandler
       {
          try
          {
-            Class epImpl = ep.getTargetBeanClass();
+            Class<?> epImpl = ep.getTargetBeanClass();
             targetBean = epImpl.newInstance();
             invCtx.setTargetBean(targetBean);
          }
@@ -79,7 +81,12 @@ public class InvocationHandlerJSE extends InvocationHandler
          {
             throw new IllegalStateException("Cannot get target bean instance", ex);
          }
+
+         InjectionHelper.injectResources(targetBean, ep.getAttachment(InjectionsMetaData.class));
+         InjectionHelper.callPostConstructMethod(targetBean);
+         ep.addAttachment(PreDestroyHolder.class, new PreDestroyHolder(targetBean));
       }
+
       return targetBean;
    }
 
@@ -107,13 +114,13 @@ public class InvocationHandlerJSE extends InvocationHandler
       }
    }
 
-   protected Method getImplMethod(Class implClass, Method seiMethod) throws ClassNotFoundException, NoSuchMethodException
+   protected Method getImplMethod(Class<?> implClass, Method seiMethod) throws ClassNotFoundException, NoSuchMethodException
    {
       String methodName = seiMethod.getName();
-      Class[] paramTypes = seiMethod.getParameterTypes();
+      Class<?>[] paramTypes = seiMethod.getParameterTypes();
       for (int i = 0; i < paramTypes.length; i++)
       {
-         Class paramType = paramTypes[i];
+         Class<?> paramType = paramTypes[i];
          if (JavaUtils.isPrimitive(paramType) == false)
          {
             String paramTypeName = paramType.getName();
