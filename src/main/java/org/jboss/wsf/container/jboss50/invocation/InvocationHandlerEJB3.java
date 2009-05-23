@@ -1,8 +1,8 @@
 /*
- * JBoss, Home of Professional Open Source
- * Copyright 2005, JBoss Inc., and individual contributors as indicated
- * by the @authors tag. See the copyright.txt in the distribution for a
- * full listing of individual contributors.
+ * JBoss, Home of Professional Open Source.
+ * Copyright 2006, Red Hat Middleware LLC, and individual contributors
+ * as indicated by the @author tags. See the copyright.txt file in the
+ * distribution for a full listing of individual contributors.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -21,45 +21,38 @@
  */
 package org.jboss.wsf.container.jboss50.invocation;
 
-// $Id$
-
-import java.lang.reflect.Method;
-
-import javax.ejb.EJBContext;
-import javax.management.ObjectName;
-import javax.xml.ws.WebServiceException;
-
-import org.jboss.aop.Dispatcher;
-import org.jboss.aop.MethodInfo;
-import org.jboss.ejb3.BeanContext;
-import org.jboss.ejb3.BeanContextLifecycleCallback;
-import org.jboss.ejb3.EJBContainerInvocation;
-import org.jboss.ejb3.stateless.StatelessBeanContext;
-import org.jboss.ejb3.stateless.StatelessContainer;
-import org.jboss.injection.lang.reflect.BeanProperty;
-import org.jboss.wsf.common.ObjectNameFactory;
-import org.jboss.wsf.spi.SPIProvider;
-import org.jboss.wsf.spi.SPIProviderResolver;
-import org.jboss.wsf.spi.deployment.ArchiveDeployment;
+import org.jboss.dependency.spi.ControllerContext;
+import org.jboss.kernel.spi.dependency.KernelController;
 import org.jboss.wsf.spi.deployment.Endpoint;
-import org.jboss.wsf.spi.invocation.ExtensibleWebServiceContext;
 import org.jboss.wsf.spi.invocation.Invocation;
-import org.jboss.wsf.spi.invocation.InvocationHandler;
-import org.jboss.wsf.spi.invocation.InvocationType;
-import org.jboss.wsf.spi.invocation.WebServiceContextFactory;
+import org.jboss.wsf.spi.invocation.integration.InvocationContextCallback;
+import org.jboss.wsf.spi.invocation.integration.ServiceEndpointContainer;
+import org.jboss.wsf.spi.util.KernelLocator;
+
+import javax.xml.ws.WebServiceException;
+import java.lang.reflect.Method;
 
 /**
  * Handles invocations on EJB3 endpoints.
  *
  * @author Thomas.Diesler@jboss.org
+ * @author Heiko.Braun@jboss.com
+ * 
  * @since 25-Apr-2007
  */
 public class InvocationHandlerEJB3 extends AbstractInvocationHandler
 {
-   private ObjectName objectName;
+
+   public static final String CONTAINER_NAME = "org.jboss.wsf.spi.invocation.ContainerName";
+
+   private String containerName;
+   private KernelController houston;
+   private ServiceEndpointContainer serviceEndpointContainer;
+
 
    InvocationHandlerEJB3()
    {
+      houston = KernelLocator.getKernel().getController();
    }
 
    public Invocation createInvocation()
@@ -69,39 +62,38 @@ public class InvocationHandlerEJB3 extends AbstractInvocationHandler
 
    public void init(Endpoint ep)
    {
-      String ejbName = ep.getShortName();
-      ArchiveDeployment dep = (ArchiveDeployment)ep.getService().getDeployment();
-      String nameStr = "jboss.j2ee:name=" + ejbName + ",service=EJB3,jar=" + dep.getSimpleName();
-      if (dep.getParent() != null)
+      containerName = (String)ep.getProperty(InvocationHandlerEJB3.CONTAINER_NAME);
+      assert containerName!=null : "Target container name not set";
+
+   }
+
+   private ServiceEndpointContainer lazyInitializeInvocationTarget()
+   {
+      if(null==this.serviceEndpointContainer)
       {
-         nameStr += ",ear=" + dep.getParent().getSimpleName();
+         ControllerContext context = houston.getInstalledContext(containerName);
+         if (context == null)
+            throw new WebServiceException("Cannot find service endpoint target: " + containerName);
+
+         assert (context.getTarget() instanceof ServiceEndpointContainer) : "Invocation target mismatch";
+         this.serviceEndpointContainer = (ServiceEndpointContainer) context.getTarget();
       }
 
-      objectName = ObjectNameFactory.create(nameStr.toString());
-
-      Dispatcher dispatcher = Dispatcher.singleton;
-      if (dispatcher.getRegistered(objectName.getCanonicalName()) == null)
-         throw new WebServiceException("Cannot find service endpoint target: " + objectName);
+      return this.serviceEndpointContainer;
    }
 
    public void invoke(Endpoint ep, Invocation wsInv) throws Exception
    {
       try
       {
-         Dispatcher dispatcher = Dispatcher.singleton;
-         StatelessContainer container = (StatelessContainer)dispatcher.getRegistered(objectName.getCanonicalName());
-         Class beanClass = container.getBeanClass();
-
+         ServiceEndpointContainer invocationTarget = lazyInitializeInvocationTarget();
+         
+         Class beanClass = invocationTarget.getServiceImplementationClass();
          Method method = getImplMethod(beanClass, wsInv.getJavaMethod());
          Object[] args = wsInv.getArgs();
-
-         MethodInfo info = container.getMethodInfo(method);
-         EJBContainerInvocation<StatelessContainer, StatelessBeanContext> jbInv = new EJBContainerInvocation<StatelessContainer, StatelessBeanContext>(info);
-         jbInv.setAdvisor(container);
-         jbInv.setArguments(args);
-         jbInv.setContextCallback(new CallbackImpl(wsInv));
-
-         Object retObj = jbInv.invokeNext();
+         InvocationContextCallback invProps = new EJB3InvocationContextCallback(wsInv);
+         
+         Object retObj = invocationTarget.invokeEndpoint(method, args, invProps);
 
          wsInv.setReturnValue(retObj);
       }
@@ -111,41 +103,18 @@ public class InvocationHandlerEJB3 extends AbstractInvocationHandler
       }
    }
 
-   static class CallbackImpl implements BeanContextLifecycleCallback
+   static class EJB3InvocationContextCallback implements InvocationContextCallback
    {
-      private javax.xml.ws.handler.MessageContext jaxwsMessageContext;
-      private javax.xml.rpc.handler.MessageContext jaxrpcMessageContext;
+      private Invocation wsInv;
 
-      public CallbackImpl(Invocation epInv)
+      public EJB3InvocationContextCallback(Invocation wsInv)
       {
-         jaxrpcMessageContext = epInv.getInvocationContext().getAttachment(javax.xml.rpc.handler.MessageContext.class);
-         jaxwsMessageContext = epInv.getInvocationContext().getAttachment(javax.xml.ws.handler.MessageContext.class);
+         this.wsInv = wsInv;
       }
 
-      public void attached(BeanContext beanCtx)
+      public <T> T get(Class<T> propertyType)
       {
-         StatelessBeanContext sbc = (StatelessBeanContext)beanCtx;
-         sbc.setMessageContextJAXRPC(jaxrpcMessageContext);
-
-         BeanProperty beanProp = sbc.getWebServiceContextProperty();
-         if (beanProp != null)
-         {
-            EJBContext ejbCtx = beanCtx.getEJBContext();
-            SPIProvider spiProvider = SPIProviderResolver.getInstance().getProvider();
-            ExtensibleWebServiceContext wsContext = spiProvider.getSPI(WebServiceContextFactory.class).newWebServiceContext(InvocationType.JAXWS_EJB3, jaxwsMessageContext);
-            wsContext.addAttachment(EJBContext.class, ejbCtx);
-            beanProp.set(beanCtx.getInstance(), wsContext);
-         }
-      }
-
-      public void released(BeanContext beanCtx)
-      {
-         StatelessBeanContext sbc = (StatelessBeanContext)beanCtx;
-         sbc.setMessageContextJAXRPC(null);
-
-         BeanProperty beanProp = sbc.getWebServiceContextProperty();
-         if (beanProp != null)
-            beanProp.set(beanCtx.getInstance(), null);
+         return wsInv.getInvocationContext().getAttachment(propertyType);               
       }
    }
 }

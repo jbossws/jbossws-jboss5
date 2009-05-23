@@ -1,8 +1,8 @@
 /*
- * JBoss, Home of Professional Open Source
- * Copyright 2005, JBoss Inc., and individual contributors as indicated
- * by the @authors tag. See the copyright.txt in the distribution for a
- * full listing of individual contributors.
+ * JBoss, Home of Professional Open Source.
+ * Copyright 2006, Red Hat Middleware LLC, and individual contributors
+ * as indicated by the @author tags. See the copyright.txt file in the
+ * distribution for a full listing of individual contributors.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -21,20 +21,17 @@
  */
 package org.jboss.wsf.container.jboss50.deployer;
 
-//$Id$
-
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.deployers.vfs.spi.structure.VFSDeploymentUnit;
-import org.jboss.ejb3.EJBContainer;
-import org.jboss.ejb3.Ejb3Deployment;
-import org.jboss.ejb3.mdb.MessagingContainer;
-import org.jboss.ejb3.stateless.StatelessContainer;
 import org.jboss.metadata.serviceref.VirtualFileAdaptor;
+import org.jboss.wsf.spi.deployment.ArchiveDeployment;
 import org.jboss.wsf.spi.deployment.Deployment;
 import org.jboss.wsf.spi.deployment.Deployment.DeploymentType;
-import org.jboss.wsf.spi.deployment.ArchiveDeployment;
 import org.jboss.wsf.spi.deployment.Endpoint;
 import org.jboss.wsf.spi.deployment.Service;
+import org.jboss.wsf.spi.deployment.integration.WebServiceDeclaration;
+import org.jboss.wsf.spi.deployment.integration.WebServiceDeployment;
+import org.jboss.wsf.container.jboss50.invocation.InvocationHandlerEJB3;
 
 import javax.jws.WebService;
 import javax.xml.ws.WebServiceProvider;
@@ -65,25 +62,31 @@ public class JAXWSDeployerHookEJB3 extends AbstractDeployerHookEJB
 
       Service service = dep.getService();
 
-      Ejb3Deployment ejb3Deployment = unit.getAttachment(Ejb3Deployment.class);
-      if (ejb3Deployment == null)
-         throw new IllegalStateException("Deployment unit does not contain ejb3 deployment");
+      WebServiceDeployment webServiceDeployment = unit.getAttachment(WebServiceDeployment.class);
+      if (webServiceDeployment == null)
+         throw new IllegalStateException("Deployment unit does not contain webServiceDeployment");
 
       // Copy the attachments
-      dep.addAttachment(Ejb3Deployment.class, ejb3Deployment);
+      dep.addAttachment(WebServiceDeployment.class, webServiceDeployment);
 
-      Iterator it = ejb3Deployment.getEjbContainers().values().iterator();
+      Iterator<WebServiceDeclaration> it = webServiceDeployment.getServiceEndpoints().iterator();
       while (it.hasNext())
       {
-         EJBContainer container = (EJBContainer)it.next();
+         WebServiceDeclaration container = it.next();
          if (isWebServiceBean(container))
          {
-            String ejbName = container.getEjbName();
-            String epBean = container.getBeanClassName();
+            String ejbName = container.getComponentName();
+            String epBean = container.getComponentClassName();
 
             // Create the endpoint
             Endpoint ep = newEndpoint(epBean);
             ep.setShortName(ejbName);
+
+            String containName = container.getContainerName();
+            if(null==containName)
+               throw new IllegalArgumentException("Target container name not set");
+            ep.setProperty(InvocationHandlerEJB3.CONTAINER_NAME, containName);
+
             service.addEndpoint(ep);
          }
       }
@@ -94,16 +97,16 @@ public class JAXWSDeployerHookEJB3 extends AbstractDeployerHookEJB
    @Override
    public boolean isWebServiceDeployment(DeploymentUnit unit)
    {
-      Ejb3Deployment ejb3Deployment = unit.getAttachment(Ejb3Deployment.class);
-      if (ejb3Deployment == null)
+      WebServiceDeployment webServiceDeployment = unit.getAttachment(WebServiceDeployment.class);
+      if (null == webServiceDeployment )
          return false;
 
       boolean isWebServiceDeployment = false;
 
-      Iterator it = ejb3Deployment.getEjbContainers().values().iterator();
+      Iterator<WebServiceDeclaration> it = webServiceDeployment.getServiceEndpoints().iterator();
       while (it.hasNext())
       {
-         EJBContainer container = (EJBContainer)it.next();
+         WebServiceDeclaration container = it.next();
          if (isWebServiceBean(container))
          {
             isWebServiceDeployment = true;
@@ -114,15 +117,13 @@ public class JAXWSDeployerHookEJB3 extends AbstractDeployerHookEJB
       return isWebServiceDeployment;
    }
 
-   private boolean isWebServiceBean(EJBContainer container)
+   private boolean isWebServiceBean(WebServiceDeclaration container)
    {
       boolean isWebServiceBean = false;
-      if (container instanceof StatelessContainer || container instanceof MessagingContainer)
-      {
-         boolean isWebService = container.resolveAnnotation(WebService.class) != null;
-         boolean isWebServiceProvider = container.resolveAnnotation(WebServiceProvider.class) != null;
-         isWebServiceBean = isWebService || isWebServiceProvider;
-      }
+      boolean isWebService = container.getAnnotation(WebService.class) != null;
+      boolean isWebServiceProvider = container.getAnnotation(WebServiceProvider.class) != null;
+      isWebServiceBean = isWebService || isWebServiceProvider;
+
       return isWebServiceBean;
    }
 }

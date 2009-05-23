@@ -1,8 +1,8 @@
 /*
- * JBoss, Home of Professional Open Source
- * Copyright 2005, JBoss Inc., and individual contributors as indicated
- * by the @authors tag. See the copyright.txt in the distribution for a
- * full listing of individual contributors.
+ * JBoss, Home of Professional Open Source.
+ * Copyright 2006, Red Hat Middleware LLC, and individual contributors
+ * as indicated by the @author tags. See the copyright.txt file in the
+ * distribution for a full listing of individual contributors.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -21,58 +21,46 @@
  */
 package org.jboss.wsf.container.jboss50.deployment.tomcat;
 
-//$Id$
-
-import org.dom4j.Element;
 import org.jboss.metadata.common.ejb.IAssemblyDescriptorMetaData;
 import org.jboss.metadata.ejb.jboss.JBossMetaData;
 import org.jboss.metadata.javaee.spec.SecurityRolesMetaData;
+import org.jboss.metadata.web.jboss.JBossWebMetaData;
 import org.jboss.wsf.spi.deployment.Deployment;
 import org.jboss.wsf.spi.metadata.j2ee.EJBArchiveMetaData;
-import org.jboss.wsf.spi.deployment.SecurityHandler;
-
-import java.util.Iterator;
 
 /**
- * Generate a service endpoint deployment for EJB endpoints 
+ * Handle web app security meta data for EJB21 
  * 
  * @author Thomas.Diesler@jboss.org
  * @since 12-May-2006
  */
 public class SecurityHandlerEJB21 implements SecurityHandler
 {
-   public void addSecurityDomain(Element jbossWeb, Deployment dep)
+   public void addSecurityDomain(JBossWebMetaData jbossWeb, Deployment dep)
    {
       EJBArchiveMetaData ejbMetaData = dep.getAttachment(EJBArchiveMetaData.class);
       if (ejbMetaData == null)
          throw new IllegalStateException("Cannot obtain application meta data");
-      
+
       String securityDomain = ejbMetaData.getSecurityDomain();
       if (securityDomain != null)
       {
          if (securityDomain.startsWith("java:/jaas/") == false)
             securityDomain = "java:/jaas/" + securityDomain;
-         
-         jbossWeb.addElement("security-domain").addText(securityDomain);
+
+         jbossWeb.setSecurityDomain(securityDomain);
       }
    }
-   
-   public void addSecurityRoles(Element webApp, Deployment dep)
+
+   public void addSecurityRoles(JBossWebMetaData webApp, Deployment dep)
    {
-      // Fix: http://jira.jboss.org/jira/browse/JBWS-309
       JBossMetaData jbmd = dep.getAttachment(JBossMetaData.class);
       IAssemblyDescriptorMetaData assemblyDescriptor = jbmd.getAssemblyDescriptor();
       if (assemblyDescriptor != null)
       {
-         SecurityRolesMetaData srmd = assemblyDescriptor.getSecurityRoles();
-         if (srmd != null)
-         {
-            Iterator it = srmd.keySet().iterator();
-            while (it.hasNext())
-            {
-               webApp.addElement("security-role").addElement("role-name").addText((String)it.next());
-            }
-         }
+         SecurityRolesMetaData securityRoles = assemblyDescriptor.getSecurityRoles();
+         if (securityRoles != null)
+            webApp.setSecurityRoles(securityRoles);
       }
    }
 }

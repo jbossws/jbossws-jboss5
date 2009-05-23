@@ -1,8 +1,8 @@
 /*
- * JBoss, Home of Professional Open Source
- * Copyright 2005, JBoss Inc., and individual contributors as indicated
- * by the @authors tag. See the copyright.txt in the distribution for a
- * full listing of individual contributors.
+ * JBoss, Home of Professional Open Source.
+ * Copyright 2006, Red Hat Middleware LLC, and individual contributors
+ * as indicated by the @author tags. See the copyright.txt file in the
+ * distribution for a full listing of individual contributors.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -20,8 +20,6 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 package org.jboss.wsf.container.jboss50.invocation;
-
-// $Id$
 
 import java.lang.reflect.Method;
 import java.security.Principal;
@@ -41,7 +39,7 @@ import org.jboss.invocation.PayloadKey;
 import org.jboss.logging.Logger;
 import org.jboss.mx.util.MBeanServerLocator;
 import org.jboss.security.SecurityContext;
-import org.jboss.security.plugins.SecurityContextAssociation;
+import org.jboss.security.SecurityContextAssociation;
 import org.jboss.wsf.common.ObjectNameFactory;
 import org.jboss.wsf.spi.SPIProvider;
 import org.jboss.wsf.spi.SPIProviderResolver;
@@ -54,6 +52,7 @@ import org.jboss.wsf.spi.invocation.SecurityAdaptor;
 import org.jboss.wsf.spi.invocation.SecurityAdaptorFactory;
 import org.jboss.wsf.spi.metadata.j2ee.EJBArchiveMetaData;
 import org.jboss.wsf.spi.metadata.j2ee.EJBMetaData;
+import org.jboss.wsf.container.jboss50.invocation.ServiceEndpointInterceptor;
 
 /**
  * Handles invocations on EJB21 endpoints.
@@ -88,51 +87,28 @@ public class InvocationHandlerEJB21 extends InvocationHandler
       if (beanMetaData == null)
          throw new WebServiceException("Cannot obtain ejb meta data for: " + ejbName);
 
+      // get the MBeanServer
+      server = MBeanServerLocator.locateJBoss();
+
       // get the bean's JNDI name
       jndiName = beanMetaData.getContainerObjectNameJndiName();
       if (jndiName == null)
          throw new WebServiceException("Cannot obtain JNDI name for: " + ejbName);
-
-      server = MBeanServerLocator.locateJBoss();
-      objectName = ObjectNameFactory.create("jboss.j2ee:jndiName=" + jndiName + ",service=EJB");
-      if (server.isRegistered(objectName) == false)
-         throw new WebServiceException("Cannot find service endpoint target: " + objectName);
-
-      // Dynamically add the service endpoint interceptor
-      // http://jira.jboss.org/jira/browse/JBWS-758
-      try
-      {
-         EjbModule ejbModule = (EjbModule)server.getAttribute(objectName, "EjbModule");
-         StatelessSessionContainer container = (StatelessSessionContainer)ejbModule.getContainer(ejbName);
-
-         boolean injectionPointFound = false;
-         Interceptor prev = container.getInterceptor();
-         while (prev != null && prev.getNext() != null)
-         {
-            Interceptor next = prev.getNext();
-            if (next.getNext() == null)
-            {
-               log.debug("Inject service endpoint interceptor after: " + prev.getClass().getName());
-               ServiceEndpointInterceptor sepInterceptor = new ServiceEndpointInterceptor();
-               prev.setNext(sepInterceptor);
-               sepInterceptor.setNext(next);
-               injectionPointFound = true;
-            }
-            prev = next;
-         }
-         if (injectionPointFound == false)
-            log.warn("Cannot service endpoint interceptor injection point");
-      }
-      catch (Exception ex)
-      {
-         log.warn("Cannot add service endpoint interceptor", ex);
-      }
-
    }
 
    public void invoke(Endpoint ep, Invocation inv) throws Exception
    {
       log.debug("Invoke: " + inv.getJavaMethod().getName());
+
+      if (objectName == null)
+      {
+         objectName = ObjectNameFactory.create("jboss.j2ee:jndiName=" + jndiName + ",service=EJB");
+         if (server.isRegistered(objectName) == false)
+            throw new WebServiceException("Cannot find service endpoint target: " + objectName);
+
+         // Inject the Service endpoint interceptor
+         injectServiceEndpointInterceptor(objectName, ep.getShortName());
+      }
 
       // invoke on the container
       try
@@ -168,21 +144,54 @@ public class InvocationHandlerEJB21 extends InvocationHandler
 
       if (credential == null && sc != null)
          credential = sc.getUtil().getCredential();
-      
+
       Method method = inv.getJavaMethod();
       Object[] args = inv.getArgs();
       org.jboss.invocation.Invocation jbInv = new org.jboss.invocation.Invocation(null, method, args, null, principal, credential);
-      
+
       HandlerCallback callback = inv.getInvocationContext().getAttachment(HandlerCallback.class);
       if (callback == null)
          throw new IllegalStateException("Cannot obtain HandlerCallback");
-      
+
       jbInv.setValue(InvocationKey.SOAP_MESSAGE_CONTEXT, msgContext);
       jbInv.setValue(InvocationKey.SOAP_MESSAGE, ((SOAPMessageContext)msgContext).getMessage());
       jbInv.setType(InvocationType.SERVICE_ENDPOINT);
       jbInv.setValue(HandlerCallback.class.getName(), callback, PayloadKey.TRANSIENT);
       jbInv.setValue(Invocation.class.getName(), inv, PayloadKey.TRANSIENT);
-      
+
       return jbInv;
+   }
+
+   private void injectServiceEndpointInterceptor(ObjectName objectName, String ejbName)
+   {
+      // Dynamically add the service endpoint interceptor
+      // http://jira.jboss.org/jira/browse/JBWS-758
+      try
+      {
+         EjbModule ejbModule = (EjbModule)server.getAttribute(objectName, "EjbModule");
+         StatelessSessionContainer container = (StatelessSessionContainer)ejbModule.getContainer(ejbName);
+
+         boolean injectionPointFound = false;
+         Interceptor prev = container.getInterceptor();
+         while (prev != null && prev.getNext() != null)
+         {
+            Interceptor next = prev.getNext();
+            if (next.getNext() == null)
+            {
+               log.debug("Inject service endpoint interceptor after: " + prev.getClass().getName());
+               ServiceEndpointInterceptor sepInterceptor = new ServiceEndpointInterceptor();
+               prev.setNext(sepInterceptor);
+               sepInterceptor.setNext(next);
+               injectionPointFound = true;
+            }
+            prev = next;
+         }
+         if (injectionPointFound == false)
+            log.warn("Cannot service endpoint interceptor injection point");
+      }
+      catch (Exception ex)
+      {
+         log.warn("Cannot add service endpoint interceptor", ex);
+      }
    }
 }

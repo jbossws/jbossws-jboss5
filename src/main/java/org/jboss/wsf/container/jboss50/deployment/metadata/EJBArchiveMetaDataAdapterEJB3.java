@@ -1,8 +1,8 @@
 /*
- * JBoss, Home of Professional Open Source
- * Copyright 2005, JBoss Inc., and individual contributors as indicated
- * by the @authors tag. See the copyright.txt in the distribution for a
- * full listing of individual contributors.
+ * JBoss, Home of Professional Open Source.
+ * Copyright 2006, Red Hat Middleware LLC, and individual contributors
+ * as indicated by the @author tags. See the copyright.txt file in the
+ * distribution for a full listing of individual contributors.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -21,36 +21,23 @@
  */
 package org.jboss.wsf.container.jboss50.deployment.metadata;
 
-// $Id$
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.ejb3.Container;
-import org.jboss.ejb3.EJBContainer;
-import org.jboss.ejb3.Ejb3Deployment;
-import org.jboss.ejb3.mdb.MessagingContainer;
-import org.jboss.ejb3.stateless.StatelessContainer;
 import org.jboss.logging.Logger;
 import org.jboss.metadata.common.jboss.WebserviceDescriptionMetaData;
 import org.jboss.metadata.common.jboss.WebserviceDescriptionsMetaData;
-import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeanMetaData;
-import org.jboss.metadata.ejb.jboss.JBossGenericBeanMetaData;
 import org.jboss.metadata.ejb.jboss.JBossMetaData;
-import org.jboss.metadata.ejb.jboss.JBossSessionBeanMetaData;
 import org.jboss.metadata.ejb.jboss.WebservicesMetaData;
-import org.jboss.metadata.ejb.spec.ActivationConfigPropertyMetaData;
-import org.jboss.metadata.javaee.spec.PortComponent;
 import org.jboss.wsf.spi.deployment.Deployment;
-import org.jboss.wsf.spi.metadata.j2ee.EJBArchiveMetaData;
-import org.jboss.wsf.spi.metadata.j2ee.EJBMetaData;
-import org.jboss.wsf.spi.metadata.j2ee.EJBSecurityMetaData;
-import org.jboss.wsf.spi.metadata.j2ee.MDBMetaData;
-import org.jboss.wsf.spi.metadata.j2ee.SLSBMetaData;
+import org.jboss.wsf.spi.deployment.integration.WebServiceDeclaration;
+import org.jboss.wsf.spi.deployment.integration.WebServiceDeployment;
+import org.jboss.wsf.spi.metadata.j2ee.*;
 import org.jboss.wsf.spi.metadata.j2ee.EJBArchiveMetaData.PublishLocationAdapter;
+
+import javax.ejb.ActivationConfigProperty;
+import javax.ejb.MessageDriven;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Build container independent application meta data 
@@ -64,12 +51,11 @@ public class EJBArchiveMetaDataAdapterEJB3
    private static Logger log = Logger.getLogger(EJBArchiveMetaDataAdapterEJB3.class);
 
    public EJBArchiveMetaData buildMetaData(Deployment dep, DeploymentUnit unit)
-   {
-      Ejb3Deployment ejb3Deployment = unit.getAttachment(Ejb3Deployment.class);
-      dep.addAttachment(Ejb3Deployment.class, ejb3Deployment);
-
+   {     
       EJBArchiveMetaData umd = new EJBArchiveMetaData();
-      buildEnterpriseBeansMetaData(umd, ejb3Deployment);
+
+      WebServiceDeployment webServiceDeployment = dep.getAttachment(WebServiceDeployment.class);
+      buildEnterpriseBeansMetaData(umd, webServiceDeployment);
 
       JBossMetaData jbMetaData = unit.getAttachment(JBossMetaData.class);
       if (jbMetaData != null)
@@ -104,58 +90,51 @@ public class EJBArchiveMetaDataAdapterEJB3
       }
    }
 
-   private void buildEnterpriseBeansMetaData(EJBArchiveMetaData jarMetaData, Ejb3Deployment ejb3Deployment)
+   private void buildEnterpriseBeansMetaData(EJBArchiveMetaData jarMetaData, WebServiceDeployment ejb3Deployment)
    {
       List<EJBMetaData> ejbMetaDataList = new ArrayList<EJBMetaData>();
-      Iterator<Container> it = ejb3Deployment.getEjbContainers().values().iterator();
+      Iterator<WebServiceDeclaration> it = ejb3Deployment.getServiceEndpoints().iterator();
       while (it.hasNext())
       {
-         EJBContainer container = (EJBContainer)it.next();
-         
+         WebServiceDeclaration container = it.next();
+
+         PortComponentSpec pcMetaData = container.getAnnotation(PortComponentSpec.class);
+         MessageDriven mdbMetaData = container.getAnnotation(MessageDriven.class);
+
          EJBMetaData ejbMetaData = null;
-         PortComponent pcMetaData = null;
-         if (container instanceof StatelessContainer)
-         {
-            ejbMetaData = new SLSBMetaData();
-            JBossEnterpriseBeanMetaData beanMetaData = container.getXml();
-            if (beanMetaData instanceof JBossGenericBeanMetaData)
-            {
-               pcMetaData = ((JBossGenericBeanMetaData)beanMetaData).getPortComponent();
-            }
-            else if (beanMetaData instanceof JBossSessionBeanMetaData)
-            {
-               pcMetaData = ((JBossSessionBeanMetaData)beanMetaData).getPortComponent();
-            }
-         }
-         else if (container instanceof MessagingContainer)
+
+         if(mdbMetaData!=null)
          {
             ejbMetaData = new MDBMetaData();
-            MessagingContainer mdb = (MessagingContainer)container;
-            Map props = mdb.getActivationConfigProperties();
+
+            ActivationConfigProperty[] props = mdbMetaData.activationConfig();
             if (props != null)
             {
-               ActivationConfigPropertyMetaData destProp = (ActivationConfigPropertyMetaData)props.get("destination");
-               if (destProp != null)
-               {
-                  String destination = destProp.getValue();
+               String destination = getActivationProperty("destination", props);
+               if (destination != null)
+               {                  
                   ((MDBMetaData)ejbMetaData).setDestinationJndiName(destination);
                }
             }
          }
+         else
+         {
+            ejbMetaData = new SLSBMetaData();
+         }
 
          if (ejbMetaData != null)
          {
-            ejbMetaData.setEjbName(container.getEjbName());
-            ejbMetaData.setEjbClass(container.getBeanClassName());
+            ejbMetaData.setEjbName(container.getComponentName());
+            ejbMetaData.setEjbClass(container.getComponentClassName());
 
             if (pcMetaData != null)
             {
-               ejbMetaData.setPortComponentName(pcMetaData.getPortComponentName());
-               ejbMetaData.setPortComponentURI(pcMetaData.getPortComponentURI());
+               ejbMetaData.setPortComponentName(pcMetaData.portComponentName());
+               ejbMetaData.setPortComponentURI(pcMetaData.portComponentURI());
                EJBSecurityMetaData smd = new EJBSecurityMetaData();
-               smd.setAuthMethod(pcMetaData.getAuthMethod());
-               smd.setTransportGuarantee(pcMetaData.getTransportGuarantee());
-               smd.setSecureWSDLAccess(pcMetaData.getSecureWSDLAccess());
+               smd.setAuthMethod(pcMetaData.authMethod());
+               smd.setTransportGuarantee(pcMetaData.transportGuarantee());
+               smd.setSecureWSDLAccess(pcMetaData.secureWSDLAccess());
                ejbMetaData.setSecurityMetaData(smd);
             }
             
@@ -164,6 +143,21 @@ public class EJBArchiveMetaDataAdapterEJB3
       }
       
       jarMetaData.setEnterpriseBeans(ejbMetaDataList);
+   }
+
+   private String getActivationProperty(String name, ActivationConfigProperty[] props)
+   {
+      String result = null;
+      for(ActivationConfigProperty p : props)
+      {
+         if(p.propertyName().equals(name))
+         {
+            result = p.propertyValue();
+            break;
+         }
+      }
+
+      return result;
    }
 
    private PublishLocationAdapter getPublishLocationAdpater(final WebservicesMetaData wsMetaData)
@@ -182,4 +176,5 @@ public class EJBArchiveMetaDataAdapterEJB3
          }
       };
    }
+
 }

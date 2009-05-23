@@ -1,8 +1,8 @@
 /*
- * JBoss, Home of Professional Open Source
- * Copyright 2005, JBoss Inc., and individual contributors as indicated
- * by the @authors tag. See the copyright.txt in the distribution for a
- * full listing of individual contributors.
+ * JBoss, Home of Professional Open Source.
+ * Copyright 2006, Red Hat Middleware LLC, and individual contributors
+ * as indicated by the @author tags. See the copyright.txt file in the
+ * distribution for a full listing of individual contributors.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -21,18 +21,16 @@
  */
 package org.jboss.wsf.container.jboss50.deployer;
 
-// $Id$
-
-import java.util.LinkedList;
-import java.util.List;
-
 import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.spi.deployer.helpers.AbstractComponentDeployer;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.logging.Logger;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /**
- * This deployer that calls the registered DeployerHooks
+ * This is the deployer that calls the registered DeployerHooks
  * 
  * @author Thomas.Diesler@jboss.org
  * @since 24-Apr-2007
@@ -59,14 +57,12 @@ public abstract class AbstractWebServiceDeployer<T> extends AbstractComponentDep
    @Override
    public void internalDeploy(DeploymentUnit unit) throws DeploymentException
    {
-      for (DeployerHook deployer : deployerHooks)
-         deployer.deploy(unit);
+      for (DeployerHook deployer : deployerHooks) deployer.deploy(unit);
    }
 
    @Override
    public void internalUndeploy(DeploymentUnit unit)
    {
-      for (DeployerHook deployer : deployerHooks)
-         deployer.undeploy(unit);
+      for (DeployerHook deployer : deployerHooks) deployer.undeploy(unit);
    }
 }

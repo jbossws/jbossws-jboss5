@@ -19,42 +19,23 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.wsf.container.jboss50.transport;
+package org.jboss.wsf.container.jboss50.deployment.tomcat;
 
-import org.jboss.wsf.spi.transport.TransportManagerFactory;
-import org.jboss.wsf.spi.transport.TransportManager;
-import org.jboss.wsf.spi.transport.Protocol;
+import org.jboss.wsf.spi.deployment.Deployment;
 
 /**
- * Used with MC
- * 
- * @author Heiko.Braun <heiko.braun@jboss.com>
+ * Modifies the web app according to the stack requirements.
+ *
+ * @author Thomas.Diesler@jboss.org
+ * @since 19-May-2007
  */
-public class BareTransportManagerFactory implements TransportManagerFactory
-{
+public interface WebMetaDataModifier
+{            
+   final static String PROPERTY_GENERATED_WEBAPP = "org.jboss.ws.generated.webapp";
+   final static String PROPERTY_WEBAPP_CONTEXT_PARAMETERS = "org.jboss.ws.webapp.ContextParameterMap";
+   final static String PROPERTY_WEBAPP_SERVLET_CLASS = "org.jboss.ws.webapp.ServletClass";
+   final static String PROPERTY_WEBAPP_SERVLET_CONTEXT_LISTENER = "org.jboss.ws.webapp.ServletContextListener";
+   final static String PROPERTY_WEBAPP_URL = "org.jboss.ws.webapp.url";
 
-   private TransportManager httpTransport;
-
-
-   public void setHttpTransport(TransportManager httpTransport)
-   {
-      this.httpTransport = httpTransport;
-   }
-
-   public TransportManager createTransportManager(Protocol protocol)
-   {
-      TransportManager manager = null;
-
-      switch(protocol)
-      {
-         case HTTP:
-            manager = httpTransport;
-            break;
-         default:
-            throw new IllegalArgumentException("No TransportManager for protocol: " + protocol);
-      }
-
-      return manager;
-   }
+   RewriteResults modifyMetaData(Deployment dep) throws ClassNotFoundException;
 }
-

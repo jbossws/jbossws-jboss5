@@ -1,8 +1,8 @@
 /*
- * JBoss, Home of Professional Open Source
- * Copyright 2005, JBoss Inc., and individual contributors as indicated
- * by the @authors tag. See the copyright.txt in the distribution for a
- * full listing of individual contributors.
+ * JBoss, Home of Professional Open Source.
+ * Copyright 2006, Red Hat Middleware LLC, and individual contributors
+ * as indicated by the @author tags. See the copyright.txt file in the
+ * distribution for a full listing of individual contributors.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -21,13 +21,9 @@
  */
 package org.jboss.wsf.container.jboss50.deployer;
 
-// $Id$
-
-import org.jboss.deployers.spi.DeploymentException;
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.wsf.spi.deployment.Deployment;
 import org.jboss.wsf.spi.metadata.webservices.WebservicesMetaData;
-import static org.jboss.wsf.spi.deployment.Deployment.DeploymentState;
 
 /**
  * A deployer JAXRPC JSE Endpoints
@@ -37,25 +33,6 @@ import static org.jboss.wsf.spi.deployment.Deployment.DeploymentState;
  */
 public class JAXRPCDeployerHookPostJSE extends DeployerHookPostJSE
 {
-   
-   /**
-    * Expects the 'create' step to be executed in
-    * {@link org.jboss.wsf.container.jboss50.deployer.JAXRPCDeployerHookPreJSE}
-    * and executes the 'start' step.
-    *
-    */
-   public void deploy(DeploymentUnit unit) throws DeploymentException
-   {
-      if (!ignoreDeployment(unit) && isWebServiceDeployment(unit))
-      {
-         Deployment dep = getDeployment(unit);
-         if(null==dep || DeploymentState.CREATED != dep.getState())
-            throw new DeploymentException("Create step is missing");
-
-         // execute the 'start' step
-         getWsfRuntime().start(dep);          
-      }
-   }
 
    /**
     * Get the deployment type this deployer can handle
@@ -69,7 +46,7 @@ public class JAXRPCDeployerHookPostJSE extends DeployerHookPostJSE
    public boolean isWebServiceDeployment(DeploymentUnit unit)
    {
       WebservicesMetaData wsMetaData = getWebservicesMetaData(unit);
-      return (wsMetaData!=null && super.isWebServiceDeployment(unit));    
+      return (wsMetaData!=null && super.isWebServiceDeployment(unit));
    }
    
 }
