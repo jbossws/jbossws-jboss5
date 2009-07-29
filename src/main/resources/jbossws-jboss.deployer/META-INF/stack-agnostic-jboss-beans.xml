@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<deployment xmlns="urn:jboss:bean-deployer:2.0">
+
+  <!-- Locate the single instance of the kernel -->
+  <bean name="WSKernelLocator" class="org.jboss.wsf.spi.util.KernelLocator">
+    <property name="kernel"><inject bean="jboss.kernel:service=Kernel"/></property>
+  </bean>
+
+  <!-- Locate the single instance of the MBeanServer -->
+  <bean name="WSMBeanServerLocator" class="org.jboss.wsf.framework.management.MBeanServerLocator">
+    <property name="mbeanServer"><inject bean="JMXKernel" property="mbeanServer"/></property>
+  </bean>
+
+  <!-- An abstraction of server configuration aspects. -->
+  <bean name="WSServerConfig" class="org.jboss.webservices.integration.config.ServerConfigImpl">
+    <property name="mbeanServer"><inject bean="WSMBeanServerLocator" property="mbeanServer"/></property>
+
+    <!--
+      The WSDL, that is a required deployment artifact for an endpoint, has a <soap:address>
+      element which points to the location of the endpoint. JBoss supports rewriting of that SOAP address.
+
+      If the content of <soap:address> is a valid URL, JBossWS will not rewrite it unless 'modifySOAPAddress' is true.
+      If the content of <soap:address> is not a valid URL, JBossWS will rewrite it using the attribute values given below.
+
+      If 'webServiceHost' is not set, JBossWS uses requesters protocol host when rewriting the <soap:address>.
+    -->
+    <property name="webServiceHost">${jboss.bind.address}</property>
+    <property name="modifySOAPAddress">true</property>
+
+    <!--
+      Set these properties to explicitly define the ports that will be used for rewriting the SOAP address.
+      Otherwise the ports will be identified by querying the list of installed connectors.
+      If multiple connectors are found the port of the first connector is used.
+      <property name="webServiceSecurePort">8443</property>
+      <property name="webServicePort">8080</property>
+    -->
+  </bean>
+
+  <!-- deployers -->
+  <bean name="WSDescriptorDeployer" class="org.jboss.webservices.integration.deployers.WSDescriptorDeployer">
+    <property name="name">webservices.xml</property>
+    <property name="useSchemaValidation">true</property>
+  </bean>
+
+  <bean name="WSEJBAdapterDeployer" class="org.jboss.webservices.integration.deployers.WSEJBAdapterDeployer"/>
+
+  <bean name="WSTypeDeployer" class="org.jboss.webservices.integration.deployers.WSTypeDeployer">
+    <property name="relativeOrder">1</property> <!-- [JBDEPLOY-201] workaround -->
+  </bean>
+
+  <bean name="WSDeploymentDeployer" class="org.jboss.webservices.integration.deployers.WSDeploymentDeployer">
+    <property name="relativeOrder">2</property> <!-- [JBDEPLOY-201] workaround -->
+  </bean>
+
+  <!-- WSDeploymentAspectDeployers factory -->
+  <bean name="WSDeployersFactory" class="org.jboss.webservices.integration.deployers.WSDeployersFactory">
+    <constructor>
+      <parameter>
+        <inject bean="Deployers"/>
+      </parameter>
+    </constructor>
+    <incallback method="newDeployer"/>
+  </bean>
+
+  <!-- Deployment aspect helper beans -->
+  <bean name="WSSecurityHandlerEJB21" class="org.jboss.webservices.integration.tomcat.SecurityHandlerEJB21"/>
+  <bean name="WSSecurityHandlerEJB3" class="org.jboss.webservices.integration.tomcat.SecurityHandlerEJB3"/>
+  <bean name="WSWebMetaDataModifier" class="org.jboss.webservices.integration.tomcat.WebMetaDataModifier"/>
+
+  <!-- The AS specific deployment aspects -->
+  <bean name="WSContainerMetaDataDeploymentAspect" class="org.jboss.webservices.integration.metadata.ContainerMetaDataDeploymentAspect">
+    <property name="provides">ContainerMetaData, VFSRoot</property>
+    <property name="relativeOrder">12</property> <!-- [JBDEPLOY-201] workaround -->
+  </bean>
+
+  <bean name="WSInjectionMetaDataDeploymentAspect" class="org.jboss.webservices.integration.injection.InjectionMetaDataDeploymentAspect">
+    <property name="requires">WebMetaData</property>
+    <property name="provides">InjectionMetaData</property>
+    <property name="relativeOrder">34</property> <!-- [JBDEPLOY-201] workaround -->
+  </bean>
+
+  <!-- TODO: remove this hacky aspect in AS trunk -->
+  <bean name="WSJACCPermissionsDeploymentAspect" class="org.jboss.webservices.integration.security.JACCPermissionsDeploymentAspect">
+    <property name="requires">WebMetaData</property>
+    <property name="provides">JACCPermisions</property>
+    <property name="relativeOrder">34</property> <!-- [JBDEPLOY-201] workaround -->
+  </bean>
+
+  <bean name="WSContextRootDeploymentAspect" class="org.jboss.wsf.framework.deployment.BackwardCompatibleContextRootDeploymentAspect">
+    <property name="requires">ContainerMetaData</property>
+    <property name="provides">ContextRoot</property>
+    <property name="relativeOrder">14</property> <!-- [JBDEPLOY-201] workaround -->
+  </bean>
+
+  <bean name="WSVirtualHostDeploymentAspect" class="org.jboss.wsf.framework.deployment.VirtualHostDeploymentAspect">
+    <property name="requires">ContainerMetaData</property>
+    <property name="provides">VirtualHosts</property>
+    <property name="relativeOrder">18</property> <!-- [JBDEPLOY-201] workaround -->
+  </bean>
+
+  <bean name="WSEndpointAddressDeploymentAspect" class="org.jboss.wsf.framework.deployment.EndpointAddressDeploymentAspect">
+    <property name="requires">URLPattern</property>
+    <property name="provides">EndpointAddress</property>
+    <property name="relativeOrder">16</property> <!-- [JBDEPLOY-201] workaround -->
+  </bean>
+
+  <bean name="WSEndpointLifecycleDeploymentAspect" class="org.jboss.wsf.framework.deployment.EndpointLifecycleDeploymentAspect">
+    <property name="provides">LifecycleHandler</property>
+    <property name="last">true</property>
+    <property name="relativeOrder">37</property> <!-- [JBDEPLOY-201] workaround -->
+  </bean>
+
+  <bean name="WSEndpointMetricsDeploymentAspect" class="org.jboss.wsf.framework.deployment.EndpointMetricsDeploymentAspect">
+    <property name="provides">EndpointMetrics</property>
+    <property name="relativeOrder">11</property> <!-- [JBDEPLOY-201] workaround -->
+  </bean>
+
+  <bean name="WSEndpointNameDeploymentAspect" class="org.jboss.wsf.framework.deployment.EndpointNameDeploymentAspect">
+    <property name="requires">URLPattern</property>
+    <property name="provides">EndpointName</property>
+    <property name="relativeOrder">17</property> <!-- [JBDEPLOY-201] workaround -->
+  </bean>
+
+  <bean name="WSEndpointRegistryDeploymentAspect" class="org.jboss.wsf.framework.deployment.EndpointRegistryDeploymentAspect">
+    <property name="requires">EndpointName</property>
+    <property name="provides">RegisteredEndpoint</property>
+    <property name="relativeOrder">35</property> <!-- [JBDEPLOY-201] workaround -->
+  </bean>
+
+  <bean name="WSURLPatternDeploymentAspect" class="org.jboss.wsf.framework.deployment.URLPatternDeploymentAspect">
+    <property name="requires">ContextRoot, ContainerMetaData</property>
+    <property name="provides">URLPattern</property>
+    <property name="relativeOrder">15</property> <!-- [JBDEPLOY-201] workaround -->
+  </bean>
+
+  <bean name="WSWebMetaDataModifyingDeploymentAspect" class="org.jboss.webservices.integration.tomcat.WebMetaDataModifyingDeploymentAspect">
+    <property name="requires">WebMetaData, ContextProperties, StackDescriptor</property>
+    <property name="provides">WebMetaData</property>
+    <property name="webMetaDataModifier"><inject bean="WSWebMetaDataModifier"/></property>
+    <property name="relativeOrder">33</property> <!-- [JBDEPLOY-201] workaround -->
+  </bean>
+
+  <bean name="WSWebAppGeneratorDeploymentAspect" class="org.jboss.webservices.integration.tomcat.WebAppGeneratorDeploymentAspect">
+    <property name="requires">VirtualHosts,URLPattern</property>
+    <property name="provides">WebMetaData</property>
+    <property name="securityHandlerEJB21"><inject bean="WSSecurityHandlerEJB21"/></property>
+    <property name="securityHandlerEJB3"><inject bean="WSSecurityHandlerEJB3"/></property>
+    <property name="relativeOrder">32</property> <!-- [JBDEPLOY-201] workaround -->
+  </bean>
+
+</deployment>
