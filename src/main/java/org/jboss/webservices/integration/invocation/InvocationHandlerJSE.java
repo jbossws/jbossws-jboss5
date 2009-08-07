@@ -97,15 +97,20 @@ public class InvocationHandlerJSE extends InvocationHandler
 
          InvocationContext invContext = epInv.getInvocationContext();
          WebServiceContext wsContext = invContext.getAttachment(WebServiceContext.class);
+         ResourceInjector injector = null;
          if (wsContext != null)
          {
-            ResourceInjector injector = resourceInjectorFactory.newResourceInjector();
+            injector = resourceInjectorFactory.newResourceInjector();
             injector.inject(targetBean, wsContext);
          }
 
          Method method = getImplMethod(targetBean.getClass(), epInv.getJavaMethod());
          Object retObj = method.invoke(targetBean, epInv.getArgs());
          epInv.setReturnValue(retObj);
+         if (wsContext != null) //JBWS-2662
+         {
+            injector.inject(targetBean, null);
+         }
       }
       catch (Exception e)
       {
