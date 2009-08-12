@@ -23,7 +23,7 @@
       If the content of <soap:address> is a valid URL, JBossWS will not rewrite it unless 'modifySOAPAddress' is true.
       If the content of <soap:address> is not a valid URL, JBossWS will rewrite it using the attribute values given below.
 
-      If 'webServiceHost' is not set, JBossWS uses requesters protocol host when rewriting the <soap:address>.
+      If 'webServiceHost' is set to 'jbossws.undefined.host', JBossWS uses requesters protocol host when rewriting the <soap:address>.
     -->
     <property name="webServiceHost">${jboss.bind.address}</property>
     <property name="modifySOAPAddress">true</property>
