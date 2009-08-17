@@ -34,7 +34,7 @@ import org.jboss.wsf.spi.metadata.webservices.WebservicesMetaData;
 /**
  * Detects Web Service deployment type.
  *
- * @author <a href="ropalka@redhat.com">Richard Opalka</a>
+ * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
 public final class WSTypeDeployer extends AbstractRealDeployer
 {
@@ -45,15 +45,15 @@ public final class WSTypeDeployer extends AbstractRealDeployer
    public WSTypeDeployer()
    {
       super();
-      
+
       // inputs
-      this.addInput( JBossWebMetaData.class );
-      this.addInput( WebservicesMetaData.class );
-      this.addInput( WebServiceDeployment.class );
-      
+      this.addInput(JBossWebMetaData.class);
+      this.addInput(WebservicesMetaData.class);
+      this.addInput(WebServiceDeployment.class);
+
       // outputs
-      this.addOutput( DeploymentType.class );
-      this.addOutput( JBossWebMetaData.class );
+      this.addOutput(DeploymentType.class);
+      this.addOutput(JBossWebMetaData.class);
    }
 
    /**
@@ -63,72 +63,76 @@ public final class WSTypeDeployer extends AbstractRealDeployer
     * @throws DeploymentException on failure
     */
    @Override
-   protected void internalDeploy( final DeploymentUnit unit ) throws DeploymentException
+   protected void internalDeploy(final DeploymentUnit unit) throws DeploymentException
    {
-      if ( this.isJaxwsJseDeployment( unit ) )
+      if (this.isJaxwsJseDeployment(unit))
       {
-         unit.addAttachment( DeploymentType.class, DeploymentType.JAXWS_JSE );
+         this.log.debug("Detected JAXWS JSE deployment");
+         unit.addAttachment(DeploymentType.class, DeploymentType.JAXWS_JSE);
       }
-      else if ( this.isJaxwsEjbDeployment( unit ) )
+      else if (this.isJaxwsEjbDeployment(unit))
       {
-         unit.addAttachment( DeploymentType.class, DeploymentType.JAXWS_EJB3 );
+         this.log.debug("Detected JAXWS EJB3 deployment");
+         unit.addAttachment(DeploymentType.class, DeploymentType.JAXWS_EJB3);
       }
-      else if ( this.isJaxrpcJseDeployment( unit ) )
+      else if (this.isJaxrpcJseDeployment(unit))
       {
-         unit.addAttachment( DeploymentType.class, DeploymentType.JAXRPC_JSE );
+         this.log.debug("Detected JAXRPC JSE deployment");
+         unit.addAttachment(DeploymentType.class, DeploymentType.JAXRPC_JSE);
       }
-      else if ( this.isJaxrpcEjbDeployment( unit ) )
+      else if (this.isJaxrpcEjbDeployment(unit))
       {
-         unit.addAttachment( DeploymentType.class, DeploymentType.JAXRPC_EJB21 );
+         this.log.debug("Detected JAXRPC EJB21 deployment");
+         unit.addAttachment(DeploymentType.class, DeploymentType.JAXRPC_EJB21);
       }
    }
-   
+
    /**
     * Returns true if JAXRPC EJB deployment is detected.
     * 
     * @param unit deployment unit
     * @return true if JAXRPC EJB, false otherwise
     */
-   private boolean isJaxrpcEjbDeployment( final DeploymentUnit unit )
+   private boolean isJaxrpcEjbDeployment(final DeploymentUnit unit)
    {
-      final boolean hasWebservicesMD = ASHelper.hasAttachment( unit, WebservicesMetaData.class );
-      final boolean hasJBossMD = unit.getAllMetaData( JBossMetaData.class ).size() > 0;
-      
+      final boolean hasWebservicesMD = ASHelper.hasAttachment(unit, WebservicesMetaData.class);
+      final boolean hasJBossMD = unit.getAllMetaData(JBossMetaData.class).size() > 0;
+
       return hasWebservicesMD && hasJBossMD;
    }
-   
+
    /**
     * Returns true if JAXRPC JSE deployment is detected.
     * 
     * @param unit deployment unit
     * @return true if JAXRPC JSE, false otherwise
     */
-   private boolean isJaxrpcJseDeployment( final DeploymentUnit unit )
+   private boolean isJaxrpcJseDeployment(final DeploymentUnit unit)
    {
-      final boolean hasWebservicesMD = ASHelper.hasAttachment( unit, WebservicesMetaData.class );
-      final boolean hasJBossWebMD = ASHelper.hasAttachment( unit, JBossWebMetaData.class );
+      final boolean hasWebservicesMD = ASHelper.hasAttachment(unit, WebservicesMetaData.class);
+      final boolean hasJBossWebMD = ASHelper.hasAttachment(unit, JBossWebMetaData.class);
 
-      if ( hasWebservicesMD && hasJBossWebMD )
+      if (hasWebservicesMD && hasJBossWebMD)
       {
-         return ASHelper.getJaxrpcServlets( unit ).size() > 0;
+         return ASHelper.getJaxrpcServlets(unit).size() > 0;
       }
 
       return false;
    }
-   
+
    /**
     * Returns true if JAXWS EJB deployment is detected.
     * 
     * @param unit deployment unit
     * @return true if JAXWS EJB, false otherwise
     */
-   private boolean isJaxwsEjbDeployment( final DeploymentUnit unit )
+   private boolean isJaxwsEjbDeployment(final DeploymentUnit unit)
    {
-      final boolean hasWSDeployment = ASHelper.hasAttachment( unit, WebServiceDeployment.class );
+      final boolean hasWSDeployment = ASHelper.hasAttachment(unit, WebServiceDeployment.class);
 
-      if ( hasWSDeployment )
+      if (hasWSDeployment)
       {
-         return ASHelper.getJaxwsEjbs( unit ).size() > 0;
+         return ASHelper.getJaxwsEjbs(unit).size() > 0;
       }
 
       return false;
@@ -140,13 +144,13 @@ public final class WSTypeDeployer extends AbstractRealDeployer
     * @param unit deployment unit
     * @return true if JAXWS JSE, false otherwise
     */
-   private boolean isJaxwsJseDeployment( final DeploymentUnit unit )
+   private boolean isJaxwsJseDeployment(final DeploymentUnit unit)
    {
-      final boolean hasJBossWebMD = ASHelper.hasAttachment( unit, JBossWebMetaData.class );
+      final boolean hasJBossWebMD = ASHelper.hasAttachment(unit, JBossWebMetaData.class);
 
-      if ( hasJBossWebMD )
+      if (hasJBossWebMD)
       {
-         return ASHelper.getJaxwsServlets( unit ).size() > 0;
+         return ASHelper.getJaxwsServlets(unit).size() > 0;
       }
 
       return false;

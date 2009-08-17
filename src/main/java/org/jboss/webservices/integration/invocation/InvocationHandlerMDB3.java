@@ -21,65 +21,21 @@
  */
 package org.jboss.webservices.integration.invocation;
 
-import java.lang.reflect.Method;
-
-import org.jboss.logging.Logger;
-import org.jboss.wsf.spi.deployment.Endpoint;
-import org.jboss.wsf.spi.invocation.Invocation;
-import org.jboss.wsf.spi.invocation.InvocationContext;
-
 /**
  * Handles invocations on MDB EJB3 endpoints.
  *
- * @author Thomas.Diesler@jboss.org
+ * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
+ * @author <a href="mailto:tdiesler@redhat.com">Thomas Diesler</a>
  */
-public class InvocationHandlerMDB3 extends AbstractInvocationHandler
+final class InvocationHandlerMDB3 extends AbstractInvocationHandlerJSE
 {
-   // provide logging
-   private static final Logger log = Logger.getLogger(InvocationHandlerMDB3.class);
 
-   public Invocation createInvocation()
+   /**
+    * Constructor.
+    */
+   InvocationHandlerMDB3()
    {
-      return new Invocation();
+      super();
    }
 
-   public void init(Endpoint ep)
-   {
-
-   }
-
-   public void invoke(Endpoint ep, Invocation epInv) throws Exception
-   {
-      log.debug("Invoke: " + epInv.getJavaMethod().getName());
-
-      try
-      {
-         InvocationContext invCtx = epInv.getInvocationContext();
-         Object targetBean = invCtx.getTargetBean();
-         if (targetBean == null)
-         {
-            try
-            {
-               Class epImpl = ep.getTargetBeanClass();
-               targetBean = epImpl.newInstance();
-               invCtx.setTargetBean(targetBean);
-            }
-            catch (Exception ex)
-            {
-               throw new IllegalStateException("Canot get target bean instance", ex);
-            }
-         }
-         Class implClass = targetBean.getClass();
-         Method seiMethod = epInv.getJavaMethod();
-         Method implMethod = getImplMethod(implClass, seiMethod);
-
-         Object[] args = epInv.getArgs();
-         Object retObj = implMethod.invoke(targetBean, args);
-         epInv.setReturnValue(retObj);
-      }
-      catch (Exception e)
-      {
-         handleInvocationException(e);
-      }
-   }
 }

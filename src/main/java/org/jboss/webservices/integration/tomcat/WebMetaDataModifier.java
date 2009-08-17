@@ -21,13 +21,11 @@
  */
 package org.jboss.webservices.integration.tomcat;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.jboss.logging.Logger;
 import org.jboss.metadata.javaee.spec.ParamValueMetaData;
-import org.jboss.metadata.web.jboss.JBossServletMetaData;
 import org.jboss.metadata.web.jboss.JBossWebMetaData;
 import org.jboss.metadata.web.spec.ServletMetaData;
 import org.jboss.webservices.integration.util.ASHelper;
@@ -37,163 +35,115 @@ import org.jboss.wsf.spi.deployment.Deployment;
 import org.jboss.wsf.spi.deployment.Endpoint;
 
 /**
- * The modifier of jboss web meta data. 
+ * The modifier of jboss web meta data.
  * It configures WS transport for every webservice endpoint
  * plus propagates WS stack specific context parameters if required.
  *
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
+ * @author <a href="mailto:tdiesler@redhat.com">Thomas Diesler</a>
  */
-public final class WebMetaDataModifier
+final class WebMetaDataModifier
 {
+
+   /** Logger. */
+   private final Logger log = Logger.getLogger(WebMetaDataModifier.class);
 
    /**
     * Constructor.
     */
-   public WebMetaDataModifier()
+   WebMetaDataModifier()
    {
       super();
    }
 
    /**
     * Modifies web meta data to configure webservice stack transport and properties.
-    * 
+    *
     * @param dep webservice deployment
     */
-   public void modify( final Deployment dep )
+   void modify(final Deployment dep)
    {
-      final JBossWebMetaData jbossWebMD = WSHelper.getRequiredAttachment( dep, JBossWebMetaData.class );
+      final JBossWebMetaData jbossWebMD = WSHelper.getRequiredAttachment(dep, JBossWebMetaData.class);
 
-      this.propagateContextProps( dep, jbossWebMD );
-      this.configureEndpoints( dep, jbossWebMD );
+      this.propagateContextProps(dep, jbossWebMD);
+      this.configureEndpoints(dep, jbossWebMD);
    }
 
    /**
     * Propagates stack specific context parameters if specified. 
-    * 
+    *
     * @param dep webservice deployment
     * @param jbossWebMD web meta data
     */
-   @SuppressWarnings( "unchecked" )
-   private void propagateContextProps( final Deployment dep, final JBossWebMetaData jbossWebMD )
+   @SuppressWarnings("unchecked")
+   private void propagateContextProps(final Deployment dep, final JBossWebMetaData jbossWebMD)
    {
-      final Map< String, String > stackContextParams = ( Map< String, String > )
-          dep.getProperty( WSConstants.STACK_CONTEXT_PARAMS );
-      
-      if ( stackContextParams != null )
-      {
-         final List< ParamValueMetaData > contextParams = this.getContextParams( jbossWebMD );
+      final Map<String, String> stackContextParams = (Map<String, String>) dep
+            .getProperty(WSConstants.STACK_CONTEXT_PARAMS);
 
-         for ( Map.Entry< String, String > entry : stackContextParams.entrySet() )
+      if (stackContextParams != null)
+      {
+         this.log.debug("Creating context parameters");
+         final List<ParamValueMetaData> contextParams = WebMetaDataHelper.getContextParams(jbossWebMD);
+
+         for (Map.Entry<String, String> entry : stackContextParams.entrySet())
          {
-            final ParamValueMetaData newParam = this.newParameter( entry.getKey(), entry.getValue() );
-            contextParams.add( newParam );
+            final String paramName = entry.getKey();
+            final String paramValue = entry.getValue();
+
+            this.log.debug("Setting context parameter name: " + paramName + " value: " + paramValue);
+            WebMetaDataHelper.newParamValue(paramName, paramValue, contextParams);
          }
       }
    }
 
    /**
     * Configures transport servlet class for every found webservice endpoint. 
-    * 
+    *
     * @param dep webservice deployment
     * @param jbossWebMD web meta data
     */
-   private void configureEndpoints( final Deployment dep, final JBossWebMetaData jbossWebMD )
+   private void configureEndpoints(final Deployment dep, final JBossWebMetaData jbossWebMD)
    {
-      final Iterator< JBossServletMetaData > servlets = jbossWebMD.getServlets().iterator();
-      
-      while ( servlets.hasNext() )
-      {
-         final ServletMetaData servletMD = servlets.next();
-         final ClassLoader loader = dep.getInitialClassLoader();
-         final boolean isWebserviceEndpoint = ASHelper.getEndpointClass( servletMD, loader ) != null;
+      final String transportClassName = this.getTransportClassName(dep);
+      final ClassLoader loader = dep.getInitialClassLoader();
+      this.log.debug("Modifying servlets");
 
-         if ( isWebserviceEndpoint )
+      for (final ServletMetaData servletMD : jbossWebMD.getServlets())
+      {
+         final boolean isWebserviceEndpoint = ASHelper.getEndpointClass(servletMD, loader) != null;
+
+         if (isWebserviceEndpoint)
          {
             // set transport servlet
-            servletMD.setServletClass( this.getTransportClassName( dep ) );
+            servletMD.setServletClass(transportClassName);
 
             // configure webservice endpoint
             final String endpointClassName = servletMD.getServletClass();
-            final List< ParamValueMetaData > initParams = this.getServletInitParams( servletMD );
-            final ParamValueMetaData endpointParam = this.newParameter( 
-               Endpoint.SEPID_DOMAIN_ENDPOINT, endpointClassName ); 
-            
-            initParams.add( endpointParam );
+            this.log.debug("Setting transport class: " + transportClassName + " for servlet: " + endpointClassName);
+            final List<ParamValueMetaData> initParams = WebMetaDataHelper.getServletInitParams(servletMD);
+            WebMetaDataHelper.newParamValue(Endpoint.SEPID_DOMAIN_ENDPOINT, endpointClassName, initParams);
          }
       }
    }
-   
+
    /**
     * Returns stack specific transport class name.
-    * 
+    *
     * @param dep webservice deployment
     * @return stack specific transport class name
     * @throws IllegalStateException if transport class name is not found in deployment properties map
     */
-   private String getTransportClassName( final Deployment dep )
+   private String getTransportClassName(final Deployment dep)
    {
-      final String transportClassName = ( String ) dep.getProperty( WSConstants.STACK_TRANSPORT_CLASS );
-      
-      if ( transportClassName == null )
+      final String transportClassName = (String) dep.getProperty(WSConstants.STACK_TRANSPORT_CLASS);
+
+      if (transportClassName == null)
       {
-         throw new IllegalStateException( "Cannot obtain deployment property: " + WSConstants.STACK_TRANSPORT_CLASS );
+         throw new IllegalStateException("Cannot obtain deployment property: " + WSConstants.STACK_TRANSPORT_CLASS);
       }
-      
+
       return transportClassName;
-   }
-   
-   /**
-    * Creates new parameter with specified key and value.
-    * 
-    * @param key the key
-    * @param value the value
-    * @return new parameter
-    */
-   private ParamValueMetaData newParameter( final String key, final String value )
-   {
-      final ParamValueMetaData paramMD = new ParamValueMetaData();
-      paramMD.setParamName( key );
-      paramMD.setParamValue( value );
-      
-      return paramMD;
-   }
-   
-   /**
-    * Gets servlet init params list. Constructs new init params list if it does not exist yet.
-    * 
-    * @param servletMD servlet meta data
-    * @return servlet init params list
-    */
-   private List< ParamValueMetaData > getServletInitParams( final ServletMetaData servletMD )
-   {
-      List< ParamValueMetaData > initParams = servletMD.getInitParam();
-
-      if ( initParams == null )
-      {
-         initParams = new ArrayList< ParamValueMetaData >();
-         servletMD.setInitParam( initParams );
-      }
-      
-      return initParams;
-   }
-
-   /**
-    * Gets context params list. Constructs new context params list if it does not exist yet.
-    * 
-    * @param jbossWebMD web meta data
-    * @return context params list
-    */
-   private List< ParamValueMetaData > getContextParams( final JBossWebMetaData jbossWebMD )
-   {
-      List< ParamValueMetaData > contextParams = jbossWebMD.getContextParams();
-      
-      if ( contextParams == null )
-      {
-         contextParams = new ArrayList< ParamValueMetaData >();
-         jbossWebMD.setContextParams( contextParams );
-      }
-      
-      return contextParams;
    }
 
 }

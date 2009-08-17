@@ -19,40 +19,47 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.webservices.integration.deployers;
+package org.jboss.webservices.integration.tomcat;
 
-import org.jboss.deployers.plugins.deployers.DeployersImpl;
+import org.jboss.wsf.common.integration.WSHelper;
+import org.jboss.wsf.spi.deployment.Deployment;
 import org.jboss.wsf.spi.deployment.DeploymentAspect;
 
 /**
- * WSDeploymentAspectDeployer factory.
+ * A deployment aspect that generates web app meta data for EJB endpoints. 
  *
- * @author <a href="ropalka@redhat.com">Richard Opalka</a>
+ * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
+ * @author <a href="mailto:tdiesler@redhat.com">Thomas Diesler</a>
  */
-public final class WSDeployersFactory
+public final class WebMetaDataCreatingDeploymentAspect extends DeploymentAspect
 {
-   
-   /** Real deployers registry. */
-   private final DeployersImpl delegee;
-   
+
+   /** Web meta data creator. */
+   private WebMetaDataCreator webMetaDataCreator = new WebMetaDataCreator();
+
    /**
     * Constructor.
-    * 
-    * @param realDeployers real deployers registry
     */
-   public WSDeployersFactory( final DeployersImpl realDeployers )
+   public WebMetaDataCreatingDeploymentAspect()
    {
-      this.delegee = realDeployers;
+      super();
    }
 
    /**
-    * MC incallback method. It will be called each time DeploymentAspect bean will reach INSTALLED state.
-    * 
-    * @param aspect to create real WS deployer for
+    * Creates web meta data for EJB deployments.
+    *
+    * @param dep webservice deployment
     */
-   public void newDeployer( final DeploymentAspect aspect )
+   @Override
+   public void start(final Deployment dep)
    {
-      this.delegee.addDeployer( new WSDeploymentAspectDeployer( aspect ) );
+      final boolean isEjbDeployment = WSHelper.isEjbDeployment(dep);
+
+      if (isEjbDeployment)
+      {
+         this.log.debug("Creating web meta data for EJB webservice deployment: " + dep.getSimpleName());
+         this.webMetaDataCreator.create(dep);
+      }
    }
 
 }

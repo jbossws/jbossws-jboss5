@@ -30,38 +30,60 @@ import org.jboss.wsf.common.management.AbstractServerConfig;
 import org.jboss.wsf.common.management.AbstractServerConfigMBean;
 
 /**
- * A ServerConfig for AS <= 5.1.0
+ * AS specific ServerConfig.
  *
- * @author alessio.soldano@jboss.com
- * @author Thomas.Diesler@jboss.org
- *
+ * @author <a href="mailto:asoldano@redhat.com">Alessio Soldano</a>
+ * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
+ * @author <a href="mailto:tdiesler@redhat.com">Thomas Diesler</a>
  */
-public class ServerConfigImpl extends AbstractServerConfig implements AbstractServerConfigMBean
+public final class ServerConfigImpl extends AbstractServerConfig implements AbstractServerConfigMBean
 {
 
+   /**
+    * Constructor.
+    */
+   public ServerConfigImpl()
+   {
+      super();
+   }
+
+   /**
+    * Gets server temp directory.
+    * 
+    * @return temp directory
+    */
    public File getServerTempDir()
    {
       return this.getDirFromServerConfig("ServerTempDir");
    }
 
+   /**
+    * Gets server home directory.
+    * 
+    * @return home directory
+    */
    public File getHomeDir()
    {
       return this.getDirFromServerConfig("HomeDir");
    }
 
+   /**
+    * Gets server data directory.
+    * 
+    * @return data directory
+    */
    public File getServerDataDir()
    {
       return this.getDirFromServerConfig("ServerDataDir");
    }
 
    /**
-    * Obtains the specified attribute from the server configuration,
-    * represented as a {@link File}.
+    * Obtains the requested directory from the server configuration.
     *
-    * @param attributeName
-    * @return
+    * @param attributeName directory attribute name
+    * @return requested directory
     */
-   protected File getDirFromServerConfig(final String attributeName)
+   private File getDirFromServerConfig(final String attributeName)
    {
       // Define the ON to invoke upon
       final ObjectName on = OBJECT_NAME_SERVER_CONFIG;
@@ -70,7 +92,7 @@ public class ServerConfigImpl extends AbstractServerConfig implements AbstractSe
       File location = null;
       try
       {
-         location = (File) getMbeanServer().getAttribute(on, attributeName);
+         location = (File) this.getMbeanServer().getAttribute(on, attributeName);
       }
       catch (final JMException e)
       {

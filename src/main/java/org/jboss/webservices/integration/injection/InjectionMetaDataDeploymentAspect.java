@@ -24,17 +24,14 @@ package org.jboss.webservices.integration.injection;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Resource;
-import javax.jws.WebService;
 import javax.naming.Context;
 import javax.naming.NamingException;
-import javax.xml.ws.WebServiceProvider;
 
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.metadata.ejb.jboss.JBossEnterpriseBeansMetaData;
@@ -63,54 +60,100 @@ import org.jboss.wsf.spi.metadata.injection.ReferenceResolver;
 public final class InjectionMetaDataDeploymentAspect extends DeploymentAspect
 {
 
-   private static final ReferenceResolver RESOURCE_REFERENCE_RESOLVER = new ResourceReferenceResolver(); 
+   /** EJB 3 JNDI prefix. */
    private static final String EJB3_JNDI_PREFIX = "java:env/";
 
-   @Override
-   public void start(Deployment dep)
+   /** Resolver handling @Resource injections. */
+   private static final ReferenceResolver RESOURCE_RESOLVER = new ResourceReferenceResolver();
+
+   /**
+    * Constructor.
+    */
+   public InjectionMetaDataDeploymentAspect()
    {
-      super.start(dep);
+      super();
+   }
 
-      DeploymentUnit unit = WSHelper.getRequiredAttachment( dep, DeploymentUnit.class );
-      JBossWebMetaData webMD = WSHelper.getRequiredAttachment( dep, JBossWebMetaData.class );
+   /**
+    * Builds injection meta data for all endpoints in deployment.
+    * 
+    * @param dep webservice deployment
+    */
+   @Override
+   public void start(final Deployment dep)
+   {
+      final DeploymentUnit unit = WSHelper.getRequiredAttachment(dep, DeploymentUnit.class);
+      final JBossWebMetaData jbossWebMD = WSHelper.getRequiredAttachment(dep, JBossWebMetaData.class);
+      final Map<Class<? extends Annotation>, ReferenceResolver> resolvers = this.getResolvers(unit);
 
-      List<InjectionMetaData> injectionMD = new LinkedList<InjectionMetaData>();
-      Map<Class<? extends Annotation>, ReferenceResolver> resolvers = createResolvers(unit);
-
-      try
+      if (WSHelper.isJaxwsJseDeployment(dep))
       {
-         
-         if ( WSHelper.isJaxwsJseDeployment( dep ) )
+         this.log.debug("Building injection meta data for JAXWS JSE webservice deployment: " + dep.getSimpleName());
+         final EnvironmentEntriesMetaData envEntriesMD = jbossWebMD.getEnvironmentEntries();
+
+         // iterate through all POJO endpoints
+         for (Endpoint endpoint : dep.getService().getEndpoints())
          {
-            injectionMD.addAll(buildInjectionMetaData(webMD.getEnvironmentEntries()));
-            for (Endpoint endpoint : dep.getService().getEndpoints())
+            // build POJO injections meta data
+            final InjectionsMetaData injectionsMD = this.buildInjectionsMetaData(envEntriesMD, resolvers, null);
+
+            // associate injections meta data with POJO endpoint
+            endpoint.addAttachment(InjectionsMetaData.class, injectionsMD);
+         }
+      }
+      else if (WSHelper.isJaxwsEjbDeployment(dep))
+      {
+         this.log.debug("Building injection meta data for JAXWS EJB3 webservice deployment: " + dep.getSimpleName());
+         final WebServiceDeployment webServiceDeployment = ASHelper.getRequiredAttachment(unit,
+               WebServiceDeployment.class);
+
+         // iterate through all EJB3 endpoints
+         for (final WebServiceDeclaration container : webServiceDeployment.getServiceEndpoints())
+         {
+            if (ASHelper.isWebServiceBean(container))
             {
-               InjectionsMetaData injectionsMD = new InjectionsMetaData(injectionMD, resolvers, null);
+               final String ejbName = container.getComponentName();
+
+               // build EJB 3 injections meta data
+               final EnvironmentEntriesMetaData ejbEnvEntries = this.getEnvironmentEntries(ejbName, unit);
+               final Context jndiContext = this.getJndiContext(container);
+               final InjectionsMetaData injectionsMD = this.buildInjectionsMetaData(ejbEnvEntries, resolvers,
+                     jndiContext);
+
+               // associate injections meta data with EJB 3 endpoint
+               final Endpoint endpoint = dep.getService().getEndpointByName(ejbName);
                endpoint.addAttachment(InjectionsMetaData.class, injectionsMD);
             }
          }
-         else if ( WSHelper.isJaxwsEjbDeployment( dep ) )
-         {
-            WebServiceDeployment webServiceDeployment = ASHelper.getRequiredAttachment( unit, WebServiceDeployment.class );
-            JBossMetaData jbossMD = ASHelper.getRequiredAttachment( unit, JBossMetaData.class );
-            JBossEnterpriseBeansMetaData jebMDs = jbossMD.getEnterpriseBeans();
+      }
+   }
 
-            Iterator<WebServiceDeclaration> it = webServiceDeployment.getServiceEndpoints().iterator();
-            while (it.hasNext())
-            {
-               WebServiceDeclaration container = it.next();
-               if (isWebServiceBean(container))
-               {
-                  final Context ctx = (Context)container.getContext().lookup(EJB3_JNDI_PREFIX);
-                  String ejbName = container.getComponentName();
-                  EnvironmentEntriesMetaData ejbEnvEntries = jebMDs.get(ejbName).getEnvironmentEntries(); 
-                  injectionMD.addAll(buildInjectionMetaData(ejbEnvEntries));
-                  Endpoint endpoint = dep.getService().getEndpointByName(ejbName);
-                  InjectionsMetaData injectionsMD = new InjectionsMetaData(injectionMD, resolvers, ctx);
-                  endpoint.addAttachment(InjectionsMetaData.class, injectionsMD);
-               }
-            }
-         }
+   /**
+    * Returns environment entries meta data associated with specified EJB 3 bean.
+    * 
+    * @param ejbName EJB 3 bean to lookup environment entries for
+    * @param unit deployment unit
+    * @return environment entries meta data
+    */
+   private EnvironmentEntriesMetaData getEnvironmentEntries(final String ejbName, final DeploymentUnit unit)
+   {
+      final JBossMetaData jbossMD = ASHelper.getRequiredAttachment(unit, JBossMetaData.class);
+      final JBossEnterpriseBeansMetaData enterpriseBeansMDs = jbossMD.getEnterpriseBeans();
+
+      return enterpriseBeansMDs.get(ejbName).getEnvironmentEntries();
+   }
+
+   /**
+    * Returns JNDI context associated with EJB 3 container.
+    * 
+    * @param container EJB 3 container
+    * @return JNDI context
+    */
+   private Context getJndiContext(final WebServiceDeclaration container)
+   {
+      try
+      {
+         return (Context) container.getContext().lookup(InjectionMetaDataDeploymentAspect.EJB3_JNDI_PREFIX);
       }
       catch (NamingException ne)
       {
@@ -118,84 +161,91 @@ public final class InjectionMetaDataDeploymentAspect extends DeploymentAspect
       }
    }
 
-   @Override
-   public void stop(Deployment dep)
-   {
-      dep.getService().removeAttachment(InjectionMetaData.class);
-
-      super.stop(dep);
-   }
-
    /**
-    * Builds reference resolvers container.
+    * Returns reference resolvers container.
     *
     * @param unit deployment unit
     * @return reference resolvers
     */
-   private Map<Class<? extends Annotation>, ReferenceResolver> createResolvers(DeploymentUnit unit)
+   private Map<Class<? extends Annotation>, ReferenceResolver> getResolvers(final DeploymentUnit unit)
    {
       final Map<Class<? extends Annotation>, ReferenceResolver> resolvers = new HashMap<Class<? extends Annotation>, ReferenceResolver>();
-      resolvers.put(Resource.class, RESOURCE_REFERENCE_RESOLVER);
+
+      resolvers.put(Resource.class, InjectionMetaDataDeploymentAspect.RESOURCE_RESOLVER);
+
       return resolvers;
    }
 
    /**
-    * Builds JBossWS specific injection metadata from JBoss metadata.
-    *
-    * @param envEntries environment entries
-    * @return JBossWS specific injection metadata
+    * Builds JBossWS specific injections meta data.
+    * 
+    * @param envEntriesMD environment entries meta data
+    * @param resolvers known annotation resolvers
+    * @param jndiContext JNDI context to be propagated
+    * @return injections meta data
     */
-   private List<InjectionMetaData> buildInjectionMetaData(EnvironmentEntriesMetaData envEntries)
+   private InjectionsMetaData buildInjectionsMetaData(final EnvironmentEntriesMetaData envEntriesMD,
+         final Map<Class<? extends Annotation>, ReferenceResolver> resolvers, final Context jndiContext)
    {
-      if ((envEntries == null) || (envEntries.size() == 0))
+      final List<InjectionMetaData> injectionMD = new LinkedList<InjectionMetaData>();
+      injectionMD.addAll(this.buildInjectionMetaData(envEntriesMD));
+
+      return new InjectionsMetaData(injectionMD, resolvers, jndiContext);
+   }
+
+   /**
+    * Builds JBossWS specific injection meta data.
+    *
+    * @param envEntriesMD environment entries meta data
+    * @return injection meta data
+    */
+   private List<InjectionMetaData> buildInjectionMetaData(final EnvironmentEntriesMetaData envEntriesMD)
+   {
+      if ((envEntriesMD == null) || (envEntriesMD.size() == 0))
       {
          return Collections.emptyList();
       }
 
-      EnvironmentEntryMetaData eeMD = null;
-      LinkedList<InjectionMetaData> retVal = new LinkedList<InjectionMetaData>();
-      String envEntryName = null;
-      String envEntryValue = null;
-      String targetClass = null;
-      String targetName = null;
-      String valueClass = null;
+      final LinkedList<InjectionMetaData> retVal = new LinkedList<InjectionMetaData>();
 
-      for (Iterator<EnvironmentEntryMetaData> i = envEntries.iterator(); i.hasNext();)
+      Set<ResourceInjectionTargetMetaData> injectionTargets;
+      String envEntryName;
+      String envEntryValue;
+      String targetClass;
+      String targetName;
+      String envEntryValueClass;
+      boolean hasInjectionTargets;
+
+      // iterate through defined environment entries
+      for (final EnvironmentEntryMetaData envEntryMD : envEntriesMD)
       {
-         eeMD = i.next();
-         envEntryName = eeMD.getEnvEntryName();
-         envEntryValue = eeMD.getValue();
-         valueClass = eeMD.getType();
+         injectionTargets = envEntryMD.getInjectionTargets();
+         hasInjectionTargets = (injectionTargets != null) && (injectionTargets.size() > 0);
 
-         Set<ResourceInjectionTargetMetaData> injectionTargets = eeMD.getInjectionTargets();
-         if ((injectionTargets != null) && (injectionTargets.size() > 0))
+         if (hasInjectionTargets)
          {
-            for (Iterator<ResourceInjectionTargetMetaData> j = injectionTargets.iterator(); j.hasNext(); )
+            // prepare env entry meta data
+            envEntryName = envEntryMD.getEnvEntryName();
+            envEntryValue = envEntryMD.getValue();
+            envEntryValueClass = envEntryMD.getType();
+
+            // env entry can specify multiple injection targets
+            for (final ResourceInjectionTargetMetaData resourceInjectionTargetMD : injectionTargets)
             {
-               ResourceInjectionTargetMetaData ritMD = j.next();
-               targetClass = ritMD.getInjectionTargetClass();
-               targetName = ritMD.getInjectionTargetName();
-               InjectionMetaData injectionMD = new InjectionMetaData(targetClass, targetName, valueClass, envEntryName, envEntryValue != null);
+               // prepare injection target meta data
+               targetClass = resourceInjectionTargetMD.getInjectionTargetClass();
+               targetName = resourceInjectionTargetMD.getInjectionTargetName();
+
+               // build injection meta data for injection target
+               final InjectionMetaData injectionMD = new InjectionMetaData(targetClass, targetName, envEntryValueClass,
+                     envEntryName, envEntryValue != null);
+               this.log.debug(injectionMD);
                retVal.add(injectionMD);
             }
          }
       }
 
       return retVal;
-   }
-
-   /**
-    * Returns true if EJB represents webservice endpoint, false otherwise.
-    *
-    * @param container to analyze
-    * @return true if webservice endpoint, false otherwise
-    */
-   private boolean isWebServiceBean(WebServiceDeclaration container)
-   {
-      boolean isWebService = container.getAnnotation(WebService.class) != null;
-      boolean isWebServiceProvider = container.getAnnotation(WebServiceProvider.class) != null;
-
-      return isWebService || isWebServiceProvider;
    }
 
 }
