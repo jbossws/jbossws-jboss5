@@ -21,44 +21,62 @@
  */
 package org.jboss.webservices.integration.invocation;
 
-import org.jboss.wsf.spi.invocation.*;
+import org.jboss.wsf.spi.invocation.InvocationHandler;
+import org.jboss.wsf.spi.invocation.InvocationHandlerFactory;
+import org.jboss.wsf.spi.invocation.InvocationType;
 
 /**
- * The default invocation model factory fro AS 5.0.
+ * The default invocation model factory for JBoss AS.
  *
- * @author Heiko.Braun@jboss.com
+ * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
+ * @author <a href="mailto:tdiesler@redhat.com">Thomas Diesler</a>
  */
-public class InvocationHandlerFactoryImpl extends InvocationHandlerFactory
+public final class InvocationHandlerFactoryImpl extends InvocationHandlerFactory
 {
-   public InvocationHandler newInvocationHandler(InvocationType type)
+
+   /**
+    * Constructor.
+    */
+   public InvocationHandlerFactoryImpl()
+   {
+      super();
+   }
+
+   /**
+    * Returns invocation handler associated with invocation type.
+    * 
+    * @param type invocation type
+    * @return invocation handler
+    */
+   public InvocationHandler newInvocationHandler(final InvocationType type)
    {
       InvocationHandler handler = null;
 
-      switch(type)
+      switch (type)
       {
-         case JAXRPC_JSE:
+         case JAXRPC_JSE :
             handler = new InvocationHandlerJAXRPC();
             break;
-         case JAXRPC_EJB21:
+         case JAXRPC_EJB21 :
             handler = new InvocationHandlerEJB21();
             break;
-         case JAXRPC_MDB21:
+         case JAXRPC_MDB21 :
             handler = new InvocationHandlerMDB21();
             break;
-         case JAXWS_JSE:
+         case JAXWS_JSE :
             handler = new InvocationHandlerJAXWS();
             break;
-         case JAXWS_EJB3:
+         case JAXWS_EJB3 :
             handler = new InvocationHandlerEJB3();
             break;
-         case JAXWS_MDB3:
+         case JAXWS_MDB3 :
             handler = new InvocationHandlerMDB3();
             break;
+         default :
+            throw new IllegalArgumentException("Unable to resolve spi.invocation.InvocationHandler for type " + type);
       }
-
-      if(null == handler)
-         throw new IllegalArgumentException("Unable to resolve spi.invocation.InvocationHandler for type " +type);
 
       return handler;
    }
+
 }

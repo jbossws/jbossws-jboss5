@@ -36,11 +36,7 @@ import org.jboss.ejb.StatelessSessionContainer;
 import org.jboss.invocation.InvocationKey;
 import org.jboss.invocation.InvocationType;
 import org.jboss.invocation.PayloadKey;
-import org.jboss.logging.Logger;
 import org.jboss.mx.util.MBeanServerLocator;
-import org.jboss.security.SecurityContext;
-import org.jboss.security.SecurityContextAssociation;
-import org.jboss.webservices.integration.invocation.ServiceEndpointInterceptor;
 import org.jboss.wsf.common.ObjectNameFactory;
 import org.jboss.wsf.common.integration.WSHelper;
 import org.jboss.wsf.spi.SPIProvider;
@@ -49,7 +45,6 @@ import org.jboss.wsf.spi.deployment.Deployment;
 import org.jboss.wsf.spi.deployment.Endpoint;
 import org.jboss.wsf.spi.invocation.HandlerCallback;
 import org.jboss.wsf.spi.invocation.Invocation;
-import org.jboss.wsf.spi.invocation.InvocationHandler;
 import org.jboss.wsf.spi.invocation.SecurityAdaptor;
 import org.jboss.wsf.spi.invocation.SecurityAdaptorFactory;
 import org.jboss.wsf.spi.metadata.j2ee.EJBArchiveMetaData;
@@ -58,140 +53,195 @@ import org.jboss.wsf.spi.metadata.j2ee.EJBMetaData;
 /**
  * Handles invocations on EJB21 endpoints.
  *
- * @author Thomas.Diesler@jboss.org
+ * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
+ * @author <a href="mailto:tdiesler@redhat.com">Thomas Diesler</a>
  */
-public class InvocationHandlerEJB21 extends InvocationHandler
+final class InvocationHandlerEJB21 extends AbstractInvocationHandler
 {
-   // provide logging
-   private static final Logger log = Logger.getLogger(InvocationHandlerEJB21.class);
 
+   /** EJB21 JNDI name. */
    private String jndiName;
-   private MBeanServer server;
-   private ObjectName objectName;
 
+   /** MBean server. */
+   private MBeanServer server;
+
+   /** Object name. */
+   private ObjectName ejb21ContainerName;
+
+   /**
+    * Consctructor.
+    */
    InvocationHandlerEJB21()
    {
+      super();
+
+      this.server = MBeanServerLocator.locateJBoss();
    }
 
-   public Invocation createInvocation()
+   /**
+    * Initializes EJB 21 endpoint.
+    * 
+    * @param endpoint web service endpoint
+    */
+   public void init(final Endpoint endpoint)
    {
-      return new Invocation();
-   }
+      final String ejbName = endpoint.getShortName();
+      final Deployment dep = endpoint.getService().getDeployment();
+      final EJBArchiveMetaData ejbArchiveMD = WSHelper.getRequiredAttachment(dep, EJBArchiveMetaData.class);
+      final EJBMetaData ejbMD = (EJBMetaData) ejbArchiveMD.getBeanByEjbName(ejbName);
 
-   public void init(Endpoint ep)
-   {
-      String ejbName = ep.getShortName();
-      Deployment dep = ep.getService().getDeployment();
-      EJBArchiveMetaData apMetaData = WSHelper.getRequiredAttachment( dep, EJBArchiveMetaData.class );
-      EJBMetaData beanMetaData = (EJBMetaData)apMetaData.getBeanByEjbName(ejbName);
-      if (beanMetaData == null)
-         throw new WebServiceException("Cannot obtain ejb meta data for: " + ejbName);
-
-      // get the MBeanServer
-      server = MBeanServerLocator.locateJBoss();
-
-      // get the bean's JNDI name
-      jndiName = beanMetaData.getContainerObjectNameJndiName();
-      if (jndiName == null)
-         throw new WebServiceException("Cannot obtain JNDI name for: " + ejbName);
-   }
-
-   public void invoke(Endpoint ep, Invocation inv) throws Exception
-   {
-      log.debug("Invoke: " + inv.getJavaMethod().getName());
-
-      if (objectName == null)
+      if (ejbMD == null)
       {
-         objectName = ObjectNameFactory.create("jboss.j2ee:jndiName=" + jndiName + ",service=EJB");
-         if (server.isRegistered(objectName) == false)
-            throw new WebServiceException("Cannot find service endpoint target: " + objectName);
-
-         // Inject the Service endpoint interceptor
-         injectServiceEndpointInterceptor(objectName, ep.getShortName());
+         throw new WebServiceException("Cannot obtain ejb meta data for: " + ejbName);
       }
 
-      // invoke on the container
+      // get the bean's JNDI name
+      this.jndiName = ejbMD.getContainerObjectNameJndiName();
+
+      if (this.jndiName == null)
+      {
+         throw new WebServiceException("Cannot obtain JNDI name for: " + ejbName);
+      }
+   }
+
+   /**
+    * Gets EJB 21 container name lazily.
+    * 
+    * @param endpoint webservice endpoint
+    * @return EJB21 container name
+    */
+   private synchronized ObjectName getEjb21ContainerName(final Endpoint endpoint)
+   {
+      final boolean ejb21ContainerNotInitialized = this.ejb21ContainerName == null;
+
+      if (ejb21ContainerNotInitialized)
+      {
+         this.ejb21ContainerName = ObjectNameFactory.create("jboss.j2ee:jndiName=" + this.jndiName + ",service=EJB");
+         final boolean ejb21NotRegistered = !this.server.isRegistered(this.ejb21ContainerName);
+         if (ejb21NotRegistered)
+         {
+            throw new IllegalArgumentException("Cannot find service endpoint target: " + this.ejb21ContainerName);
+         }
+
+         // Inject the Service endpoint interceptor
+         this.insertEJB21ServiceEndpointInterceptor(this.ejb21ContainerName, endpoint.getShortName());
+      }
+
+      return this.ejb21ContainerName;
+   }
+
+   /**
+    * Invokes EJB 21 endpoint.
+    * 
+    * @param endpoint EJB 21 endpoint
+    * @param wsInvocation web service invocation
+    * @throws Exception if any error occurs
+    */
+   public void invoke(final Endpoint endpoint, final Invocation wsInvocation) throws Exception
+   {
+      final ObjectName ejb21Name = this.getEjb21ContainerName(endpoint);
+
       try
       {
-         // setup the invocation
-         org.jboss.invocation.Invocation jbInv = getMBeanInvocation(inv);
+         // prepare for invocation
+         final org.jboss.invocation.Invocation jbossInvocation = this.getMBeanInvocation(wsInvocation);
+         final String[] signature =
+         {org.jboss.invocation.Invocation.class.getName()};
+         final Object[] args = new Object[]
+         {jbossInvocation};
 
-         String[] sig = { org.jboss.invocation.Invocation.class.getName() };
-         Object retObj = server.invoke(objectName, "invoke", new Object[] { jbInv }, sig);
-         inv.setReturnValue(retObj);
+         // invoke method
+         final Object retObj = this.server.invoke(ejb21Name, "invoke", args, signature);
+         wsInvocation.setReturnValue(retObj);
       }
       catch (Exception e)
       {
-         handleInvocationException(e);
+         this.log.error("Method invocation failed with exception: " + e.getMessage(), e);
+         this.handleInvocationException(e);
       }
    }
 
-   private org.jboss.invocation.Invocation getMBeanInvocation(Invocation inv)
+   /**
+    * Returns configured EJB 21 JBoss MBean invocation.
+    * 
+    * @param wsInvocation webservice invocation
+    * @return configured JBoss invocation
+    */
+   private org.jboss.invocation.Invocation getMBeanInvocation(final Invocation wsInvocation)
    {
-      // EJB2.1 endpoints will only get an JAXRPC context 
-      MessageContext msgContext = inv.getInvocationContext().getAttachment(MessageContext.class);
+      // ensure preconditions
+      final MessageContext msgContext = wsInvocation.getInvocationContext().getAttachment(MessageContext.class);
       if (msgContext == null)
+      {
          throw new IllegalStateException("Cannot obtain MessageContext");
+      }
 
-      SPIProvider spiProvider = SPIProviderResolver.getInstance().getProvider();
-      SecurityAdaptor securityAdaptor = spiProvider.getSPI(SecurityAdaptorFactory.class).newSecurityAdapter();
-      SecurityContext sc = SecurityContextAssociation.getSecurityContext();
-      Principal principal = securityAdaptor.getPrincipal();
-      Object credential = securityAdaptor.getCredential();
-
-      if (principal == null && sc != null)
-         principal = sc.getUtil().getUserPrincipal();
-
-      if (credential == null && sc != null)
-         credential = sc.getUtil().getCredential();
-
-      Method method = inv.getJavaMethod();
-      Object[] args = inv.getArgs();
-      org.jboss.invocation.Invocation jbInv = new org.jboss.invocation.Invocation(null, method, args, null, principal, credential);
-
-      HandlerCallback callback = inv.getInvocationContext().getAttachment(HandlerCallback.class);
+      final HandlerCallback callback = wsInvocation.getInvocationContext().getAttachment(HandlerCallback.class);
       if (callback == null)
+      {
          throw new IllegalStateException("Cannot obtain HandlerCallback");
+      }
 
-      jbInv.setValue(InvocationKey.SOAP_MESSAGE_CONTEXT, msgContext);
-      jbInv.setValue(InvocationKey.SOAP_MESSAGE, ((SOAPMessageContext)msgContext).getMessage());
-      jbInv.setType(InvocationType.SERVICE_ENDPOINT);
-      jbInv.setValue(HandlerCallback.class.getName(), callback, PayloadKey.TRANSIENT);
-      jbInv.setValue(Invocation.class.getName(), inv, PayloadKey.TRANSIENT);
+      // prepare security data
+      final SPIProvider spiProvider = SPIProviderResolver.getInstance().getProvider();
+      final SecurityAdaptor securityAdaptor = spiProvider.getSPI(SecurityAdaptorFactory.class).newSecurityAdapter();
+      final Principal principal = securityAdaptor.getPrincipal();
+      final Object credential = securityAdaptor.getCredential();
 
-      return jbInv;
+      // prepare invocation data
+      final Method method = wsInvocation.getJavaMethod();
+      final Object[] args = wsInvocation.getArgs();
+      final org.jboss.invocation.Invocation jbossInvocation = new org.jboss.invocation.Invocation(null, method, args,
+            null, principal, credential);
+
+      // propagate values to JBoss invocation
+      jbossInvocation.setValue(InvocationKey.SOAP_MESSAGE_CONTEXT, msgContext);
+      jbossInvocation.setValue(InvocationKey.SOAP_MESSAGE, ((SOAPMessageContext) msgContext).getMessage());
+      jbossInvocation.setType(InvocationType.SERVICE_ENDPOINT);
+      jbossInvocation.setValue(HandlerCallback.class.getName(), callback, PayloadKey.TRANSIENT);
+      jbossInvocation.setValue(Invocation.class.getName(), wsInvocation, PayloadKey.TRANSIENT);
+
+      return jbossInvocation;
    }
 
-   private void injectServiceEndpointInterceptor(ObjectName objectName, String ejbName)
+   /**
+    * This method dynamically inserts EJB 21 webservice endpoint interceptor
+    * to the last but one position in EJB 21 processing chain. See [JBWS-756] for more info.
+    * 
+    * @param objectName EJB 21 object name
+    * @param ejbName EJB 21 short name
+    */
+   private void insertEJB21ServiceEndpointInterceptor(final ObjectName objectName, final String ejbName)
    {
-      // Dynamically add the service endpoint interceptor
-      // http://jira.jboss.org/jira/browse/JBWS-758
       try
       {
-         EjbModule ejbModule = (EjbModule)server.getAttribute(objectName, "EjbModule");
-         StatelessSessionContainer container = (StatelessSessionContainer)ejbModule.getContainer(ejbName);
+         final EjbModule ejbModule = (EjbModule) this.server.getAttribute(objectName, "EjbModule");
+         final StatelessSessionContainer container = (StatelessSessionContainer) ejbModule.getContainer(ejbName);
 
-         boolean injectionPointFound = false;
-         Interceptor prev = container.getInterceptor();
-         while (prev != null && prev.getNext() != null)
+         Interceptor currentInterceptor = container.getInterceptor();
+         while (currentInterceptor != null && currentInterceptor.getNext() != null)
          {
-            Interceptor next = prev.getNext();
-            if (next.getNext() == null)
+            final Interceptor nextInterceptor = currentInterceptor.getNext();
+
+            if (nextInterceptor.getNext() == null)
             {
-               log.debug("Inject service endpoint interceptor after: " + prev.getClass().getName());
-               ServiceEndpointInterceptor sepInterceptor = new ServiceEndpointInterceptor();
-               prev.setNext(sepInterceptor);
-               sepInterceptor.setNext(next);
-               injectionPointFound = true;
+               final ServiceEndpointInterceptorEJB21 sepInterceptor = new ServiceEndpointInterceptorEJB21();
+               currentInterceptor.setNext(sepInterceptor);
+               sepInterceptor.setNext(nextInterceptor);
+               this.log.debug("Injecting EJB 21 service endpoint interceptor after: "
+                     + currentInterceptor.getClass().getName());
+
+               return;
             }
-            prev = next;
+            currentInterceptor = nextInterceptor;
          }
-         if (injectionPointFound == false)
-            log.warn("Cannot service endpoint interceptor injection point");
+
+         this.log.warn("Cannot find EJB 21 service endpoint interceptor insert point");
       }
       catch (Exception ex)
       {
-         log.warn("Cannot add service endpoint interceptor", ex);
+         this.log.warn("Cannot register EJB 21 service endpoint interceptor: ", ex);
       }
    }
+
 }

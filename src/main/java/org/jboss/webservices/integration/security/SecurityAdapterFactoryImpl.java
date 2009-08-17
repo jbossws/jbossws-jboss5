@@ -19,18 +19,36 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.webservices.integration.invocation;
+package org.jboss.webservices.integration.security;
 
-import org.jboss.wsf.spi.invocation.SecurityAdaptorFactory;
 import org.jboss.wsf.spi.invocation.SecurityAdaptor;
+import org.jboss.wsf.spi.invocation.SecurityAdaptorFactory;
 
 /**
- * @author Heiko.Braun@jboss.com
+ * Security adapters factory.
+ * 
+ * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
+ * @author <a href="mailto:tdiesler@redhat.com">Thomas Diesler</a>
  */
-public class SecurityAdapterFactoryImpl extends SecurityAdaptorFactory
+public final class SecurityAdapterFactoryImpl extends SecurityAdaptorFactory
 {
+
+   /**
+    * Constructor.
+    */
+   public SecurityAdapterFactoryImpl()
+   {
+      super();
+   }
+
+   /**
+    * Creates new security adapter instance.
+    * 
+    * @return security adapter
+    */
    public SecurityAdaptor newSecurityAdapter()
    {
-      return new SecurityAdaptorImpl();
+      return new SecurityAdapterImpl();
    }
+
 }

@@ -34,15 +34,17 @@ import org.jboss.wsf.spi.deployment.DeploymentAspect;
 /**
  * A deployer that delegates to JBossWS deployment aspect.
  * 
- * @author <a href="ropalka@redhat.com">Richard Opalka</a>
+ * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-public final class WSDeploymentAspectDeployer extends AbstractRealDeployer
+final class WSDeploymentAspectDeployer extends AbstractRealDeployer
 {
 
    /** JBossWS specific inputs/outputs prefix. */
    private static final String JBOSSWS_ATTACHMENT_PREFIX = "jbossws.";
+
    /** JBossWS specific metadata. */
    private static final String JBOSSWS_METADATA = WSDeploymentAspectDeployer.JBOSSWS_ATTACHMENT_PREFIX + "metadata";
+
    /** Delegee. */
    private final DeploymentAspect aspect;
 
@@ -51,40 +53,40 @@ public final class WSDeploymentAspectDeployer extends AbstractRealDeployer
     * 
     * @param aspect deployment aspect
     */
-   public WSDeploymentAspectDeployer( final DeploymentAspect aspect )
+   WSDeploymentAspectDeployer(final DeploymentAspect aspect)
    {
       super();
-      
+
       // inputs
-      this.addInput( JBossWebMetaData.class );
-      this.addInput( Deployment.class );
-      if ( aspect.isLast() )
+      this.addInput(JBossWebMetaData.class);
+      this.addInput(Deployment.class);
+      if (aspect.isLast())
       {
-         this.addInput( WSDeploymentAspectDeployer.JBOSSWS_METADATA );
+         this.addInput(WSDeploymentAspectDeployer.JBOSSWS_METADATA);
       }
-      
+
       // propagate DA requirements and map them to deployer inputs
-      final Set< String > inputs = aspect.getRequiresAsSet();
-      for ( String input : inputs )
+      final Set<String> inputs = aspect.getRequiresAsSet();
+      for (String input : inputs)
       {
-         this.addInput( WSDeploymentAspectDeployer.JBOSSWS_ATTACHMENT_PREFIX + input );
+         this.addInput(WSDeploymentAspectDeployer.JBOSSWS_ATTACHMENT_PREFIX + input);
       }
-      
+
       // outputs
-      this.addOutput( JBossWebMetaData.class );
-      if ( !aspect.isLast() )
+      this.addOutput(JBossWebMetaData.class);
+      if (!aspect.isLast())
       {
-         this.addOutput( WSDeploymentAspectDeployer.JBOSSWS_METADATA );
+         this.addOutput(WSDeploymentAspectDeployer.JBOSSWS_METADATA);
       }
 
       // propagate DA provides and map them to deployer outputs
-      final Set< String > outputs = aspect.getProvidesAsSet();
-      for ( String output : outputs )
+      final Set<String> outputs = aspect.getProvidesAsSet();
+      for (String output : outputs)
       {
-         this.addOutput( WSDeploymentAspectDeployer.JBOSSWS_ATTACHMENT_PREFIX + output );
+         this.addOutput(WSDeploymentAspectDeployer.JBOSSWS_ATTACHMENT_PREFIX + output);
       }
 
-      this.setRelativeOrder( aspect.getRelativeOrder() );
+      this.setRelativeOrder(aspect.getRelativeOrder());
       this.aspect = aspect;
    }
 
@@ -96,13 +98,13 @@ public final class WSDeploymentAspectDeployer extends AbstractRealDeployer
     * @throws DeploymentException on deployment failure
     */
    @Override
-   public void internalDeploy( final DeploymentUnit unit ) throws DeploymentException
+   protected void internalDeploy(final DeploymentUnit unit) throws DeploymentException
    {
-      if ( ASHelper.isWebServiceDeployment( unit ) )
+      if (ASHelper.isWebServiceDeployment(unit))
       {
-         log.debug( this.aspect.getClass() + " deploy: " + unit.getName() );
-         final Deployment dep = ASHelper.getRequiredAttachment( unit, Deployment.class );
-         this.aspect.start( dep );
+         this.log.debug(this.aspect + " start: " + unit.getName());
+         final Deployment dep = ASHelper.getRequiredAttachment(unit, Deployment.class);
+         this.aspect.start(dep);
       }
    }
 
@@ -113,18 +115,18 @@ public final class WSDeploymentAspectDeployer extends AbstractRealDeployer
     * @param unit deployment unit
     */
    @Override
-   public void internalUndeploy( final DeploymentUnit unit )
+   protected void internalUndeploy(final DeploymentUnit unit)
    {
-      if ( ASHelper.isWebServiceDeployment( unit ) )
+      if (ASHelper.isWebServiceDeployment(unit))
       {
-         log.debug( this.aspect.getClass() + " undeploy: " + unit.getName() );
-         final Deployment dep = ASHelper.getRequiredAttachment( unit, Deployment.class );
-         this.aspect.stop( dep );
+         this.log.debug(this.aspect + " stop: " + unit.getName());
+         final Deployment dep = ASHelper.getRequiredAttachment(unit, Deployment.class);
+         this.aspect.stop(dep);
       }
    }
-   
+
    /**
-    * Displays also WS deployment aspect being used.
+    * Displays also WS deployment aspect being wrapped.
     * 
     * @return deployer instance id including wrapped deployment aspect id.
     */
@@ -132,7 +134,7 @@ public final class WSDeploymentAspectDeployer extends AbstractRealDeployer
    public String toString()
    {
       final StringBuilder sb = new StringBuilder();
-      sb.append( super.toString() ).append( '(' ).append( this.aspect ).append( ')' );
+      sb.append(super.toString()).append('(').append(this.aspect).append(')');
       return sb.toString();
    }
 

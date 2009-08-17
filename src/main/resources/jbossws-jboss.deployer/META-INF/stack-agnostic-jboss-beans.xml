@@ -23,7 +23,7 @@
       If the content of <soap:address> is a valid URL, JBossWS will not rewrite it unless 'modifySOAPAddress' is true.
       If the content of <soap:address> is not a valid URL, JBossWS will rewrite it using the attribute values given below.
 
-      If 'webServiceHost' is set to 'jbossws.undefined.host', JBossWS uses requesters protocol host when rewriting the <soap:address>.
+      If 'webServiceHost' is set to 'jbossws.undefined.host', JBossWS uses requesters host when rewriting the <soap:address>
     -->
     <property name="webServiceHost">${jboss.bind.address}</property>
     <property name="modifySOAPAddress">true</property>
@@ -54,19 +54,15 @@
   </bean>
 
   <!-- WSDeploymentAspectDeployers factory -->
-  <bean name="WSDeployersFactory" class="org.jboss.webservices.integration.deployers.WSDeployersFactory">
+  <bean name="WSAspectizedDeployersFactory" class="org.jboss.webservices.integration.deployers.WSAspectizedDeployersFactory">
     <constructor>
       <parameter>
         <inject bean="Deployers"/>
       </parameter>
     </constructor>
-    <incallback method="newDeployer"/>
+    <incallback method="addDeployer"/>
+    <uncallback method="removeDeployer"/>
   </bean>
-
-  <!-- Deployment aspect helper beans -->
-  <bean name="WSSecurityHandlerEJB21" class="org.jboss.webservices.integration.tomcat.SecurityHandlerEJB21"/>
-  <bean name="WSSecurityHandlerEJB3" class="org.jboss.webservices.integration.tomcat.SecurityHandlerEJB3"/>
-  <bean name="WSWebMetaDataModifier" class="org.jboss.webservices.integration.tomcat.WebMetaDataModifier"/>
 
   <!-- The AS specific deployment aspects -->
   <bean name="WSContainerMetaDataDeploymentAspect" class="org.jboss.webservices.integration.metadata.ContainerMetaDataDeploymentAspect">
@@ -138,15 +134,12 @@
   <bean name="WSWebMetaDataModifyingDeploymentAspect" class="org.jboss.webservices.integration.tomcat.WebMetaDataModifyingDeploymentAspect">
     <property name="requires">WebMetaData, ContextProperties, StackDescriptor</property>
     <property name="provides">WebMetaData</property>
-    <property name="webMetaDataModifier"><inject bean="WSWebMetaDataModifier"/></property>
     <property name="relativeOrder">33</property> <!-- [JBDEPLOY-201] workaround -->
   </bean>
 
-  <bean name="WSWebAppGeneratorDeploymentAspect" class="org.jboss.webservices.integration.tomcat.WebAppGeneratorDeploymentAspect">
+  <bean name="WSWebMetaDataCreatingDeploymentAspect" class="org.jboss.webservices.integration.tomcat.WebMetaDataCreatingDeploymentAspect">
     <property name="requires">VirtualHosts,URLPattern</property>
     <property name="provides">WebMetaData</property>
-    <property name="securityHandlerEJB21"><inject bean="WSSecurityHandlerEJB21"/></property>
-    <property name="securityHandlerEJB3"><inject bean="WSSecurityHandlerEJB3"/></property>
     <property name="relativeOrder">32</property> <!-- [JBDEPLOY-201] workaround -->
   </bean>
 

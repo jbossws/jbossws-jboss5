@@ -23,7 +23,6 @@ package org.jboss.webservices.integration.deployers;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.management.MalformedObjectNameException;
@@ -47,7 +46,7 @@ import org.jboss.wsf.spi.metadata.webservices.WebservicesMetaData;
 /**
  * WebServiceDeployment deployer processes EJB containers and its metadata and creates WS adapters wrapping it.
  *
- * @author <a href="ropalka@redhat.com">Richard Opalka</a>
+ * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
 public final class WSEJBAdapterDeployer extends AbstractRealDeployer
 {
@@ -58,15 +57,15 @@ public final class WSEJBAdapterDeployer extends AbstractRealDeployer
    public WSEJBAdapterDeployer()
    {
       super();
-      
+
       // inputs
-      this.addInput( MergedJBossMetaDataDeployer.EJB_MERGED_ATTACHMENT_NAME );   
-      this.addInput( EjbDeployment.class );
-      this.addInput( Ejb3Deployment.class );
-      this.addInput( WebservicesMetaData.class );
+      this.addInput(MergedJBossMetaDataDeployer.EJB_MERGED_ATTACHMENT_NAME);
+      this.addInput(EjbDeployment.class);
+      this.addInput(Ejb3Deployment.class);
+      this.addInput(WebservicesMetaData.class);
 
       // outputs
-      this.addOutput( WebServiceDeployment.class );
+      this.addOutput(WebServiceDeployment.class);
    }
 
    /**
@@ -76,36 +75,34 @@ public final class WSEJBAdapterDeployer extends AbstractRealDeployer
     * @throws DeploymentException exception
     */
    @Override
-   protected void internalDeploy( final DeploymentUnit unit ) throws DeploymentException
+   protected void internalDeploy(final DeploymentUnit unit) throws DeploymentException
    {
-      final JBossMetaData mergedMD = ( JBossMetaData ) unit.getAttachment(
-         MergedJBossMetaDataDeployer.EJB_MERGED_ATTACHMENT_NAME
-      );
-      final Ejb3Deployment ejb3Deployment = ASHelper.getOptionalAttachment( unit, Ejb3Deployment.class );
+      final JBossMetaData mergedMD = (JBossMetaData) unit
+            .getAttachment(MergedJBossMetaDataDeployer.EJB_MERGED_ATTACHMENT_NAME);
+      final Ejb3Deployment ejb3Deployment = ASHelper.getOptionalAttachment(unit, Ejb3Deployment.class);
 
-      if ( mergedMD != null )
+      if (mergedMD != null)
       {
-         final WebServiceDeploymentAdapter wsDeploymentAdapter = new WebServiceDeploymentAdapter();   
-         final Iterator< JBossEnterpriseBeanMetaData > ejbIterator = mergedMD.getEnterpriseBeans().iterator();
+         final WebServiceDeploymentAdapter wsDeploymentAdapter = new WebServiceDeploymentAdapter();
+         final List<WebServiceDeclaration> endpoints = wsDeploymentAdapter.getServiceEndpoints();
 
-         while ( ejbIterator.hasNext() )
+         for (final JBossEnterpriseBeanMetaData ejbMD : mergedMD.getEnterpriseBeans())
          {
-            final JBossEnterpriseBeanMetaData ejbMD = ejbIterator.next();
-            final EJBContainer ejbContainer = this.getContainer( ejb3Deployment, ejbMD );
-            
-            if ( ejbMD.getEjbClass() != null )
+            final String ejbName = ejbMD.determineContainerName();
+
+            if (ejbMD.getEjbClass() != null)
             {
-               wsDeploymentAdapter.getServiceEndpoints().add(
-                  new WebServiceDeclarationAdapter( ejbMD, ejbContainer, unit.getClassLoader() )
-               );
+               this.log.debug("Creating webservice EJB adapter for: " + ejbName);
+               final EJBContainer ejbContainer = this.getContainer(ejb3Deployment, ejbMD);
+               endpoints.add(new WebServiceDeclarationAdapter(ejbMD, ejbContainer, unit.getClassLoader()));
             }
             else
             {
-               log.warn( "Ingoring ejb deployment with null classname: " + ejbMD );
+               this.log.warn("Ingoring EJB deployment with null classname: " + ejbName);
             }
          }
 
-         unit.addAttachment( WebServiceDeployment.class, wsDeploymentAdapter );
+         unit.addAttachment(WebServiceDeployment.class, wsDeploymentAdapter);
       }
    }
 
@@ -117,22 +114,22 @@ public final class WSEJBAdapterDeployer extends AbstractRealDeployer
     * @return EJB container or null if not EJB3 stateless bean
     * @throws DeploymentException if some error occurs
     */
-   private EJBContainer getContainer( final Ejb3Deployment ejb3Deployment, final JBossEnterpriseBeanMetaData ejbMD )
-      throws DeploymentException
+   private EJBContainer getContainer(final Ejb3Deployment ejb3Deployment, final JBossEnterpriseBeanMetaData ejbMD)
+         throws DeploymentException
    {
-      if ( ( ejb3Deployment != null ) && ( !ejbMD.isEntity() ) )
+      if ((ejb3Deployment != null) && (!ejbMD.isEntity()))
       {
          try
          {
-            final ObjectName objName = new ObjectName( ejbMD.determineContainerName() );
-            return ( EJBContainer ) ejb3Deployment.getContainer( objName );
+            final ObjectName objName = new ObjectName(ejbMD.determineContainerName());
+            return (EJBContainer) ejb3Deployment.getContainer(objName);
          }
-         catch ( MalformedObjectNameException e )
+         catch (MalformedObjectNameException e)
          {
-            throw new DeploymentException( e );
+            throw new DeploymentException(e);
          }
       }
-      
+
       return null;
    }
 
@@ -145,10 +142,12 @@ public final class WSEJBAdapterDeployer extends AbstractRealDeployer
 
       /** EJB meta data. */
       private final JBossEnterpriseBeanMetaData ejbMetaData;
+
       /** EJB container. */
       private final EJBContainer ejbContainer;
+
       /** Class loader. */
-      private final ClassLoader loader;      
+      private final ClassLoader loader;
 
       /**
        * Constructor.
@@ -157,20 +156,16 @@ public final class WSEJBAdapterDeployer extends AbstractRealDeployer
        * @param ejbContainer EJB container
        * @param loader class loader
        */
-      private WebServiceDeclarationAdapter
-      (
-         final JBossEnterpriseBeanMetaData ejbMetaData, 
-         final EJBContainer ejbContainer, 
-         final ClassLoader loader
-      )
+      private WebServiceDeclarationAdapter(final JBossEnterpriseBeanMetaData ejbMetaData,
+            final EJBContainer ejbContainer, final ClassLoader loader)
       {
          super();
-         
+
          this.ejbMetaData = ejbMetaData;
          this.ejbContainer = ejbContainer;
          this.loader = loader;
       }
-      
+
       /**
        * Returns EJB container name.
        *
@@ -218,18 +213,18 @@ public final class WSEJBAdapterDeployer extends AbstractRealDeployer
        * @param <T> annotation class type
        * @return requested annotation or null if not found
        */
-      public < T extends Annotation > T getAnnotation( final Class<T> annotationType )
+      public <T extends Annotation> T getAnnotation(final Class<T> annotationType)
       {
-         final boolean haveEjbContainer = this.ejbContainer != null; 
+         final boolean haveEjbContainer = this.ejbContainer != null;
 
-         if ( haveEjbContainer )
+         if (haveEjbContainer)
          {
-            return this.ejbContainer.getAnnotation( annotationType );
+            return this.ejbContainer.getAnnotation(annotationType);
          }
          else
          {
-            final Class< ? > bean = this.getComponentClass();
-            return ( T ) bean.getAnnotation( annotationType );
+            final Class<?> bean = this.getComponentClass();
+            return (T) bean.getAnnotation(annotationType);
          }
       }
 
@@ -238,16 +233,16 @@ public final class WSEJBAdapterDeployer extends AbstractRealDeployer
        *
        * @return ejb class instance
        */
-      private Class< ? > getComponentClass()
+      private Class<?> getComponentClass()
       {
          try
          {
-            return this.loader.loadClass( this.getComponentClassName() );
+            return this.loader.loadClass(this.getComponentClassName());
          }
-         catch ( ClassNotFoundException cnfe )
+         catch (ClassNotFoundException cnfe)
          {
-            throw new RuntimeException( "Failed to load component class: " + 
-               this.getComponentClassName() + " from loader: " + this.loader );
+            throw new RuntimeException("Failed to load component class: " + this.getComponentClassName()
+                  + " from loader: " + this.loader);
          }
       }
 
@@ -259,9 +254,9 @@ public final class WSEJBAdapterDeployer extends AbstractRealDeployer
     */
    private static final class WebServiceDeploymentAdapter implements WebServiceDeployment
    {
-      
+
       /** List of endpoints. */
-      private final List< WebServiceDeclaration > endpoints = new ArrayList< WebServiceDeclaration >();
+      private final List<WebServiceDeclaration> endpoints = new ArrayList<WebServiceDeclaration>();
 
       /**
        * Constructor.
@@ -270,15 +265,15 @@ public final class WSEJBAdapterDeployer extends AbstractRealDeployer
       {
          super();
       }
-      
+
       /**
        * Returns endpoints list.
        * 
        * @return endpoints list
        */
-      public List< WebServiceDeclaration > getServiceEndpoints()
+      public List<WebServiceDeclaration> getServiceEndpoints()
       {
-         return this.endpoints;  
+         return this.endpoints;
       }
 
    }

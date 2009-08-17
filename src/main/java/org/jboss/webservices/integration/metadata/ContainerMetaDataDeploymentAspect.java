@@ -21,8 +21,6 @@
  */
 package org.jboss.webservices.integration.metadata;
 
-import org.jboss.deployers.structure.spi.DeploymentUnit;
-import org.jboss.webservices.integration.util.ASHelper;
 import org.jboss.wsf.common.integration.WSHelper;
 import org.jboss.wsf.spi.deployment.Deployment;
 import org.jboss.wsf.spi.deployment.DeploymentAspect;
@@ -32,18 +30,20 @@ import org.jboss.wsf.spi.metadata.j2ee.JSEArchiveMetaData;
 /**
  * An aspect that builds container independent meta data. 
  *
- * @author Thomas.Diesler@jboss.org
- * @author <a href="ropalka@redhat.com">Richard Opalka</a>
+ * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
+ * @author <a href="mailto:tdiesler@redhat.com">Thomas Diesler</a>
  */
 public final class ContainerMetaDataDeploymentAspect extends DeploymentAspect
 {
-   
+
    /** JSE meta data builder. */
-   private JSEMetaDataBuilder jseMetaDataBuilder = new JSEMetaDataBuilder();
+   private final MetaDataBuilderJSE metaDataBuilderJSE = new MetaDataBuilderJSE();
+
    /** EJB3 meta data builder. */
-   private EJB3MetaDataBuilder ejb3MetaDataBuilder = new EJB3MetaDataBuilder();
+   private final MetaDataBuilderEJB3 metaDataBuilderEJB3 = new MetaDataBuilderEJB3();
+
    /** EJB21 meta data builder. */
-   private EJB21MetaDataBuilder ejb21MetaDataBuilder = new EJB21MetaDataBuilder();
+   private final MetaDataBuilderEJB21 metaDataBuilderEJB21 = new MetaDataBuilderEJB21();
 
    /**
     * Constructor.
@@ -52,32 +52,33 @@ public final class ContainerMetaDataDeploymentAspect extends DeploymentAspect
    {
       super();
    }
-   
+
    /**
     * Build container independent meta data.
     * 
     * @param dep webservice deployment
     */
    @Override
-   public void start( final Deployment dep )
+   public void start(final Deployment dep)
    {
-      final DeploymentUnit unit = WSHelper.getRequiredAttachment( dep, DeploymentUnit.class );
-      
-      if ( ASHelper.isJseDeployment( unit ) )
+      if (WSHelper.isJseDeployment(dep))
       {
-         final JSEArchiveMetaData jseMetaData = this.jseMetaDataBuilder.create( dep, unit );
-         dep.addAttachment( JSEArchiveMetaData.class, jseMetaData );
+         this.log.debug("Creating JBoss agnostic JSE meta data for deployment: " + dep.getSimpleName());
+         final JSEArchiveMetaData jseMetaData = this.metaDataBuilderJSE.create(dep);
+         dep.addAttachment(JSEArchiveMetaData.class, jseMetaData);
       }
-      else if ( ASHelper.isJaxwsEjbDeployment( unit ) )
+      else if (WSHelper.isJaxwsEjbDeployment(dep))
       {
-         final EJBArchiveMetaData ejbMetaData = this.ejb3MetaDataBuilder.create( dep, unit );
-         dep.addAttachment( EJBArchiveMetaData.class, ejbMetaData );
+         this.log.debug("Creating JBoss agnostic EJB3 meta data for deployment: " + dep.getSimpleName());
+         final EJBArchiveMetaData ejbMetaData = this.metaDataBuilderEJB3.create(dep);
+         dep.addAttachment(EJBArchiveMetaData.class, ejbMetaData);
       }
-      else if ( ASHelper.isJaxrpcEjbDeployment( unit ) )
+      else if (WSHelper.isJaxrpcEjbDeployment(dep))
       {
-         final EJBArchiveMetaData ejbMetaData = this.ejb21MetaDataBuilder.create( dep, unit );
-         dep.addAttachment( EJBArchiveMetaData.class, ejbMetaData );
+         this.log.debug("Creating JBoss agnostic EJB21 meta data for deployment: " + dep.getSimpleName());
+         final EJBArchiveMetaData ejbMetaData = this.metaDataBuilderEJB21.create(dep);
+         dep.addAttachment(EJBArchiveMetaData.class, ejbMetaData);
       }
    }
-   
+
 }

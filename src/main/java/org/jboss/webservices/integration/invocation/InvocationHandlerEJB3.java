@@ -21,98 +21,146 @@
  */
 package org.jboss.webservices.integration.invocation;
 
+import java.lang.reflect.Method;
+
+import javax.xml.ws.WebServiceException;
+
 import org.jboss.dependency.spi.ControllerContext;
 import org.jboss.kernel.spi.dependency.KernelController;
+import org.jboss.webservices.integration.util.ASHelper;
 import org.jboss.wsf.spi.deployment.Endpoint;
 import org.jboss.wsf.spi.invocation.Invocation;
 import org.jboss.wsf.spi.invocation.integration.InvocationContextCallback;
 import org.jboss.wsf.spi.invocation.integration.ServiceEndpointContainer;
 import org.jboss.wsf.spi.util.KernelLocator;
 
-import javax.xml.ws.WebServiceException;
-import java.lang.reflect.Method;
-
 /**
  * Handles invocations on EJB3 endpoints.
  *
- * @author Thomas.Diesler@jboss.org
- * @author Heiko.Braun@jboss.com
+ * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
+ * @author <a href="mailto:tdiesler@redhat.com">Thomas Diesler</a>
  */
-public class InvocationHandlerEJB3 extends AbstractInvocationHandler
+final class InvocationHandlerEJB3 extends AbstractInvocationHandler
 {
 
-   public static final String CONTAINER_NAME = "org.jboss.wsf.spi.invocation.ContainerName";
+   /** MC kernel controller. */
+   private final KernelController controller;
 
+   /** EJB3 container name. */
    private String containerName;
-   private KernelController houston;
+
+   /** EJB3 container. */
    private ServiceEndpointContainer serviceEndpointContainer;
 
-
+   /**
+    * Constructor.
+    */
    InvocationHandlerEJB3()
    {
-      houston = KernelLocator.getKernel().getController();
+      super();
+
+      this.controller = KernelLocator.getKernel().getController();
    }
 
-   public Invocation createInvocation()
+   /**
+    * Initializes EJB3 container name.
+    * 
+    * @param endpoint web service endpoint
+    */
+   public void init(final Endpoint endpoint)
    {
-      return new Invocation();
-   }
+      this.containerName = (String) endpoint.getProperty(ASHelper.CONTAINER_NAME);
 
-   public void init(Endpoint ep)
-   {
-      containerName = (String)ep.getProperty(InvocationHandlerEJB3.CONTAINER_NAME);
-      assert containerName!=null : "Target container name not set";
-
-   }
-
-   private ServiceEndpointContainer lazyInitializeInvocationTarget()
-   {
-      if(null==this.serviceEndpointContainer)
+      if (this.containerName == null)
       {
-         ControllerContext context = houston.getInstalledContext(containerName);
-         if (context == null)
-            throw new WebServiceException("Cannot find service endpoint target: " + containerName);
+         throw new IllegalArgumentException("Container name cannot be null");
+      }
+   }
 
-         assert (context.getTarget() instanceof ServiceEndpointContainer) : "Invocation target mismatch";
+   /**
+    * Gets EJB 3 container lazily.
+    * 
+    * @return EJB3 container
+    */
+   private synchronized ServiceEndpointContainer getEjb3Container()
+   {
+      final boolean ejb3ContainerNotInitialized = this.serviceEndpointContainer == null;
+
+      if (ejb3ContainerNotInitialized)
+      {
+         final ControllerContext context = this.controller.getInstalledContext(this.containerName);
+         if (context == null)
+         {
+            throw new WebServiceException("Cannot find service endpoint target: " + this.containerName);
+         }
+
          this.serviceEndpointContainer = (ServiceEndpointContainer) context.getTarget();
       }
 
       return this.serviceEndpointContainer;
    }
 
-   public void invoke(Endpoint ep, Invocation wsInv) throws Exception
+   /**
+    * Invokes EJB 3 endpoint.
+    * 
+    * @param endpoint EJB 3 endpoint
+    * @param wsInvocation web service invocation
+    * @throws Exception if any error occurs
+    */
+   public void invoke(final Endpoint endpoint, final Invocation wsInvocation) throws Exception
    {
       try
       {
-         ServiceEndpointContainer invocationTarget = lazyInitializeInvocationTarget();
-         
-         Class beanClass = invocationTarget.getServiceImplementationClass();
-         Method method = getImplMethod(beanClass, wsInv.getJavaMethod());
-         Object[] args = wsInv.getArgs();
-         InvocationContextCallback invProps = new EJB3InvocationContextCallback(wsInv);
-         
-         Object retObj = invocationTarget.invokeEndpoint(method, args, invProps);
+         // prepare for invocation
+         final ServiceEndpointContainer ejbContainer = this.getEjb3Container();
+         final InvocationContextCallback invocationCallback = new EJB3InvocationContextCallback(wsInvocation);
+         final Class<?> implClass = ejbContainer.getServiceImplementationClass();
+         final Method seiMethod = wsInvocation.getJavaMethod();
+         final Method implMethod = this.getImplMethod(implClass, seiMethod);
+         final Object[] args = wsInvocation.getArgs();
 
-         wsInv.setReturnValue(retObj);
+         // invoke method
+         final Object retObj = ejbContainer.invokeEndpoint(implMethod, args, invocationCallback);
+         wsInvocation.setReturnValue(retObj);
       }
-      catch (Throwable th)
+      catch (Throwable t)
       {
-         handleInvocationException(th);
+         this.log.error("Method invocation failed with exception: " + t.getMessage(), t);
+         this.handleInvocationException(t);
       }
    }
 
-   static class EJB3InvocationContextCallback implements InvocationContextCallback
+   /**
+    * EJB3 invocation callback allowing EJB 3 beans to access Web Service invocation properties.
+    */
+   private static final class EJB3InvocationContextCallback implements InvocationContextCallback
    {
-      private Invocation wsInv;
 
-      public EJB3InvocationContextCallback(Invocation wsInv)
+      /** WebService invocation. */
+      private Invocation wsInvocation;
+
+      /**
+       * Constructor.
+       * 
+       * @param wsInvocation delegee
+       */
+      public EJB3InvocationContextCallback(final Invocation wsInvocation)
       {
-         this.wsInv = wsInv;
+         this.wsInvocation = wsInvocation;
       }
 
-      public <T> T get(Class<T> propertyType)
+      /**
+       * Retrieves attachment type from Web Service invocation context attachments.
+       * 
+       * @param <T> attachment type
+       * @param attachmentType attachment class
+       * @return attachment value
+       */
+      public <T> T get(final Class<T> attachmentType)
       {
-         return wsInv.getInvocationContext().getAttachment(propertyType);               
+         return this.wsInvocation.getInvocationContext().getAttachment(attachmentType);
       }
+
    }
+
 }

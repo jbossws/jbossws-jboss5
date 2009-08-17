@@ -21,11 +21,123 @@
  */
 package org.jboss.webservices.integration.invocation;
 
+import javax.xml.ws.WebServiceContext;
+
+import org.jboss.wsf.common.injection.InjectionHelper;
+import org.jboss.wsf.common.injection.PreDestroyHolder;
+import org.jboss.wsf.spi.SPIProvider;
+import org.jboss.wsf.spi.SPIProviderResolver;
+import org.jboss.wsf.spi.deployment.Endpoint;
+import org.jboss.wsf.spi.invocation.Invocation;
+import org.jboss.wsf.spi.invocation.InvocationContext;
+import org.jboss.wsf.spi.invocation.ResourceInjector;
+import org.jboss.wsf.spi.invocation.ResourceInjectorFactory;
+import org.jboss.wsf.spi.metadata.injection.InjectionsMetaData;
+
 /**
- * Handles invocations on JSE endpoints.
+ * Handles invocations on JAXWS endpoints.
  *
- * @author Thomas.Diesler@jboss.org
+ * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
+ * @author <a href="mailto:tdiesler@redhat.com">Thomas Diesler</a>
  */
-public class InvocationHandlerJAXWS extends InvocationHandlerJSE
+final class InvocationHandlerJAXWS extends AbstractInvocationHandlerJSE
 {
+
+   /** WebServiceContext injector. */
+   private final ResourceInjector wsContextInjector;
+
+   /**
+    * Constructor.
+    */
+   InvocationHandlerJAXWS()
+   {
+      super();
+
+      final SPIProvider spiProvider = SPIProviderResolver.getInstance().getProvider();
+      final ResourceInjectorFactory resourceInjectorFactory = spiProvider.getSPI(ResourceInjectorFactory.class);
+      this.wsContextInjector = resourceInjectorFactory.newResourceInjector();
+   }
+
+   /**
+    * Injects resources on target bean and calls post construct method.
+    * Finally it registers target bean for predestroy phase.
+    * 
+    * @param endpoint used for predestroy phase registration process
+    * @param invocation current invocation
+    */
+   @Override
+   protected void onEndpointInstantiated(final Endpoint endpoint, final Invocation invocation)
+   {
+      final InjectionsMetaData injectionsMD = endpoint.getAttachment(InjectionsMetaData.class);
+      final Object targetBean = this.getTargetBean(invocation);
+
+      this.log.debug("Injecting resources on JAXWS JSE endpoint: " + targetBean);
+      InjectionHelper.injectResources(targetBean, injectionsMD);
+      this.log.debug("Calling postConstruct method on JAXWS JSE endpoint: " + targetBean);
+      InjectionHelper.callPostConstructMethod(targetBean);
+
+      endpoint.addAttachment(PreDestroyHolder.class, new PreDestroyHolder(targetBean));
+   }
+
+   /**
+    * Injects webservice context on target bean.
+    * 
+    *  @param invocation current invocation
+    */
+   @Override
+   protected void onBeforeInvocation(final Invocation invocation)
+   {
+      final WebServiceContext wsContext = this.getWebServiceContext(invocation);
+
+      if (wsContext != null)
+      {
+         final Object targetBean = this.getTargetBean(invocation);
+         this.wsContextInjector.inject(targetBean, wsContext);
+      }
+   }
+
+   /**
+    * Cleanups injected webservice context on target bean.
+    * 
+    * @param invocation current invocation
+    */
+   @Override
+   protected void onAfterInvocation(final Invocation invocation)
+   {
+      final WebServiceContext wsContext = this.getWebServiceContext(invocation);
+
+      if (wsContext != null)
+      {
+         final Object targetBean = this.getTargetBean(invocation);
+
+         this.wsContextInjector.inject(targetBean, null);
+      }
+   }
+
+   /**
+    * Returns WebServiceContext associated with this invocation.
+    * 
+    * @param invocation current invocation
+    * @return web service context or null if not available
+    */
+   private WebServiceContext getWebServiceContext(final Invocation invocation)
+   {
+      final InvocationContext invocationContext = invocation.getInvocationContext();
+
+      return invocationContext.getAttachment(WebServiceContext.class);
+   }
+
+   /**
+    * Returns endpoint instance associated with current invocation.
+    * 
+    * @param invocation current invocation
+    * @return target bean in invocation
+    */
+   private Object getTargetBean(final Invocation invocation)
+   {
+      final InvocationContext invocationContext = invocation.getInvocationContext();
+
+      return invocationContext.getTargetBean();
+   }
+
 }
