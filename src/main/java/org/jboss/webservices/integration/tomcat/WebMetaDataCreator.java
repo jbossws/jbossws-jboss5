@@ -129,11 +129,6 @@ final class WebMetaDataCreator
          jbossWebMD.setSecurityDomain(securityDomain);
       }
 
-      // Set context root
-      final String contextRoot = dep.getService().getContextRoot();
-      this.log.debug("Setting context root: " + contextRoot);
-      jbossWebMD.setContextRoot(contextRoot);
-
       // Set virtual hosts
       final List<String> virtualHosts = dep.getService().getVirtualHosts();
       this.log.debug("Setting virtual hosts: " + virtualHosts);

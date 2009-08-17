@@ -67,6 +67,7 @@ final class WebMetaDataModifier
 
       this.propagateContextProps(dep, jbossWebMD);
       this.configureEndpoints(dep, jbossWebMD);
+      this.modifyContextRoot(dep, jbossWebMD);
    }
 
    /**
@@ -125,6 +126,19 @@ final class WebMetaDataModifier
             WebMetaDataHelper.newParamValue(Endpoint.SEPID_DOMAIN_ENDPOINT, endpointClassName, initParams);
          }
       }
+   }
+
+   /**
+    * Modifies context root. 
+    *
+    * @param dep webservice deployment
+    * @param jbossWebMD web meta data
+    */
+   private void modifyContextRoot(final Deployment dep, final JBossWebMetaData jbossWebMD)
+   {
+      final String contextRoot = dep.getService().getContextRoot();
+      this.log.debug("Setting context root: " + contextRoot + " for deployment: " + dep.getSimpleName());
+      jbossWebMD.setContextRoot(contextRoot);
    }
 
    /**
