@@ -21,39 +21,57 @@
  */
 package org.jboss.webservices.integration.tomcat;
 
+import org.jboss.metadata.javaee.spec.SecurityRolesMetaData;
 import org.jboss.wsf.spi.deployment.Deployment;
-import org.jboss.wsf.spi.deployment.DeploymentAspect;
+import org.jboss.wsf.spi.deployment.Endpoint;
 
 /**
- * Modifies web meta data to configure webservice stack endpoints and properties.
+ * Creates web app security meta data for EJB deployments.
  *
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  * @author <a href="mailto:tdiesler@redhat.com">Thomas Diesler</a>
  */
-public final class WebMetaDataModifyingDeploymentAspect extends DeploymentAspect
+interface SecurityMetaDataAccessorEJB
 {
 
-   /** Web meta data modifier. */
-   private WebMetaDataModifier webMetaDataModifier = new WebMetaDataModifier();
-
    /**
-    * Constructor.
-    */
-   public WebMetaDataModifyingDeploymentAspect()
-   {
-      super();
-   }
-
-   /**
-    * Modifies web meta data.
+    * Obtains security domain from EJB deployment.
     *
     * @param dep webservice deployment
+    * @return security domain associated with EJB deployment
     */
-   @Override
-   public void start(final Deployment dep)
-   {
-      this.log.debug("Modifying web meta data for webservice deployment: " + dep.getSimpleName());
-      this.webMetaDataModifier.modify(dep);
-   }
+   String getSecurityDomain(Deployment dep);
+
+   /**
+    * Obtains security roles from EJB deployment.
+    *
+    * @param dep webservice deployment
+    * @return security roles associated with EJB deployment
+    */
+   SecurityRolesMetaData getSecurityRoles(Deployment dep);
+
+   /**
+    * Whether WSDL access have to be secured.
+    *
+    * @param endpoint webservice EJB endpoint
+    * @return authentication method or null if not specified
+    */
+   boolean isSecureWsdlAccess(Endpoint endpoint);
+
+   /**
+    * Gets EJB authentication method.
+    *
+    * @param endpoint webservice EJB endpoint
+    * @return authentication method or null if not specified
+    */
+   String getAuthMethod(Endpoint endpoint);
+
+   /**
+    * Gets EJB transport guarantee.
+    *
+    * @param endpoint webservice EJB endpoint
+    * @return transport guarantee or null if not specified
+    */
+   String getTransportGuarantee(Endpoint endpoint);
 
 }

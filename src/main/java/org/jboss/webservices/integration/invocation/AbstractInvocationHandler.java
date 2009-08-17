@@ -23,30 +23,65 @@ package org.jboss.webservices.integration.invocation;
 
 import java.lang.reflect.Method;
 
-import org.jboss.wsf.common.JavaUtils;
+import org.jboss.logging.Logger;
+import org.jboss.wsf.spi.deployment.Endpoint;
+import org.jboss.wsf.spi.invocation.Invocation;
 import org.jboss.wsf.spi.invocation.InvocationHandler;
 
 /**
- * @author Thomas.Diesler@jboss.org
+ * Base class for all Web Service invocation handlers inside AS.
+ * 
+ * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
+ * @author <a href="mailto:tdiesler@redhat.com">Thomas Diesler</a>
  */
-public abstract class AbstractInvocationHandler extends InvocationHandler
+abstract class AbstractInvocationHandler extends InvocationHandler
 {
-   protected Method getImplMethod(Class implClass, Method seiMethod) throws ClassNotFoundException, NoSuchMethodException
-   {
-      String methodName = seiMethod.getName();
-      Class[] paramTypes = seiMethod.getParameterTypes();
-      for (int i = 0; i < paramTypes.length; i++)
-      {
-         Class paramType = paramTypes[i];
-         if (JavaUtils.isPrimitive(paramType) == false)
-         {
-            String paramTypeName = paramType.getName();
-            paramType = JavaUtils.loadJavaType(paramTypeName);
-            paramTypes[i] = paramType;
-         }
-      }
 
-      Method implMethod = implClass.getMethod(methodName, paramTypes);
-      return implMethod;
+   /** Logger. */
+   protected final Logger log = Logger.getLogger(this.getClass());
+
+   /**
+    * Constructor.
+    */
+   protected AbstractInvocationHandler()
+   {
+      super();
    }
+
+   /**
+    * Creates invocation.
+    * 
+    * @return invocation instance
+    */
+   public final Invocation createInvocation()
+   {
+      return new Invocation();
+   }
+
+   /**
+    * Initialization method.
+    * 
+    * @param endpoint endpoint
+    */
+   public void init(final Endpoint endpoint)
+   {
+      // does nothing
+   }
+
+   /**
+    * Returns implementation method that will be used for invocation.
+    * 
+    * @param implClass implementation endpoint class
+    * @param seiMethod SEI interface method used for method finding algorithm
+    * @return implementation method
+    * @throws NoSuchMethodException if implementation method wasn't found
+    */
+   protected final Method getImplMethod(final Class<?> implClass, final Method seiMethod) throws NoSuchMethodException
+   {
+      final String methodName = seiMethod.getName();
+      final Class<?>[] paramTypes = seiMethod.getParameterTypes();
+
+      return implClass.getMethod(methodName, paramTypes);
+   }
+
 }

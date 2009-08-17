@@ -31,6 +31,8 @@ import javax.xml.ws.WebServiceProvider;
 
 import org.jboss.deployers.structure.spi.DeploymentUnit;
 import org.jboss.logging.Logger;
+import org.jboss.metadata.common.jboss.WebserviceDescriptionMetaData;
+import org.jboss.metadata.common.jboss.WebserviceDescriptionsMetaData;
 import org.jboss.metadata.web.jboss.JBossServletMetaData;
 import org.jboss.metadata.web.jboss.JBossWebMetaData;
 import org.jboss.metadata.web.spec.ServletMetaData;
@@ -46,8 +48,13 @@ import org.jboss.wsf.spi.deployment.integration.WebServiceDeployment;
 public final class ASHelper
 {
 
+   /** 
+    * EJB invocation property.
+    */
+   public static final String CONTAINER_NAME = "org.jboss.wsf.spi.invocation.ContainerName";
+
    /** Logger. */
-   private static final Logger LOG = Logger.getLogger( ASHelper.class );
+   private static final Logger LOGGER = Logger.getLogger(ASHelper.class);
 
    /**
     * Forbidden constructor.
@@ -63,9 +70,9 @@ public final class ASHelper
     * @param unit deployment unit
     * @return true if JAXWS JSE, JAXRPC JSE, JAXWS EJB or JAXRPC EJB deployment, false otherwise.
     */
-   public static boolean isWebServiceDeployment( final DeploymentUnit unit )
+   public static boolean isWebServiceDeployment(final DeploymentUnit unit)
    {
-      return ASHelper.getOptionalAttachment( unit, DeploymentType.class ) != null;
+      return ASHelper.getOptionalAttachment(unit, DeploymentType.class) != null;
    }
 
    /**
@@ -74,11 +81,11 @@ public final class ASHelper
     * @param unit deployment unit
     * @return true if JAXRPC EJB deployment, false otherwise
     */
-   public static boolean isJaxrpcEjbDeployment( final DeploymentUnit unit )
+   public static boolean isJaxrpcEjbDeployment(final DeploymentUnit unit)
    {
-      final DeploymentType deploymentType = ASHelper.getOptionalAttachment( unit, DeploymentType.class );
+      final DeploymentType deploymentType = ASHelper.getOptionalAttachment(unit, DeploymentType.class);
 
-      return DeploymentType.JAXRPC_EJB21.equals( deploymentType );
+      return DeploymentType.JAXRPC_EJB21.equals(deploymentType);
    }
 
    /**
@@ -87,11 +94,11 @@ public final class ASHelper
     * @param unit deployment unit
     * @return true if JAXRPC JSE deployment, false otherwise
     */
-   public static boolean isJaxrpcJseDeployment( final DeploymentUnit unit )
+   public static boolean isJaxrpcJseDeployment(final DeploymentUnit unit)
    {
-      final DeploymentType deploymentType = ASHelper.getOptionalAttachment( unit, DeploymentType.class );
+      final DeploymentType deploymentType = ASHelper.getOptionalAttachment(unit, DeploymentType.class);
 
-      return DeploymentType.JAXRPC_JSE.equals( deploymentType );
+      return DeploymentType.JAXRPC_JSE.equals(deploymentType);
    }
 
    /**
@@ -100,11 +107,11 @@ public final class ASHelper
     * @param unit deployment unit
     * @return true if JAXWS EJB deployment, false otherwise
     */
-   public static boolean isJaxwsEjbDeployment( final DeploymentUnit unit )
+   public static boolean isJaxwsEjbDeployment(final DeploymentUnit unit)
    {
-      final DeploymentType deploymentType = ASHelper.getOptionalAttachment( unit, DeploymentType.class );
+      final DeploymentType deploymentType = ASHelper.getOptionalAttachment(unit, DeploymentType.class);
 
-      return DeploymentType.JAXWS_EJB3.equals( deploymentType );
+      return DeploymentType.JAXWS_EJB3.equals(deploymentType);
    }
 
    /**
@@ -113,11 +120,11 @@ public final class ASHelper
     * @param unit deployment unit
     * @return true if JAXWS JSE deployment, false otherwise
     */
-   public static boolean isJaxwsJseDeployment( final DeploymentUnit unit )
+   public static boolean isJaxwsJseDeployment(final DeploymentUnit unit)
    {
-      final DeploymentType deploymentType = ASHelper.getOptionalAttachment( unit, DeploymentType.class );
+      final DeploymentType deploymentType = ASHelper.getOptionalAttachment(unit, DeploymentType.class);
 
-      return DeploymentType.JAXWS_JSE.equals( deploymentType );
+      return DeploymentType.JAXWS_JSE.equals(deploymentType);
    }
 
    /**
@@ -126,10 +133,10 @@ public final class ASHelper
     * @param unit deployment unit
     * @return true if either JAXWS JSE or JAXRPC JSE deployment, false otherwise.
     */
-   public static boolean isJseDeployment( final DeploymentUnit unit )
+   public static boolean isJseDeployment(final DeploymentUnit unit)
    {
-      final boolean isJaxwsJse = ASHelper.isJaxwsJseDeployment( unit );
-      final boolean isJaxrpcJse = ASHelper.isJaxrpcJseDeployment( unit );
+      final boolean isJaxwsJse = ASHelper.isJaxwsJseDeployment(unit);
+      final boolean isJaxrpcJse = ASHelper.isJaxrpcJseDeployment(unit);
 
       return isJaxwsJse || isJaxrpcJse;
    }
@@ -140,10 +147,10 @@ public final class ASHelper
     * @param unit deployment unit
     * @return true if either JAXWS EJB or JAXRPC EJB deployment, false otherwise
     */
-   public static boolean isEjbDeployment( final DeploymentUnit unit )
+   public static boolean isEjbDeployment(final DeploymentUnit unit)
    {
-      final boolean isJaxwsEjb = ASHelper.isJaxwsEjbDeployment( unit );
-      final boolean isJaxrpcEjb = ASHelper.isJaxrpcEjbDeployment( unit );
+      final boolean isJaxwsEjb = ASHelper.isJaxwsEjbDeployment(unit);
+      final boolean isJaxrpcEjb = ASHelper.isJaxrpcEjbDeployment(unit);
 
       return isJaxwsEjb || isJaxrpcEjb;
    }
@@ -154,10 +161,10 @@ public final class ASHelper
     * @param unit deployment unit
     * @return true if either JAXWS EJB or JAXWS JSE deployment, false otherwise
     */
-   public static boolean isJaxwsDeployment( final DeploymentUnit unit )
+   public static boolean isJaxwsDeployment(final DeploymentUnit unit)
    {
-      final boolean isJaxwsEjb = ASHelper.isJaxwsEjbDeployment( unit );
-      final boolean isJaxwsJse = ASHelper.isJaxwsJseDeployment( unit );
+      final boolean isJaxwsEjb = ASHelper.isJaxwsEjbDeployment(unit);
+      final boolean isJaxwsJse = ASHelper.isJaxwsJseDeployment(unit);
 
       return isJaxwsEjb || isJaxwsJse;
    }
@@ -168,10 +175,10 @@ public final class ASHelper
     * @param unit deployment unit
     * @return true if either JAXRPC EJB or JAXRPC JSE deployment, false otherwise
     */
-   public static boolean isJaxrpcDeployment( final DeploymentUnit unit )
+   public static boolean isJaxrpcDeployment(final DeploymentUnit unit)
    {
-      final boolean isJaxrpcEjb = ASHelper.isJaxrpcEjbDeployment( unit );
-      final boolean isJaxrpcJse = ASHelper.isJaxrpcJseDeployment( unit );
+      final boolean isJaxrpcEjb = ASHelper.isJaxrpcEjbDeployment(unit);
+      final boolean isJaxrpcJse = ASHelper.isJaxrpcJseDeployment(unit);
 
       return isJaxrpcEjb || isJaxrpcJse;
    }
@@ -182,9 +189,9 @@ public final class ASHelper
     * @param unit deployment unit
     * @return list of JAXWS servlets meta data
     */
-   public static List< ServletMetaData > getJaxwsServlets( final DeploymentUnit unit )
+   public static List<ServletMetaData> getJaxwsServlets(final DeploymentUnit unit)
    {
-      return ASHelper.getWebServiceServlets( unit, true );
+      return ASHelper.getWebServiceServlets(unit, true);
    }
 
    /**
@@ -193,9 +200,9 @@ public final class ASHelper
     * @param unit deployment unit
     * @return list of JAXRPC servlets meta data
     */
-   public static List< ServletMetaData > getJaxrpcServlets( final DeploymentUnit unit )
+   public static List<ServletMetaData> getJaxrpcServlets(final DeploymentUnit unit)
    {
-      return ASHelper.getWebServiceServlets( unit, false );
+      return ASHelper.getWebServiceServlets(unit, false);
    }
 
    /**
@@ -204,18 +211,18 @@ public final class ASHelper
     * @param unit deployment unit
     * @return list of JAXWS EJBs meta data
     */
-   public static List< WebServiceDeclaration > getJaxwsEjbs( final DeploymentUnit unit )
+   public static List<WebServiceDeclaration> getJaxwsEjbs(final DeploymentUnit unit)
    {
-      final WebServiceDeployment wsDeployment = ASHelper.getRequiredAttachment( unit, WebServiceDeployment.class );
-      final List< WebServiceDeclaration > endpoints = new ArrayList< WebServiceDeclaration >();
+      final WebServiceDeployment wsDeployment = ASHelper.getRequiredAttachment(unit, WebServiceDeployment.class);
+      final List<WebServiceDeclaration> endpoints = new ArrayList<WebServiceDeclaration>();
 
-      final Iterator< WebServiceDeclaration > ejbIterator = wsDeployment.getServiceEndpoints().iterator();
-      while ( ejbIterator.hasNext() )
+      final Iterator<WebServiceDeclaration> ejbIterator = wsDeployment.getServiceEndpoints().iterator();
+      while (ejbIterator.hasNext())
       {
          final WebServiceDeclaration ejbContainer = ejbIterator.next();
-         if ( ASHelper.isWebServiceBean( ejbContainer ) )
+         if (ASHelper.isWebServiceBean(ejbContainer))
          {
-            endpoints.add( ejbContainer );
+            endpoints.add(ejbContainer);
          }
       }
 
@@ -228,10 +235,10 @@ public final class ASHelper
     * @param ejbContainerAdapter EJB container adapter
     * @return true if EJB container is webservice endpoint, false otherwise
     */
-   public static boolean isWebServiceBean( final WebServiceDeclaration ejbContainerAdapter )
+   public static boolean isWebServiceBean(final WebServiceDeclaration ejbContainerAdapter)
    {
-      final boolean isWebService = ejbContainerAdapter.getAnnotation( WebService.class ) != null;
-      final boolean isWebServiceProvider = ejbContainerAdapter.getAnnotation( WebServiceProvider.class ) != null;
+      final boolean isWebService = ejbContainerAdapter.getAnnotation(WebService.class) != null;
+      final boolean isWebServiceProvider = ejbContainerAdapter.getAnnotation(WebServiceProvider.class) != null;
 
       return isWebService || isWebServiceProvider;
    }
@@ -242,7 +249,7 @@ public final class ASHelper
     * @param servletMD servlet meta data
     * @return endpoint class name
     */
-   public static String getEndpointName( final ServletMetaData servletMD )
+   public static String getEndpointName(final ServletMetaData servletMD)
    {
       final String endpointClass = servletMD.getServletClass();
 
@@ -256,17 +263,17 @@ public final class ASHelper
     * @param servletName servlet name
     * @return servlet meta data
     */
-   public static ServletMetaData getServletForName( final JBossWebMetaData jbossWebMD, final String servletName )
+   public static ServletMetaData getServletForName(final JBossWebMetaData jbossWebMD, final String servletName)
    {
-      for ( JBossServletMetaData servlet : jbossWebMD.getServlets() )
+      for (JBossServletMetaData servlet : jbossWebMD.getServlets())
       {
-         if ( servlet.getName().equals( servletName ) )
+         if (servlet.getName().equals(servletName))
          {
             return servlet;
          }
       }
 
-      throw new IllegalStateException( "Cannot find servlet for link: " + servletName );
+      throw new IllegalStateException("Cannot find servlet for link: " + servletName);
    }
 
    /**
@@ -276,26 +283,26 @@ public final class ASHelper
     * @param loader class loader
     * @return webservice endpoint class or null
     */
-   public static Class< ? > getEndpointClass( final ServletMetaData servletMD, final ClassLoader loader )
+   public static Class<?> getEndpointClass(final ServletMetaData servletMD, final ClassLoader loader)
    {
-      final String endpointClassName = ASHelper.getEndpointName( servletMD );
-      final boolean notJSP = endpointClassName != null && endpointClassName.length() > 0; 
+      final String endpointClassName = ASHelper.getEndpointName(servletMD);
+      final boolean notJSP = endpointClassName != null && endpointClassName.length() > 0;
 
-      if ( notJSP )
+      if (notJSP)
       {
          try
          {
-            final Class< ? > endpointClass = loader.loadClass( endpointClassName );
-            final boolean notServlet = !Servlet.class.isAssignableFrom( endpointClass );
+            final Class<?> endpointClass = loader.loadClass(endpointClassName);
+            final boolean notServlet = !Servlet.class.isAssignableFrom(endpointClass);
 
-            if ( notServlet )
+            if (notServlet)
             {
                return endpointClass;
             }
          }
-         catch ( ClassNotFoundException cnfe )
+         catch (ClassNotFoundException cnfe)
          {
-            ASHelper.LOG.warn( "Cannot load servlet class: " + endpointClassName, cnfe );
+            ASHelper.LOGGER.warn("Cannot load servlet class: " + endpointClassName, cnfe);
          }
       }
 
@@ -311,18 +318,18 @@ public final class ASHelper
     * @return required attachment 
     * @throws IllegalStateException if attachment value is null
     */
-   public static <A> A getRequiredAttachment( final DeploymentUnit unit, final Class< A > key )
+   public static <A> A getRequiredAttachment(final DeploymentUnit unit, final Class<A> key)
    {
-      final A value = unit.getAttachment( key );
-      if ( value == null )
+      final A value = unit.getAttachment(key);
+      if (value == null)
       {
-         ASHelper.LOG.error( "Cannot find attachment in deployment unit: " + key );
+         ASHelper.LOGGER.error("Cannot find attachment in deployment unit: " + key);
          throw new IllegalStateException();
       }
-      
+
       return value;
    }
-   
+
    /**
     * Returns optional attachment value from deployment unit or null if not bound.
     * 
@@ -331,11 +338,11 @@ public final class ASHelper
     * @param key attachment key
     * @return optional attachment value or null 
     */
-   public static <A> A getOptionalAttachment( final DeploymentUnit unit, final Class< A > key )
+   public static <A> A getOptionalAttachment(final DeploymentUnit unit, final Class<A> key)
    {
-      return unit.getAttachment( key );
+      return unit.getAttachment(key);
    }
-   
+
    /**
     * Returns true if deployment unit have attachment value associated with the <b>key</b>.
     *  
@@ -343,9 +350,34 @@ public final class ASHelper
     * @param key attachment key
     * @return true if contains attachment, false otherwise
     */
-   public static boolean hasAttachment( final DeploymentUnit unit, final Class< ? > key )
+   public static boolean hasAttachment(final DeploymentUnit unit, final Class<?> key)
    {
-      return ASHelper.getOptionalAttachment( unit, key ) != null;
+      return ASHelper.getOptionalAttachment(unit, key) != null;
+   }
+
+   /**
+    * Returns first webservice description meta data or null if not found.
+    *
+    * @param wsDescriptionsMD webservice descriptions
+    * @return webservice description
+    */
+   public static WebserviceDescriptionMetaData getWebserviceDescriptionMetaData(
+         final WebserviceDescriptionsMetaData wsDescriptionsMD)
+   {
+      if (wsDescriptionsMD != null)
+      {
+         if (wsDescriptionsMD.size() > 1)
+         {
+            ASHelper.LOGGER.warn("Multiple <webservice-description> elements not supported");
+         }
+
+         if (wsDescriptionsMD.size() > 0)
+         {
+            return wsDescriptionsMD.iterator().next();
+         }
+      }
+
+      return null;
    }
 
    /**
@@ -355,28 +387,28 @@ public final class ASHelper
     * @param jaxws if passed value is <b>true</b> JAXWS servlets list will be returned, otherwise JAXRPC servlets list
     * @return either JAXRPC or JAXWS servlets list
     */
-   private static List< ServletMetaData > getWebServiceServlets( final DeploymentUnit unit, final boolean jaxws )
+   private static List<ServletMetaData> getWebServiceServlets(final DeploymentUnit unit, final boolean jaxws)
    {
-      final JBossWebMetaData jbossWebMD = ASHelper.getRequiredAttachment( unit, JBossWebMetaData.class );
+      final JBossWebMetaData jbossWebMD = ASHelper.getRequiredAttachment(unit, JBossWebMetaData.class);
       final ClassLoader loader = unit.getClassLoader();
-      final List< ServletMetaData > endpoints = new ArrayList< ServletMetaData >();
+      final List<ServletMetaData> endpoints = new ArrayList<ServletMetaData>();
 
-      for ( ServletMetaData servletMD : jbossWebMD.getServlets() )
+      for (ServletMetaData servletMD : jbossWebMD.getServlets())
       {
-         final Class< ? > endpointClass = ASHelper.getEndpointClass( servletMD, loader );
+         final Class<?> endpointClass = ASHelper.getEndpointClass(servletMD, loader);
 
-         if ( endpointClass != null )
+         if (endpointClass != null)
          {
             // check webservice annotations
-            final boolean isWebService = endpointClass.isAnnotationPresent( WebService.class );
-            final boolean isWebServiceProvider = endpointClass.isAnnotationPresent( WebServiceProvider.class );
+            final boolean isWebService = endpointClass.isAnnotationPresent(WebService.class);
+            final boolean isWebServiceProvider = endpointClass.isAnnotationPresent(WebServiceProvider.class);
             // detect webservice type
-            final boolean isJaxwsEndpoint = jaxws && ( isWebService || isWebServiceProvider );
-            final boolean isJaxrpcEndpoint = !jaxws && ( !isWebService && !isWebServiceProvider );
+            final boolean isJaxwsEndpoint = jaxws && (isWebService || isWebServiceProvider);
+            final boolean isJaxrpcEndpoint = !jaxws && (!isWebService && !isWebServiceProvider);
 
-            if ( isJaxwsEndpoint || isJaxrpcEndpoint )
+            if (isJaxwsEndpoint || isJaxrpcEndpoint)
             {
-               endpoints.add( servletMD );
+               endpoints.add(servletMD);
             }
          }
       }

@@ -43,6 +43,7 @@ final class EJBBeanReferenceResolver extends AbstractReferenceResolver<EJB>
     * Deployment unit used for resolving process.
     */
    private final DeploymentUnit unit;
+
    /**
     * Delegate used to resolve JNDI names.
     */
@@ -50,8 +51,11 @@ final class EJBBeanReferenceResolver extends AbstractReferenceResolver<EJB>
 
    /**
     * Constructor.
+    * 
+    * @param unit deployment unit
+    * @param delegate EJB reference resolver
     */
-   public EJBBeanReferenceResolver(final DeploymentUnit unit, final EjbReferenceResolver delegate)
+   EJBBeanReferenceResolver(final DeploymentUnit unit, final EjbReferenceResolver delegate)
    {
       super(EJB.class);
 
@@ -68,30 +72,36 @@ final class EJBBeanReferenceResolver extends AbstractReferenceResolver<EJB>
       this.delegate = delegate;
    }
 
-   /* (non-Javadoc)
+   /**
     * @see org.jboss.wsf.common.injection.resolvers.AbstractReferenceResolver#resolveField(java.lang.reflect.Field)
+    * 
+    * @param field to be resolved
+    * @return JNDI name of referenced EJB object
     */
    @Override
    protected String resolveField(final Field field)
    {
       final EJB ejbAnnotation = field.getAnnotation(EJB.class);
       final Class<?> type = field.getType();
-      final EjbReference reference = getEjbReference(ejbAnnotation, type);
+      final EjbReference reference = this.getEjbReference(ejbAnnotation, type);
 
-      return this.delegate.resolveEjb(unit, reference);
+      return this.delegate.resolveEjb(this.unit, reference);
    }
 
-   /* (non-Javadoc)
+   /**
     * @see org.jboss.wsf.common.injection.resolvers.AbstractReferenceResolver#resolveMethod(java.lang.reflect.Method)
+    * 
+    * @param method to be resolved
+    * @return JNDI name of referenced EJB object
     */
    @Override
    protected String resolveMethod(final Method method)
    {
       final EJB ejbAnnotation = method.getAnnotation(EJB.class);
-      final Class<?> type =  method.getParameterTypes()[0];
-      final EjbReference reference = getEjbReference(ejbAnnotation, type);
+      final Class<?> type = method.getParameterTypes()[0];
+      final EjbReference reference = this.getEjbReference(ejbAnnotation, type);
 
-      return this.delegate.resolveEjb(unit, reference);
+      return this.delegate.resolveEjb(this.unit, reference);
    }
 
    /**
@@ -101,7 +111,7 @@ final class EJBBeanReferenceResolver extends AbstractReferenceResolver<EJB>
     * @param type fall back type
     * @return ejb reference instance
     */
-   private EjbReference getEjbReference(EJB ejbAnnotation, Class<?> type)
+   private EjbReference getEjbReference(final EJB ejbAnnotation, final Class<?> type)
    {
       String beanInterface = ejbAnnotation.beanInterface().getName();
       if (java.lang.Object.class.getName().equals(beanInterface))

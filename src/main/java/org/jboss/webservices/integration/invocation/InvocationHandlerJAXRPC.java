@@ -24,46 +24,67 @@ package org.jboss.webservices.integration.invocation;
 import javax.xml.rpc.server.ServiceLifecycle;
 import javax.xml.rpc.server.ServletEndpointContext;
 
-import org.jboss.wsf.spi.deployment.Endpoint;
 import org.jboss.wsf.spi.invocation.Invocation;
 import org.jboss.wsf.spi.invocation.InvocationContext;
 
 /**
- * Handles invocations on JSE endpoints.
+ * Handles invocations on JAXRPC endpoints.
  *
- * @author Thomas.Diesler@jboss.org
+ * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
+ * @author <a href="mailto:tdiesler@redhat.com">Thomas Diesler</a>
  */
-public class InvocationHandlerJAXRPC extends InvocationHandlerJSE
+final class InvocationHandlerJAXRPC extends AbstractInvocationHandlerJSE
 {
-   public void invoke(Endpoint ep, Invocation epInv) throws Exception
+
+   /**
+    * Constructor.
+    */
+   InvocationHandlerJAXRPC()
    {
-      try
-      {
-         Object targetBean = getTargetBean(ep, epInv);
+      super();
+   }
 
-         InvocationContext invContext = epInv.getInvocationContext();
-         if (targetBean instanceof ServiceLifecycle)
-         {
-            ServletEndpointContext sepContext = invContext.getAttachment(ServletEndpointContext.class);
-            if (sepContext != null)
-               ((ServiceLifecycle)targetBean).init(sepContext);
-         }
+   /**
+    * Calls {@link javax.xml.rpc.server.ServiceLifecycle#init(Object)}
+    * method on target bean if this bean implements 
+    * {@link javax.xml.rpc.server.ServiceLifecycle} interface.
+    * 
+    * @param invocation current invocation
+    * @throws Exception if any error occurs
+    */
+   @Override
+   protected void onBeforeInvocation(final Invocation invocation) throws Exception
+   {
+      final InvocationContext invocationContext = invocation.getInvocationContext();
+      final Object targetBean = invocationContext.getTargetBean();
+      final boolean isJaxrpcLifecycleBean = targetBean instanceof ServiceLifecycle;
 
-         try
-         {
-            super.invoke(ep, epInv);
-         }
-         finally
-         {
-            if (targetBean instanceof ServiceLifecycle)
-            {
-               ((ServiceLifecycle)targetBean).destroy();
-            }
-         }
-      }
-      catch (Exception e)
+      if (isJaxrpcLifecycleBean)
       {
-         handleInvocationException(e);
+         final ServletEndpointContext sepContext = invocationContext.getAttachment(ServletEndpointContext.class);
+         ((ServiceLifecycle) targetBean).init(sepContext);
       }
    }
+
+   /**
+    * Calls {@link javax.xml.rpc.server.ServiceLifecycle#destroy()}
+    * method on target bean if this bean implements 
+    * {@link javax.xml.rpc.server.ServiceLifecycle} interface.
+    * 
+    * @param invocation current invocation
+    * @throws Exception if any error occurs
+    */
+   @Override
+   protected void onAfterInvocation(final Invocation invocation) throws Exception
+   {
+      final InvocationContext invocationContext = invocation.getInvocationContext();
+      final Object targetBean = invocationContext.getTargetBean();
+      final boolean isJaxrpcLifecycleBean = targetBean instanceof ServiceLifecycle;
+
+      if (isJaxrpcLifecycleBean)
+      {
+         ((ServiceLifecycle) targetBean).destroy();
+      }
+   }
+
 }

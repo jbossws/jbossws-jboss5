@@ -29,9 +29,9 @@ import org.jboss.xb.binding.ObjectModelFactory;
 /**
  * webservices.xml deployer.
  *
- * @author <a href="ropalka@redhat.com">Richard Opalka</a>
+ * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-public final class WSDescriptorDeployer extends ObjectModelFactoryDeployer< WebservicesMetaData >
+public final class WSDescriptorDeployer extends ObjectModelFactoryDeployer<WebservicesMetaData>
 {
 
    /**
@@ -39,7 +39,7 @@ public final class WSDescriptorDeployer extends ObjectModelFactoryDeployer< Webs
     */
    public WSDescriptorDeployer()
    {
-      super( WebservicesMetaData.class );
+      super(WebservicesMetaData.class);
    }
 
    /**
@@ -49,9 +49,10 @@ public final class WSDescriptorDeployer extends ObjectModelFactoryDeployer< Webs
     * @return object model factory
     */
    @Override
-   protected ObjectModelFactory getObjectModelFactory( final WebservicesMetaData root )
+   protected ObjectModelFactory getObjectModelFactory(final WebservicesMetaData root)
    {
-      return new WebservicesFactory( null );
+      this.log.debug("Returning webservices descriptor factory");
+      return new WebservicesFactory(null);
    }
 
 }

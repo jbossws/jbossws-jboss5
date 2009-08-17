@@ -19,41 +19,55 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.webservices.integration.tomcat;
+package org.jboss.webservices.integration.metadata;
 
-import org.jboss.wsf.spi.deployment.Deployment;
-import org.jboss.wsf.spi.deployment.DeploymentAspect;
+import org.jboss.metadata.common.jboss.WebserviceDescriptionMetaData;
+import org.jboss.metadata.common.jboss.WebserviceDescriptionsMetaData;
+import org.jboss.wsf.spi.metadata.j2ee.PublishLocationAdapter;
 
 /**
- * Modifies web meta data to configure webservice stack endpoints and properties.
+ * Publish location adapter implementation.
  *
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  * @author <a href="mailto:tdiesler@redhat.com">Thomas Diesler</a>
  */
-public final class WebMetaDataModifyingDeploymentAspect extends DeploymentAspect
+final class PublishLocationAdapterImpl implements PublishLocationAdapter
 {
 
-   /** Web meta data modifier. */
-   private WebMetaDataModifier webMetaDataModifier = new WebMetaDataModifier();
+   /** Webservice descriptions meta data. */
+   private final WebserviceDescriptionsMetaData wsDescriptionsMD;
 
    /**
     * Constructor.
+    * 
+    * @param wsDescriptionsMD webservice descriptions meta data
     */
-   public WebMetaDataModifyingDeploymentAspect()
+   PublishLocationAdapterImpl(final WebserviceDescriptionsMetaData wsDescriptionsMD)
    {
       super();
+
+      this.wsDescriptionsMD = wsDescriptionsMD;
    }
 
    /**
-    * Modifies web meta data.
-    *
-    * @param dep webservice deployment
+    * @see org.jboss.wsf.spi.metadata.j2ee.PublishLocationAdapter#getWsdlPublishLocationByName(String)
+    * 
+    * @param endpointName endpoint name
+    * @return publish location
     */
-   @Override
-   public void start(final Deployment dep)
+   public String getWsdlPublishLocationByName(final String endpointName)
    {
-      this.log.debug("Modifying web meta data for webservice deployment: " + dep.getSimpleName());
-      this.webMetaDataModifier.modify(dep);
+      if (this.wsDescriptionsMD != null)
+      {
+         final WebserviceDescriptionMetaData endpointMD = this.wsDescriptionsMD.get(endpointName);
+
+         if (endpointMD != null)
+         {
+            return endpointMD.getWsdlPublishLocation();
+         }
+      }
+
+      return null;
    }
 
 }
