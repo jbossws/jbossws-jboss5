@@ -13,13 +13,13 @@ import org.jboss.wsf.spi.deployment.Deployment;
  * 
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-final class JaxwsJseDeploymentModelBuilder extends AbstractDeploymentModelBuilder
+final class DeploymentModelBuilderJAXWS_JSE extends AbstractDeploymentModelBuilder
 {
 
    /**
     * Constructor.
     */
-   JaxwsJseDeploymentModelBuilder()
+   DeploymentModelBuilderJAXWS_JSE()
    {
       super();
    }

@@ -13,13 +13,13 @@ import org.jboss.wsf.spi.deployment.integration.WebServiceDeployment;
  * 
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-final class JaxwsEjbDeploymentModelBuilder extends AbstractDeploymentModelBuilder
+final class DeploymentModelBuilderJAXWS_EJB3 extends AbstractDeploymentModelBuilder
 {
 
    /**
     * Constructor.
     */
-   JaxwsEjbDeploymentModelBuilder()
+   DeploymentModelBuilderJAXWS_EJB3()
    {
       super();
    }

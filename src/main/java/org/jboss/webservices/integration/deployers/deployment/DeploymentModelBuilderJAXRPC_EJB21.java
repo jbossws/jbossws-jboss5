@@ -14,13 +14,13 @@ import org.jboss.wsf.spi.metadata.webservices.WebservicesMetaData;
  * 
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-final class JaxrpcEjbDeploymentModelBuilder extends AbstractDeploymentModelBuilder
+final class DeploymentModelBuilderJAXRPC_EJB21 extends AbstractDeploymentModelBuilder
 {
 
    /**
     * Constructor.
     */
-   JaxrpcEjbDeploymentModelBuilder()
+   DeploymentModelBuilderJAXRPC_EJB21()
    {
       super();
    }
