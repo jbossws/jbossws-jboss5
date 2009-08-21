@@ -44,10 +44,10 @@ public final class WSDeploymentBuilder
 
    static
    {
-      WSDeploymentBuilder.builders.put(DeploymentType.JAXWS_JSE, new JaxwsJseDeploymentModelBuilder());
-      WSDeploymentBuilder.builders.put(DeploymentType.JAXRPC_JSE, new JaxrpcJseDeploymentModelBuilder());
-      WSDeploymentBuilder.builders.put(DeploymentType.JAXWS_EJB3, new JaxwsEjbDeploymentModelBuilder());
-      WSDeploymentBuilder.builders.put(DeploymentType.JAXRPC_EJB21, new JaxrpcEjbDeploymentModelBuilder());
+      WSDeploymentBuilder.builders.put(DeploymentType.JAXWS_JSE, new DeploymentModelBuilderJAXWS_JSE());
+      WSDeploymentBuilder.builders.put(DeploymentType.JAXRPC_JSE, new DeploymentModelBuilderJAXRPC_JSE());
+      WSDeploymentBuilder.builders.put(DeploymentType.JAXWS_EJB3, new DeploymentModelBuilderJAXWS_EJB3());
+      WSDeploymentBuilder.builders.put(DeploymentType.JAXRPC_EJB21, new DeploymentModelBuilderJAXRPC_EJB21());
    }
 
    /**
