@@ -32,6 +32,7 @@ import org.jboss.metadata.web.spec.LoginConfigMetaData;
 import org.jboss.metadata.web.spec.SecurityConstraintMetaData;
 import org.jboss.metadata.web.spec.ServletMappingMetaData;
 import org.jboss.metadata.web.spec.WebResourceCollectionsMetaData;
+import org.jboss.webservices.integration.util.WebMetaDataHelper;
 import org.jboss.wsf.common.integration.WSHelper;
 import org.jboss.wsf.spi.deployment.Deployment;
 import org.jboss.wsf.spi.deployment.Endpoint;
@@ -266,7 +267,7 @@ final class WebMetaDataCreator
 
    /**
     * Creates login-config part of web.xml descriptor.
-    * 
+    *
     * <pre>
     * &lt;login-config&gt;
     *   &lt;auth-method&gt;EjbDeploymentAuthMethod&lt;/auth-method&gt;

@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.webservices.integration.tomcat;
+package org.jboss.webservices.integration.util;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -45,7 +45,7 @@ import org.jboss.metadata.web.spec.WebResourceCollectionsMetaData;
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  * @author <a href="mailto:tdiesler@redhat.com">Thomas Diesler</a>
  */
-final class WebMetaDataHelper
+public final class WebMetaDataHelper
 {
 
    /** Star utility string. */
@@ -96,7 +96,7 @@ final class WebMetaDataHelper
     * @param urlPattern URL pattern
     * @return list wrapping passed parameter
     */
-   static List<String> getUrlPatterns(final String urlPattern)
+   public static List<String> getUrlPatterns(final String urlPattern)
    {
       final List<String> linkedList = new LinkedList<String>();
 
@@ -111,7 +111,7 @@ final class WebMetaDataHelper
     * @param secureWsdlAccess whether WSDL is secured
     * @return web access methods
     */
-   static List<String> getHttpMethods(final boolean secureWsdlAccess)
+   public static List<String> getHttpMethods(final boolean secureWsdlAccess)
    {
       return secureWsdlAccess ? WebMetaDataHelper.getAndPostMethods : WebMetaDataHelper.onlyPostMethod;
    }
@@ -121,7 +121,7 @@ final class WebMetaDataHelper
     *
     * @return all role list
     */
-   static List<String> getAllRoles()
+   public static List<String> getAllRoles()
    {
       return WebMetaDataHelper.allRoles;
    }
@@ -134,7 +134,7 @@ final class WebMetaDataHelper
     * @param jbossWebMD jboss web meta data
     * @return servlets meta data
     */
-   static JBossServletsMetaData getServlets(final JBossWebMetaData jbossWebMD)
+   public static JBossServletsMetaData getServlets(final JBossWebMetaData jbossWebMD)
    {
       JBossServletsMetaData servletsMD = jbossWebMD.getServlets();
 
@@ -155,7 +155,7 @@ final class WebMetaDataHelper
     * @param jbossWebMD jboss web meta data
     * @return servlet mappings meta data
     */
-   static List<ServletMappingMetaData> getServletMappings(final JBossWebMetaData jbossWebMD)
+   public static List<ServletMappingMetaData> getServletMappings(final JBossWebMetaData jbossWebMD)
    {
       List<ServletMappingMetaData> servletMappingsMD = jbossWebMD.getServletMappings();
 
@@ -176,7 +176,7 @@ final class WebMetaDataHelper
     * @param jbossWebMD jboss web meta data
     * @return security constraints meta data
     */
-   static List<SecurityConstraintMetaData> getSecurityConstraints(final JBossWebMetaData jbossWebMD)
+   public static List<SecurityConstraintMetaData> getSecurityConstraints(final JBossWebMetaData jbossWebMD)
    {
       List<SecurityConstraintMetaData> securityConstraintsMD = jbossWebMD.getSecurityContraints();
 
@@ -197,7 +197,7 @@ final class WebMetaDataHelper
     * @param jbossWebMD jboss web meta data
     * @return login config meta data
     */
-   static LoginConfigMetaData getLoginConfig(final JBossWebMetaData jbossWebMD)
+   public static LoginConfigMetaData getLoginConfig(final JBossWebMetaData jbossWebMD)
    {
       LoginConfigMetaData loginConfigMD = jbossWebMD.getLoginConfig();
 
@@ -218,7 +218,7 @@ final class WebMetaDataHelper
     * @param jbossWebMD jboss web meta data
     * @return context parameters meta data
     */
-   static List<ParamValueMetaData> getContextParams(final JBossWebMetaData jbossWebMD)
+   public static List<ParamValueMetaData> getContextParams(final JBossWebMetaData jbossWebMD)
    {
       List<ParamValueMetaData> contextParamsMD = jbossWebMD.getContextParams();
 
@@ -239,7 +239,7 @@ final class WebMetaDataHelper
     * @param securityConstraintMD security constraint meta data
     * @return web resource collections meta data
     */
-   static WebResourceCollectionsMetaData getWebResourceCollections(final SecurityConstraintMetaData securityConstraintMD)
+   public static WebResourceCollectionsMetaData getWebResourceCollections(final SecurityConstraintMetaData securityConstraintMD)
    {
       WebResourceCollectionsMetaData webResourceCollectionsMD = securityConstraintMD.getResourceCollections();
 
@@ -260,7 +260,7 @@ final class WebMetaDataHelper
     * @param servletMD servlet meta data
     * @return init parameters meta data
     */
-   static List<ParamValueMetaData> getServletInitParams(final ServletMetaData servletMD)
+   public static List<ParamValueMetaData> getServletInitParams(final ServletMetaData servletMD)
    {
       List<ParamValueMetaData> initParamsMD = servletMD.getInitParam();
 
@@ -279,7 +279,7 @@ final class WebMetaDataHelper
     * @param securityConstraintsMD security constraints meta data
     * @return new security constraing meta data
     */
-   static SecurityConstraintMetaData newSecurityConstraint(final List<SecurityConstraintMetaData> securityConstraintsMD)
+   public static SecurityConstraintMetaData newSecurityConstraint(final List<SecurityConstraintMetaData> securityConstraintsMD)
    {
       final SecurityConstraintMetaData securityConstraintMD = new SecurityConstraintMetaData();
 
@@ -297,7 +297,7 @@ final class WebMetaDataHelper
     * @param webResourceCollectionsMD web resource collections meta data
     * @return new web resource collection meta data
     */
-   static WebResourceCollectionMetaData newWebResourceCollection(final String servletName, final String urlPattern,
+   public static WebResourceCollectionMetaData newWebResourceCollection(final String servletName, final String urlPattern,
          final boolean securedWsdl, final WebResourceCollectionsMetaData webResourceCollectionsMD)
    {
       final WebResourceCollectionMetaData webResourceCollectionMD = new WebResourceCollectionMetaData();
@@ -318,7 +318,7 @@ final class WebMetaDataHelper
     * @param servletsMD servlets meta data
     * @return new servlet meta data
     */
-   static JBossServletMetaData newServlet(final String servletName, final String servletClass,
+   public static JBossServletMetaData newServlet(final String servletName, final String servletClass,
          final JBossServletsMetaData servletsMD)
    {
       final JBossServletMetaData servletMD = new JBossServletMetaData();
@@ -338,7 +338,7 @@ final class WebMetaDataHelper
     * @param servletMappingsMD servlet mapping meta data
     * @return new servlet mapping meta data
     */
-   static ServletMappingMetaData newServletMapping(final String servletName, final List<String> urlPatterns,
+   public static ServletMappingMetaData newServletMapping(final String servletName, final List<String> urlPatterns,
          final List<ServletMappingMetaData> servletMappingsMD)
    {
       final ServletMappingMetaData servletMappingMD = new ServletMappingMetaData();
@@ -357,7 +357,7 @@ final class WebMetaDataHelper
     * @param securityConstraintMD security constraint meta data
     * @return new authentication constraint meta data
     */
-   static AuthConstraintMetaData newAuthConstraint(final List<String> roleNames,
+   public static AuthConstraintMetaData newAuthConstraint(final List<String> roleNames,
          final SecurityConstraintMetaData securityConstraintMD)
    {
       final AuthConstraintMetaData authConstraintMD = new AuthConstraintMetaData();
@@ -375,7 +375,7 @@ final class WebMetaDataHelper
     * @param securityConstraintMD security constraint meta data
     * @return new user data constraint meta data
     */
-   static UserDataConstraintMetaData newUserDataConstraint(final String transportGuarantee,
+   public static UserDataConstraintMetaData newUserDataConstraint(final String transportGuarantee,
          final SecurityConstraintMetaData securityConstraintMD)
    {
       final UserDataConstraintMetaData userDataConstraintMD = new UserDataConstraintMetaData();
@@ -395,7 +395,7 @@ final class WebMetaDataHelper
     * @param paramsMD parameters meta data
     * @return new parameter meta data
     */
-   static ParamValueMetaData newParamValue(final String key, final String value, final List<ParamValueMetaData> paramsMD)
+   public static ParamValueMetaData newParamValue(final String key, final String value, final List<ParamValueMetaData> paramsMD)
    {
       final ParamValueMetaData paramValueMD = WebMetaDataHelper.newParamValue(key, value);
 
