@@ -41,6 +41,7 @@ import org.jboss.wsf.spi.metadata.j2ee.PublishLocationAdapter;
 abstract class AbstractMetaDataBuilderEJB
 {
 
+   /** Logger. */
    protected final Logger log = Logger.getLogger(this.getClass());
 
    /**

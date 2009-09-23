@@ -12,6 +12,7 @@ import org.jboss.logging.Logger;
 import org.jboss.metadata.serviceref.VirtualFileAdaptor;
 import org.jboss.virtual.VirtualFile;
 import org.jboss.webservices.integration.util.ASHelper;
+import org.jboss.wsf.common.ResourceLoaderAdapter;
 import org.jboss.wsf.spi.SPIProvider;
 import org.jboss.wsf.spi.SPIProviderResolver;
 import org.jboss.wsf.spi.deployment.ArchiveDeployment;
@@ -24,7 +25,7 @@ import org.jboss.wsf.spi.deployment.WSFDeploymentException;
 
 /**
  * Base class for all deployment model builders.
- * 
+ *
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
 abstract class AbstractDeploymentModelBuilder implements DeploymentModelBuilder
@@ -53,7 +54,7 @@ abstract class AbstractDeploymentModelBuilder implements DeploymentModelBuilder
 
    /**
     * @see org.jboss.webservices.integration.deployers.deployment.DeploymentModelBuilder#newDeploymentModel(DeploymentUnit)
-    * 
+    *
     * @param unit deployment unit
     */
    public final void newDeploymentModel(final DeploymentUnit unit)
@@ -68,7 +69,7 @@ abstract class AbstractDeploymentModelBuilder implements DeploymentModelBuilder
 
    /**
     * Template method for subclasses to implement.
-    * 
+    *
     * @param dep webservice deployment
     * @param unit deployment unit
     */
@@ -76,7 +77,7 @@ abstract class AbstractDeploymentModelBuilder implements DeploymentModelBuilder
 
    /**
     * Creates new Web Service endpoint.
-    * 
+    *
     * @param endpointClass endpoint class name
     * @param endpointName endpoint name
     * @param dep deployment
@@ -103,7 +104,7 @@ abstract class AbstractDeploymentModelBuilder implements DeploymentModelBuilder
 
    /**
     * Creates new Web Service deployment.
-    * 
+    *
     * @param unit deployment unit
     * @return archive deployment
     */
@@ -142,7 +143,14 @@ abstract class AbstractDeploymentModelBuilder implements DeploymentModelBuilder
          dep.setParent(parentDep);
       }
 
-      dep.setRootFile(new VirtualFileAdaptor(((VFSDeploymentUnit) unit).getRoot()));
+      if (unit instanceof VFSDeploymentUnit)
+      {
+         dep.setRootFile(new VirtualFileAdaptor(((VFSDeploymentUnit) unit).getRoot()));
+      }
+      else
+      {
+         dep.setRootFile(new ResourceLoaderAdapter(unit.getClassLoader()));
+      }
       dep.setRuntimeClassLoader(unit.getClassLoader());
       final DeploymentType deploymentType = ASHelper.getRequiredAttachment(unit, DeploymentType.class);
       dep.setType(deploymentType);
@@ -152,7 +160,7 @@ abstract class AbstractDeploymentModelBuilder implements DeploymentModelBuilder
 
    /**
     * Creates new archive deployment.
-    * 
+    *
     * @param name deployment name
     * @param loader deployment loader
     * @return new archive deployment
@@ -166,7 +174,7 @@ abstract class AbstractDeploymentModelBuilder implements DeploymentModelBuilder
     * Gets specified attachment from deployment unit. 
     * Checks it's not null and then propagates it to <b>dep</b>
     * attachments. Finally it returns attachment value.
-    * 
+    *
     * @param <A> class type
     * @param attachment attachment
     * @param unit deployment unit
