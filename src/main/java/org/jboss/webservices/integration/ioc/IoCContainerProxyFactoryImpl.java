@@ -19,25 +19,38 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.webservices.integration.invocation;
+package org.jboss.webservices.integration.ioc;
 
-import org.jboss.wsf.common.invocation.AbstractInvocationHandlerJSE;
+import org.jboss.wsf.spi.ioc.IoCContainerProxy;
+import org.jboss.wsf.spi.ioc.IoCContainerProxyFactory;
 
 /**
- * Handles invocations on MDB EJB21 endpoints.
+ * @see org.jboss.wsf.spi.ioc.IoCContainerProxyFactory
  *
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
- * @author <a href="mailto:tdiesler@redhat.com">Thomas Diesler</a>
  */
-final class InvocationHandlerMDB21 extends AbstractInvocationHandlerJSE
+public final class IoCContainerProxyFactoryImpl implements IoCContainerProxyFactory
 {
+   
+   /** Container proxy singleton. */
+   private static final IoCContainerProxy CONTAINER = IoCContainerProxyImpl.getInstance();
 
    /**
     * Constructor.
     */
-   InvocationHandlerMDB21()
+   public IoCContainerProxyFactoryImpl()
    {
       super();
+   }
+
+   /**
+    * @see org.jboss.wsf.spi.ioc.IoCContainerProxyFactory#getContainer()
+    * 
+    * @return IoC container proxy
+    */
+   public IoCContainerProxy getContainer()
+   {
+      return IoCContainerProxyFactoryImpl.CONTAINER;
    }
 
 }

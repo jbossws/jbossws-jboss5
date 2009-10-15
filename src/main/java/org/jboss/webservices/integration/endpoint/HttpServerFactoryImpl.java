@@ -19,25 +19,48 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.webservices.integration.invocation;
+package org.jboss.webservices.integration.endpoint;
 
-import org.jboss.wsf.common.invocation.AbstractInvocationHandlerJSE;
+import org.jboss.wsf.spi.SPIProvider;
+import org.jboss.wsf.spi.SPIProviderResolver;
+import org.jboss.wsf.spi.http.HttpServer;
+import org.jboss.wsf.spi.http.HttpServerFactory;
+import org.jboss.wsf.spi.ioc.IoCContainerProxy;
+import org.jboss.wsf.spi.ioc.IoCContainerProxyFactory;
 
 /**
- * Handles invocations on MDB EJB21 endpoints.
+ * Lookups http server inside MC container.
  *
- * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  * @author <a href="mailto:tdiesler@redhat.com">Thomas Diesler</a>
+ * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-final class InvocationHandlerMDB21 extends AbstractInvocationHandlerJSE
+public final class HttpServerFactoryImpl extends HttpServerFactory
 {
+   
+   /** The default bean name. */
+   private static final String BEAN_NAME = "WSHTTPServer";
 
    /**
     * Constructor.
     */
-   InvocationHandlerMDB21()
+   public HttpServerFactoryImpl()
    {
       super();
+   }
+   
+   /**
+    * Returns http server registered in MC kernel.
+    * 
+    * @return http server
+    */
+   @Override
+   public HttpServer getHttpServer()
+   {
+      final SPIProvider spiProvider = SPIProviderResolver.getInstance().getProvider();
+      final IoCContainerProxyFactory iocContainerFactory = spiProvider.getSPI(IoCContainerProxyFactory.class);
+      final IoCContainerProxy iocContainer = iocContainerFactory.getContainer();
+      
+      return iocContainer.getBean(HttpServerFactoryImpl.BEAN_NAME, HttpServer.class);
    }
 
 }

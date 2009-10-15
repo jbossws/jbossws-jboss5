@@ -25,14 +25,16 @@ import java.lang.reflect.Method;
 
 import javax.xml.ws.WebServiceException;
 
-import org.jboss.dependency.spi.ControllerContext;
-import org.jboss.kernel.spi.dependency.KernelController;
 import org.jboss.webservices.integration.util.ASHelper;
+import org.jboss.wsf.common.invocation.AbstractInvocationHandler;
+import org.jboss.wsf.spi.SPIProvider;
+import org.jboss.wsf.spi.SPIProviderResolver;
 import org.jboss.wsf.spi.deployment.Endpoint;
 import org.jboss.wsf.spi.invocation.Invocation;
 import org.jboss.wsf.spi.invocation.integration.InvocationContextCallback;
 import org.jboss.wsf.spi.invocation.integration.ServiceEndpointContainer;
-import org.jboss.wsf.spi.util.KernelLocator;
+import org.jboss.wsf.spi.ioc.IoCContainerProxy;
+import org.jboss.wsf.spi.ioc.IoCContainerProxyFactory;
 
 /**
  * Handles invocations on EJB3 endpoints.
@@ -44,7 +46,7 @@ final class InvocationHandlerEJB3 extends AbstractInvocationHandler
 {
 
    /** MC kernel controller. */
-   private final KernelController controller;
+   private final IoCContainerProxy iocContainer;
 
    /** EJB3 container name. */
    private String containerName;
@@ -59,7 +61,9 @@ final class InvocationHandlerEJB3 extends AbstractInvocationHandler
    {
       super();
 
-      this.controller = KernelLocator.getKernel().getController();
+      final SPIProvider spiProvider = SPIProviderResolver.getInstance().getProvider();
+      final IoCContainerProxyFactory iocContainerFactory = spiProvider.getSPI(IoCContainerProxyFactory.class);
+      this.iocContainer = iocContainerFactory.getContainer();
    }
 
    /**
@@ -88,13 +92,11 @@ final class InvocationHandlerEJB3 extends AbstractInvocationHandler
 
       if (ejb3ContainerNotInitialized)
       {
-         final ControllerContext context = this.controller.getInstalledContext(this.containerName);
-         if (context == null)
+         this.serviceEndpointContainer = this.iocContainer.getBean(this.containerName, ServiceEndpointContainer.class);
+         if (this.serviceEndpointContainer == null)
          {
             throw new WebServiceException("Cannot find service endpoint target: " + this.containerName);
          }
-
-         this.serviceEndpointContainer = (ServiceEndpointContainer) context.getTarget();
       }
 
       return this.serviceEndpointContainer;
