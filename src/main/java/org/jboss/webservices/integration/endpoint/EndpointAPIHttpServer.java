@@ -81,14 +81,6 @@ public final class EndpointAPIHttpServer extends AbstractExtensible implements H
    }
 
    /**
-    * Starts an instance of this HTTP server.
-    */
-   public void start()
-   {
-      // Nothing to start, we're running inside JBoss AS
-   }
-
-   /**
     * Creates an requested HTTP context.
     *
     * @param contextRoot context root name

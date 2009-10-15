@@ -39,6 +39,7 @@ import org.jboss.invocation.PayloadKey;
 import org.jboss.mx.util.MBeanServerLocator;
 import org.jboss.wsf.common.ObjectNameFactory;
 import org.jboss.wsf.common.integration.WSHelper;
+import org.jboss.wsf.common.invocation.AbstractInvocationHandler;
 import org.jboss.wsf.spi.SPIProvider;
 import org.jboss.wsf.spi.SPIProviderResolver;
 import org.jboss.wsf.spi.deployment.Deployment;
