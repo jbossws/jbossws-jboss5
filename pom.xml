@@ -6,7 +6,7 @@
   <groupId>org.jboss.ws</groupId>
   <artifactId>jbossws-jboss501</artifactId>
 
-  <version>3.2.1-SNAPSHOT</version>
+  <version>3.2.1.GA</version>
 
   <!-- Parent -->
   <parent>
@@ -17,19 +17,19 @@
 
   <!-- Source Control Management -->
   <scm>
-    <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossws/container/jboss50/branches/jbossws-jboss501</connection>
-    <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossws/container/jboss50/branches/jbossws-jboss501</developerConnection>
-    <url>http://fisheye.jboss.com/viewrep/JBossWS/container/jboss50/branches/jbossws-jboss501</url>
+    <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossws/container/jboss50/tags/jbossws-jboss501-3.2.1.GA</connection>
+    <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossws/container/jboss50/tags/jbossws-jboss501-3.2.1.GA</developerConnection>
+    <url>http://fisheye.jboss.com/viewrep/JBossWS/container/jboss50/tags/jbossws-jboss501-3.2.1.GA</url>
   </scm>
 
   <!-- Properties -->
   <properties>
-    <jbossws.common.version>1.2.1-SNAPSHOT</jbossws.common.version>
-    <jbossws.spi.version>1.2.1-SNAPSHOT</jbossws.spi.version>
+    <jbossws.common.version>1.2.1.GA</jbossws.common.version>
+    <jbossws.spi.version>1.2.1.GA</jbossws.spi.version>
 
     <!--
       JBoss component versions taken from
-      http://snapshots.jboss.org/maven2/org/jboss/jbossas/jboss-as-component-matrix/5.0.1-SNAPSHOT/jboss-as-component-matrix-5.0.1-20081205.185015-1.pom
+      http://repository.jboss.org/maven2/org/jboss/jbossas/jboss-as-component-matrix/5.0.1.GA/jboss-as-component-matrix-5.0.1.GA.pom
     -->
     <jboss.version>5.0.1.GA</jboss.version>
     <jboss.ejb3.version>1.0.0</jboss.ejb3.version>
