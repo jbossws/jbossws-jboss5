@@ -44,9 +44,9 @@ import org.jboss.metadata.javaee.spec.ResourceInjectionTargetMetaData;
 import org.jboss.metadata.web.jboss.JBossWebMetaData;
 import org.jboss.webservices.integration.util.ASHelper;
 import org.jboss.wsf.common.injection.resolvers.ResourceReferenceResolver;
+import org.jboss.wsf.common.integration.AbstractDeploymentAspect;
 import org.jboss.wsf.common.integration.WSHelper;
 import org.jboss.wsf.spi.deployment.Deployment;
-import org.jboss.wsf.spi.deployment.DeploymentAspect;
 import org.jboss.wsf.spi.deployment.Endpoint;
 import org.jboss.wsf.spi.deployment.integration.WebServiceDeclaration;
 import org.jboss.wsf.spi.deployment.integration.WebServiceDeployment;
@@ -59,7 +59,7 @@ import org.jboss.wsf.spi.metadata.injection.ReferenceResolver;
  *
  * @author <a href="mailto:richard.opalka@jboss.org">Richard Opalka</a>
  */
-public final class InjectionMetaDataDeploymentAspect extends DeploymentAspect
+public final class InjectionMetaDataDeploymentAspect extends AbstractDeploymentAspect
 {
 
    /** EJB 3 JNDI prefix. */

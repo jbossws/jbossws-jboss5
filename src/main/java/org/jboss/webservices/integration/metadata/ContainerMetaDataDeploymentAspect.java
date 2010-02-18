@@ -21,9 +21,9 @@
  */
 package org.jboss.webservices.integration.metadata;
 
+import org.jboss.wsf.common.integration.AbstractDeploymentAspect;
 import org.jboss.wsf.common.integration.WSHelper;
 import org.jboss.wsf.spi.deployment.Deployment;
-import org.jboss.wsf.spi.deployment.DeploymentAspect;
 import org.jboss.wsf.spi.metadata.j2ee.EJBArchiveMetaData;
 import org.jboss.wsf.spi.metadata.j2ee.JSEArchiveMetaData;
 
@@ -33,7 +33,7 @@ import org.jboss.wsf.spi.metadata.j2ee.JSEArchiveMetaData;
  * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  * @author <a href="mailto:tdiesler@redhat.com">Thomas Diesler</a>
  */
-public final class ContainerMetaDataDeploymentAspect extends DeploymentAspect
+public final class ContainerMetaDataDeploymentAspect extends AbstractDeploymentAspect
 {
 
    /** JSE meta data builder. */
