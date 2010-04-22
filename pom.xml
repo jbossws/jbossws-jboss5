@@ -5,6 +5,7 @@
   <name>JBoss Web Services - Container JBoss-5.0.1.GA</name>
   <groupId>org.jboss.ws</groupId>
   <artifactId>jbossws-jboss501</artifactId>
+  <description>JBossWS container integration for JBoss 5.0.1.GA</description>
 
   <version>3.3.0.CR1</version>
 
@@ -12,7 +13,7 @@
   <parent>
     <groupId>org.jboss.ws</groupId>
     <artifactId>jbossws-parent</artifactId>
-    <version>1.0.5.GA</version>
+    <version>1.0.6.GA</version>
   </parent>
 
   <!-- Source Control Management -->
