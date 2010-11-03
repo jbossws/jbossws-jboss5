@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<jboss-client xmlns="http://www.jboss.com/xml/ns/javaee"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://www.jboss.com/xml/ns/javaee http://www.jboss.com/xml/ns/javaee/jboss-client_5_0.xsd"
+   version="5.0"
+   id="appclient-test">
+  <jndi-name>standaloneCclient</jndi-name>
+  <ejb-ref>
+    <jndi-name>test_resourceClasJndiName</jndi-name>
+    <ejb-ref-name>ejb/resourceClassBean</ejb-ref-name>
+    <ignore-dependency/>
+  </ejb-ref>
+</jboss-client>
