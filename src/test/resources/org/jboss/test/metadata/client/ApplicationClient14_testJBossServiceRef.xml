@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE jboss-client
+    PUBLIC "-//JBoss//DTD Application Client 4.2//EN"
+    "http://www.jboss.org/j2ee/dtd/jboss-client_4_2.dtd">
+
+<jboss-client>
+    <jndi-name>BeanMirrorSEIClient_client</jndi-name>
+    <service-ref>
+        <service-ref-name>
+              service/beanMirrorSEI
+        </service-ref-name>
+        <port-component-ref>
+            <service-endpoint-interface>com.sun.ts.tests.webservices.deploy.beanMirrorSEI.HelloWs</service-endpoint-interface>
+            <port-qname>{http://BeanMirrorSEI.org}HelloWsPort</port-qname>
+        </port-component-ref>
+        <wsdl-override>http://localhost:8080/BeanMirrorSEIWeb/ws4ee/beanMirrorSEI?WSDL</wsdl-override>
+    </service-ref>
+</jboss-client>

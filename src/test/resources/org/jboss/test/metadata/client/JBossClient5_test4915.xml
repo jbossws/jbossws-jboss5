@@ -1,0 +1,98 @@
+<jboss-client xmlns="http://www.jboss.com/xml/ns/javaee"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://www.jboss.com/xml/ns/javaee http://www.jboss.com/xml/ns/javaee/jboss-client_5_0.xsd"
+   version="5.0"
+   id="appclient-test">
+
+    <jndi-name>jbossws-client</jndi-name>
+    
+    <!--
+        @WebServiceRef(name = "Service1")
+    -->
+    <service-ref>
+        <service-impl-class>org.jboss.test.ws.jaxws.samples.webserviceref.TestEndpointService</service-impl-class>
+        <service-qname xmlns:wsref="http://org.jboss.ws/wsref">wsref:TestEndpointService</service-qname>
+        <service-ref-name>Service1</service-ref-name>
+        <wsdl-override>META-INF/wsdl/TestEndpoint.wsdl</wsdl-override>
+    </service-ref>
+    
+    <!--
+        @WebServiceRef(name = "Service2")
+    -->
+    <service-ref>
+        <config-file>META-INF/jbossws-client-config.xml</config-file>
+        <service-ref-name>Service2</service-ref-name>
+        <config-name>Custom Client</config-name>
+        <wsdl-override>META-INF/wsdl/TestEndpoint.wsdl</wsdl-override>
+    </service-ref>
+    
+    <!--
+        @WebServiceRef(name = "Service3")
+    -->
+    <service-ref>
+        <service-impl-class>org.jboss.test.ws.jaxws.samples.webserviceref.TestEndpointService</service-impl-class>
+        <service-qname xmlns:wsref="http://org.jboss.ws/wsref">wsref:TestEndpointService</service-qname>
+        <service-ref-name>Service3</service-ref-name>
+        <wsdl-override>META-INF/wsdl/TestEndpoint.wsdl</wsdl-override>
+    </service-ref>
+    
+    <!--
+        @WebServiceRef(name = "Service4")
+    -->
+    <service-ref>
+        <port-component-ref>
+            <config-name>Custom Client</config-name>
+            <config-file>META-INF/jbossws-client-config.xml</config-file>
+            <service-endpoint-interface>org.jboss.test.ws.jaxws.samples.webserviceref.TestEndpoint</service-endpoint-interface>
+        </port-component-ref>
+        <service-ref-name>Service4</service-ref-name>
+        <wsdl-override>META-INF/wsdl/TestEndpoint.wsdl</wsdl-override>
+    </service-ref>
+    
+    <!--
+        @WebServiceRef(name = "Port1", type = TestEndpoint.class)
+    -->
+    <service-ref>
+        <port-component-ref>
+            <config-name>Custom Client</config-name>
+            <config-file>META-INF/jbossws-client-config.xml</config-file>
+            <port-qname xmlns:wsref="http://org.jboss.ws/wsref">wsref:TestEndpointPort</port-qname>
+        </port-component-ref>
+        <service-ref-name>Port1</service-ref-name>
+        <wsdl-override>META-INF/wsdl/TestEndpoint.wsdl</wsdl-override>
+    </service-ref>
+    
+    <!--
+        @WebServiceRef(name = "Port2")
+    -->
+    <service-ref>
+        <port-component-ref>
+            <config-name>Custom Client</config-name>
+            <config-file>META-INF/jbossws-client-config.xml</config-file>
+            <service-endpoint-interface>org.jboss.test.ws.jaxws.samples.webserviceref.TestEndpoint</service-endpoint-interface>
+        </port-component-ref>
+        <service-ref-name>Port2</service-ref-name>
+        <wsdl-override>META-INF/wsdl/TestEndpoint.wsdl</wsdl-override>
+    </service-ref>
+    
+    <!--
+        @WebServiceRef(name = "Port3")
+    -->
+    <service-ref>
+        <port-component-ref>
+            <stub-property>
+                <prop-name>javax.xml.ws.security.auth.username</prop-name>
+                <prop-value>kermit</prop-value>
+            </stub-property>
+            <stub-property>
+                <prop-name>javax.xml.ws.security.auth.password</prop-name>
+                <prop-value>thefrog</prop-value>
+            </stub-property>
+            <service-endpoint-interface>org.jboss.test.ws.jaxws.samples.webserviceref.TestEndpoint</service-endpoint-interface>
+            <port-qname xmlns:wsref="http://org.jboss.ws/wsref">wsref:TestEndpointPort</port-qname>
+        </port-component-ref>
+        <service-ref-name>Port3</service-ref-name>
+        <wsdl-override>META-INF/wsdl/TestEndpoint.wsdl</wsdl-override>
+    </service-ref>
+    
+</jboss-client>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- $Id: RA16Negative_testParserActivationSpec.xml 83350 2009-01-23 14:12:52Z jeff.zhang $ -->
+
+<connector xmlns="http://java.sun.com/xml/ns/javaee"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+           http://java.sun.com/xml/ns/j2ee/connector_1_6.xsd"
+           version="1.6" metadata-complete="true">
+
+   <vendor-name>Red Hat Middleware LLC</vendor-name>
+   <eis-type>JMS 1.1 Server</eis-type>
+   <resourceadapter-version>6.0</resourceadapter-version>
+   <resourceadapter>
+      <inbound-resourceadapter>
+         <messageadapter>        
+            <messagelistener>
+               <messagelistener-type>javax.jms.MessageListener</messagelistener-type>
+               <activationspec>
+                  <activationspec-class>org.jboss.resource.adapter.jms.inflow.JmsActivationSpec</activationspec-class>
+                  <required-config-property>
+<!--                      <config-property-name>destination</config-property-name> -->
+                  </required-config-property>
+		  <config-property>
+		     <config-property-name>StringProperty</config-property-name>
+		     <config-property-type>java.lang.String</config-property-type>
+		  </config-property>
+               </activationspec>
+            </messagelistener>
+         </messageadapter>
+      </inbound-resourceadapter>
+   </resourceadapter>
+</connector>

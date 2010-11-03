@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application-client xmlns="http://java.sun.com/xml/ns/j2ee"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/application-client_1_4.xsd"
+   version="1.4"
+   id="appclient-test">
+   <!-- description group -->
+   <description>en-application-client-desc</description>
+   <description xml:lang="fr">fr-application-client-desc</description>
+   <description xml:lang="de">de-application-client-desc</description>
+   <display-name>en-application-client-disp</display-name>
+   <display-name xml:lang="fr">fr-application-client-disp</display-name>
+   <display-name xml:lang="de">de-application-client-disp</display-name>
+   <icon id="en-application-client-icon-id">
+      <small-icon>en-application-client-small-icon</small-icon>
+      <large-icon>en-application-client-large-icon</large-icon>
+   </icon>
+   <icon xml:lang="fr" id="fr-application-client-icon-id">
+      <small-icon>fr-application-client-small-icon</small-icon>
+      <large-icon>fr-application-client-large-icon</large-icon>
+   </icon>
+   <icon xml:lang="de" id="de-application-client-icon-id">
+      <small-icon>de-application-client-small-icon</small-icon>
+      <large-icon>de-application-client-large-icon</large-icon>
+   </icon>
+   
+   <!-- env entry -->
+   <env-entry id="appClientEnvEntry1-id">
+      <description>en-appClientEnvEntry1-desc</description>
+      <description xml:lang="fr">fr-appClientEnvEntry1-desc</description>
+      <description xml:lang="de">de-appClientEnvEntry1-desc</description>
+      <env-entry-name>
+         appClientEnvEntry1Name
+      </env-entry-name>
+      <env-entry-type>java.lang.String</env-entry-type>
+      <env-entry-value>appClientEnvEntry1Value</env-entry-value>
+   </env-entry>
+   <env-entry id="appClientEnvEntry2-id">
+      <description>en-appClientEnvEntry2-desc</description>
+      <description xml:lang="fr">fr-appClientEnvEntry2-desc</description>
+      <description xml:lang="de">de-appClientEnvEntry2-desc</description>
+      <env-entry-name>appClientEnvEntry2Name</env-entry-name>
+      <env-entry-type>java.lang.String</env-entry-type>
+      <env-entry-value>appClientEnvEntry2Value</env-entry-value>
+   </env-entry>
+   
+   <!-- ejb ref -->
+   <ejb-ref id="appClientEjbRef1-id">
+      <description>en-appClientEjbRef1-desc</description>
+      <description xml:lang="fr">fr-appClientEjbRef1-desc</description>
+      <description xml:lang="de">de-appClientEjbRef1-desc</description>
+      <ejb-ref-name>appClientEjbRef1Name</ejb-ref-name>
+      <ejb-ref-type>Session</ejb-ref-type>
+      <home>appClientEjbRef1Home</home>
+      <remote>appClientEjbRef1Remote</remote>
+      <ejb-link>appClientEjbRef1EjbLink</ejb-link>
+   </ejb-ref>
+   <ejb-ref id="appClientEjbRef2-id">
+      <description>en-appClientEjbRef2-desc</description>
+      <description xml:lang="fr">fr-appClientEjbRef2-desc</description>
+      <description xml:lang="de">de-appClientEjbRef2-desc</description>
+      <ejb-ref-name>appClientEjbRef2Name</ejb-ref-name>
+      <ejb-ref-type>Entity</ejb-ref-type>
+      <home>appClientEjbRef2Home</home>
+      <remote>appClientEjbRef2Remote</remote>
+      <ejb-link>appClientEjbRef2EjbLink</ejb-link>
+   </ejb-ref>
+
+   <!-- service ref -->
+   <service-ref id="appClientServiceRef1-id">
+      <description>en-appClientServiceRef1-desc</description>
+      <description xml:lang="fr">fr-appClientServiceRef1-desc</description>
+      <description xml:lang="de">de-appClientServiceRef1-desc</description>
+      <service-ref-name>appClientServiceRef1Name</service-ref-name>
+      <service-interface>appClientServiceRef1Iface</service-interface>
+   </service-ref>
+   <service-ref id="appClientServiceRef2-id">
+      <description>en-appClientServiceRef2-desc</description>
+      <description xml:lang="fr">fr-appClientServiceRef2-desc</description>
+      <description xml:lang="de">de-appClientServiceRef2-desc</description>
+      <service-ref-name>appClientServiceRef2Name</service-ref-name>
+      <service-interface>appClientServiceRef2Iface</service-interface>
+   </service-ref>
+
+   <!-- resource ref -->
+   <resource-ref id="appClientResourceRef1-id">
+      <description>en-appClientResourceRef1-desc</description>
+      <description xml:lang="fr">fr-appClientResourceRef1-desc</description>
+      <description xml:lang="de">de-appClientResourceRef1-desc</description>
+      <res-ref-name>appClientResourceRef1Name</res-ref-name>
+      <res-type>appClientResourceRef1Type</res-type>
+      <res-auth>Application</res-auth>
+      <res-sharing-scope>Shareable</res-sharing-scope>
+   </resource-ref>
+   <resource-ref id="appClientResourceRef2-id">
+      <description>en-appClientResourceRef2-desc</description>
+      <description xml:lang="fr">fr-appClientResourceRef2-desc</description>
+      <description xml:lang="de">de-appClientResourceRef2-desc</description>
+      <res-ref-name>appClientResourceRef2Name</res-ref-name>
+      <res-type>appClientResourceRef2Type</res-type>
+      <res-auth>Container</res-auth>
+      <res-sharing-scope>Unshareable</res-sharing-scope>
+   </resource-ref>
+   
+   <!-- resource env ref -->
+   <resource-env-ref id="appClientResourceEnvRef1-id">
+      <description>en-appClientResourceEnvRef1-desc</description>
+      <description xml:lang="fr">fr-appClientResourceEnvRef1-desc</description>
+      <description xml:lang="de">de-appClientResourceEnvRef1-desc</description>
+      <resource-env-ref-name>appClientResourceEnvRef1Name</resource-env-ref-name>
+      <resource-env-ref-type>appClientResourceEnvRef1Type</resource-env-ref-type>
+   </resource-env-ref>
+   <resource-env-ref id="appClientResourceEnvRef2-id">
+      <description>en-appClientResourceEnvRef2-desc</description>
+      <description xml:lang="fr">fr-appClientResourceEnvRef2-desc</description>
+      <description xml:lang="de">de-appClientResourceEnvRef2-desc</description>
+      <resource-env-ref-name>appClientResourceEnvRef2Name</resource-env-ref-name>
+      <resource-env-ref-type>appClientResourceEnvRef2Type</resource-env-ref-type>
+   </resource-env-ref>
+   
+   <!-- message destination ref -->
+   <message-destination-ref id="appClientMessageDestinationRef1-id">
+      <description>en-appClientMessageDestinationRef1-desc</description>
+      <description xml:lang="fr">fr-appClientMessageDestinationRef1-desc</description>
+      <description xml:lang="de">de-appClientMessageDestinationRef1-desc</description>
+      <message-destination-ref-name>appClientMessageDestinationRef1Name</message-destination-ref-name>
+      <message-destination-type>appClientMessageDestinationRef1Type</message-destination-type>
+      <message-destination-usage>Consumes</message-destination-usage>
+      <message-destination-link>appClientMessageDestinationRef1Link</message-destination-link>
+   </message-destination-ref>
+   <message-destination-ref id="appClientMessageDestinationRef2-id">
+      <description>en-appClientMessageDestinationRef2-desc</description>
+      <description xml:lang="fr">fr-appClientMessageDestinationRef2-desc</description>
+      <description xml:lang="de">de-appClientMessageDestinationRef2-desc</description>
+      <message-destination-ref-name>appClientMessageDestinationRef2Name</message-destination-ref-name>
+      <message-destination-type>appClientMessageDestinationRef2Type</message-destination-type>
+      <message-destination-usage>Produces</message-destination-usage>
+      <message-destination-link>appClientMessageDestinationRef2Link</message-destination-link>
+   </message-destination-ref>
+   <message-destination-ref id="appClientMessageDestinationRef3-id">
+      <description>en-appClientMessageDestinationRef3-desc</description>
+      <description xml:lang="fr">fr-appClientMessageDestinationRef3-desc</description>
+      <description xml:lang="de">de-appClientMessageDestinationRef3-desc</description>
+      <message-destination-ref-name>appClientMessageDestinationRef3Name</message-destination-ref-name>
+      <message-destination-type>appClientMessageDestinationRef3Type</message-destination-type>
+      <message-destination-usage>ConsumesProduces</message-destination-usage>
+      <message-destination-link>appClientMessageDestinationRef3Link</message-destination-link>
+   </message-destination-ref>
+   
+   <!-- callback handler -->
+   <callback-handler id="appClientCallbackHandler-id">org.jboss.test.metadata.client.AppClientCallbackHandler</callback-handler>
+   
+   <!-- message destination -->
+   <message-destination id="appClientMessageDestination1-id">
+      <description>en-appClientMessageDestination1-desc</description>
+      <description xml:lang="fr">fr-appClientMessageDestination1-desc</description>
+      <description xml:lang="de">de-appClientMessageDestination1-desc</description>
+      <display-name>en-appClientMessageDestination1-disp</display-name>
+      <display-name xml:lang="fr">fr-appClientMessageDestination1-disp</display-name>
+      <display-name xml:lang="de">de-appClientMessageDestination1-disp</display-name>
+      <icon id="en-appClientMessageDestination1-icon-id">
+         <small-icon>en-appClientMessageDestination1-small-icon</small-icon>
+         <large-icon>en-appClientMessageDestination1-large-icon</large-icon>
+      </icon>
+      <icon xml:lang="fr" id="fr-appClientMessageDestination1-icon-id">
+         <small-icon>fr-appClientMessageDestination1-small-icon</small-icon>
+         <large-icon>fr-appClientMessageDestination1-large-icon</large-icon>
+      </icon>
+      <icon xml:lang="de" id="de-appClientMessageDestination1-icon-id">
+         <small-icon>de-appClientMessageDestination1-small-icon</small-icon>
+         <large-icon>de-appClientMessageDestination1-large-icon</large-icon>
+      </icon>
+      <message-destination-name>appClientMessageDestination1Name</message-destination-name>
+   </message-destination>
+   <message-destination id="appClientMessageDestination2-id">
+      <description>en-appClientMessageDestination2-desc</description>
+      <description xml:lang="fr">fr-appClientMessageDestination2-desc</description>
+      <description xml:lang="de">de-appClientMessageDestination2-desc</description>
+      <display-name>en-appClientMessageDestination2-disp</display-name>
+      <display-name xml:lang="fr">fr-appClientMessageDestination2-disp</display-name>
+      <display-name xml:lang="de">de-appClientMessageDestination2-disp</display-name>
+      <icon id="en-appClientMessageDestination2-icon-id">
+         <small-icon>en-appClientMessageDestination2-small-icon</small-icon>
+         <large-icon>en-appClientMessageDestination2-large-icon</large-icon>
+      </icon>
+      <icon xml:lang="fr" id="fr-appClientMessageDestination2-icon-id">
+         <small-icon>fr-appClientMessageDestination2-small-icon</small-icon>
+         <large-icon>fr-appClientMessageDestination2-large-icon</large-icon>
+      </icon>
+      <icon xml:lang="de" id="de-appClientMessageDestination2-icon-id">
+         <small-icon>de-appClientMessageDestination2-small-icon</small-icon>
+         <large-icon>de-appClientMessageDestination2-large-icon</large-icon>
+      </icon>
+      <message-destination-name>appClientMessageDestination2Name</message-destination-name>
+   </message-destination>
+</application-client>

@@ -1,0 +1,243 @@
+<!--
+ * JBoss, Home of Professional Open Source.
+ * Copyright 2008, Red Hat Middleware LLC, and individual contributors
+ * as indicated by the @author tags. See the copyright.txt file in the
+ * distribution for a full listing of individual contributors.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+<!-- $Id$ -->
+<html>
+   <head>
+      <title>Package Documentation for org.jboss.test.metadata.rar</title>
+   </head>
+   <body>
+      <p>
+         JCA spec testcases.
+      </p>
+
+<table border>
+<thead>
+<tr><th>Area</th><th>Element</th><th>Positive</th><th>Negative</th></tr>
+</thead>
+<tbody>
+<tr><td rowspan=25>connector</td>
+<td>resourceadapter-version</td>
+<td rowspan=25>testEverything</td>
+<td>testParserRAVersion</td></tr>
+
+<tr><td>vendor-name</td>
+<td>testParserVendorName</td></tr>
+
+<tr><td>eis-type</td>
+<td>testParserEISType</td></tr>
+
+<tr><td>license-required</td>
+<td>testParserLicenseRequired</td></tr>
+
+<tr><td>resourceadapter</td>
+<td>testParserRA</td></tr>
+
+<tr><td>config-property-name</td>
+<td>testParserConfPropName</td></tr>
+
+<tr><td>config-property-type</td>
+<td>testParserConfPropType</td></tr>
+
+<tr><td>connection-definition</td>
+<td>testParserConDef</td></tr>
+
+<tr><td>reauthentication-support</td>
+<td>testParserReAuth</td></tr>
+
+<tr><td>transaction-support</td>
+<td>testParserTransSupport</td></tr>
+
+<tr><td>managedconnectionfactory-class</td>
+<td>testParserMCFClass</td></tr>
+
+<tr><td>connectionfactory-interface</td>
+<td>testParserCFInterface</td></tr>
+
+<tr><td>managedconnectionfactory-class</td>
+<td>testParserCFImpl</td></tr>
+
+<tr><td>connection-interface</td>
+<td>testParserConnectionInterface</td></tr>
+
+<tr><td>connection-impl-class</td>
+<td>testParserConnectionImpl</td></tr>
+
+<tr><td>authentication-mechanism-type</td>
+<td>testParserAuthMechanismType</td></tr>
+
+<tr><td>authentication-mechanism-type</td>
+<td>testWrongAuthMechanismType</td></tr>
+
+<tr><td>credential-interface</td>
+<td>testParserCredInterface</td></tr>
+
+<tr><td>messagelistener-type</td>
+<td>testParserMessageListenerType</td></tr>
+
+<tr><td>activationspec</td>
+<td>testParserActivationSpec</td></tr>
+
+<tr><td>activationspec-class</td>
+<td>testParserActivationSpecClass</td></tr>
+
+<tr><td>config-property-name</td>
+<td>testParserRequiredConfPropName</td></tr>
+
+<tr><td>adminobject-interface</td>
+<td>testParserAoInterface</td></tr>
+
+<tr><td>adminobject-class</td>
+<td>testParserAoClass</td></tr>
+
+<tr><td>security-permission-spec</td>
+<td>testParserSecurityPermSpec</td></tr>
+
+</tbody>
+</table>
+
+
+      <p>
+         JCA ds.xml testcases.
+      </p>
+
+<table border>
+<thead>
+<tr><th>Area</th><th>Element</th><th>Positive</th><th>Negative</th></tr>
+</thead>
+<tbody>
+<tr><td rowspan=36>ds.xml</td>
+<td>jndi-name</td>
+<td rowspan=36>testNoTxDsEverything<br/>testLocalTxDsEverything<br/>testXaDsEverything</td>
+<td>testParserJndiName</td></tr>
+
+<tr><td>use-java-context</td>
+<td></td></tr>
+
+<tr><td>connection-url</td>
+<td>testParserConnectionUrl</td></tr>
+
+<tr><td>url-delimiter</td>
+<td></td></tr>
+
+<tr><td>url-selector-strategy-class-name</td>
+<td></td></tr>
+
+<tr><td>driver-class</td>
+<td>testParserDriverClass</td></tr>
+
+<tr><td>transaction-isolation</td>
+<td></td></tr>
+
+<tr><td>connection-property</td>
+<td></td></tr>
+
+<tr><td>user-name</td>
+<td></td></tr>
+
+<tr><td>password</td>
+<td></td></tr>
+
+<tr><td>security-domain</td>
+<td></td></tr>
+
+<tr><td>min-pool-size</td>
+<td></td></tr>
+
+<tr><td>max-pool-size</td>
+<td></td></tr>
+
+<tr><td>locking-timeout-millis</td>
+<td></td></tr>
+
+<tr><td>background-validation</td>
+<td></td></tr>
+
+<tr><td>background-validation-millis</td>
+<td></td></tr>
+
+<tr><td>idle-timeout-minutes</td>
+<td></td></tr>
+
+<tr><td>allocation-retry</td>
+<td></td></tr>
+
+<tr><td>allocation-retry-wait-millis</td>
+<td></td></tr>
+
+<tr><td>validate-on-match</td>
+<td></td></tr>
+
+<tr><td>no-tx-separate-pools</td>
+<td></td></tr>
+
+<tr><td>new-connection-sql</td>
+<td></td></tr>
+
+<tr><td>check-valid-connection-sql</td>
+<td></td></tr>
+
+<tr><td>valid-connection-checker-class-name</td>
+<td></td></tr>
+
+<tr><td>exception-sorter-class-name</td>
+<td></td></tr>
+
+
+<tr><td>stale-connection-checker-class-name</td>
+<td></td></tr>
+
+<tr><td>track-statements</td>
+<td></td></tr>
+
+<tr><td>prefill</td>
+<td></td></tr>
+
+<tr><td>prepared-statement-cache-size</td>
+<td></td></tr>
+
+<tr><td>share-prepared-statements</td>
+<td></td></tr>
+
+<tr><td>set-tx-query-timeout</td>
+<td></td></tr>
+
+<tr><td>query-timeout</td>
+<td></td></tr>
+
+<tr><td>use-try-lock</td>
+<td></td></tr>
+
+<tr><td>metadata</td>
+<td></td></tr>
+
+<tr><td>type-mapping</td>
+<td></td></tr>
+
+<tr><td>depends</td>
+<td></td></tr>
+
+</tbody>
+</table>
+   </body>
+</html>
+
+

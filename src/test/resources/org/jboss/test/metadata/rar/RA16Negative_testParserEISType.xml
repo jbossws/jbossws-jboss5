@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- $Id:  $ -->
+
+<connector xmlns="http://java.sun.com/xml/ns/javaee"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+           http://java.sun.com/xml/ns/j2ee/connector_1_6.xsd"
+           version="1.6" metadata-complete="true">
+
+   <vendor-name>Red Hat Middleware LLC</vendor-name>
+
+   <resourceadapter-version>6.0</resourceadapter-version>
+
+   <resourceadapter>
+   </resourceadapter>
+</connector>
