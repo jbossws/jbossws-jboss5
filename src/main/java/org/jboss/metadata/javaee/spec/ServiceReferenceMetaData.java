@@ -21,13 +21,23 @@
 */
 package org.jboss.metadata.javaee.spec;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
+import javax.jws.HandlerChain;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.namespace.QName;
+import javax.xml.ws.Service;
+import javax.xml.ws.WebServiceRef;
+import javax.xml.ws.WebServiceRefs;
 
 import org.jboss.metadata.javaee.support.MergeableMappedMetaData;
 import org.jboss.metadata.javaee.support.ResourceInjectionMetaDataWithDescriptionGroup;
@@ -75,6 +85,9 @@ public class ServiceReferenceMetaData extends ResourceInjectionMetaDataWithDescr
    private transient AnnotatedElement anElement;
    // A flag that should be set when this service-ref has been bound.
    private transient boolean processed;
+   
+   // The optional <handler-chain> element. JAX-WS handler chain declared in the JBoss JavaEE5 descriptor
+   private transient String handlerChain;
    
    /**
     * Create a new ServiceReferenceMetaData.
@@ -141,6 +154,20 @@ public class ServiceReferenceMetaData extends ResourceInjectionMetaDataWithDescr
          setAnnotatedElement(override.getAnnotatedElement());
       else if(original != null && original.getAnnotatedElement() != null)
          setAnnotatedElement(original.getAnnotatedElement());
+      if(override != null && override.getHandlerChain() != null)
+         setHandlerChain(override.getHandlerChain());
+      else if (original != null && original.getHandlerChain() != null)
+         setHandlerChain(original.getHandlerChain());
+   }
+
+   public String getHandlerChain()
+   {
+      return handlerChain;
+   }
+
+   public void setHandlerChain(String handlerChain)
+   {
+      this.handlerChain = handlerChain;
    }
 
    /**
@@ -349,6 +376,8 @@ public class ServiceReferenceMetaData extends ResourceInjectionMetaDataWithDescr
    public void setAnnotatedElement(AnnotatedElement anElement)
    {
       this.anElement = anElement;
+      this.processHandlerChainAnnotation();
+      this.processServiceRefType();
    }
 
    @XmlTransient
@@ -360,5 +389,155 @@ public class ServiceReferenceMetaData extends ResourceInjectionMetaDataWithDescr
    public void setProcessed(boolean processed)
    {
       this.processed = processed;
+   }
+
+   private void processServiceRefType()
+   {
+      if (this.anElement instanceof Field)
+      {
+         final Class<?> targetClass = ((Field) this.anElement).getType();
+         this.setServiceRefType(targetClass.getName());
+         
+         if (Service.class.isAssignableFrom(targetClass))
+            this.setServiceInterface(targetClass.getName());
+      }
+      else if (this.anElement instanceof Method)
+      {
+         final Class<?> targetClass = ((Method) this.anElement).getParameterTypes()[0];
+         this.setServiceRefType(targetClass.getName());
+
+         if (Service.class.isAssignableFrom(targetClass))
+            this.setServiceInterface(targetClass.getName());
+      }
+      else
+      {
+         final WebServiceRef serviceRefAnnotation = this.getWebServiceRefAnnotation();
+         Class<?> targetClass = null;
+         if (serviceRefAnnotation != null && (serviceRefAnnotation.type() != Object.class))
+         {
+            targetClass = serviceRefAnnotation.type();
+            this.setServiceRefType(targetClass.getName());
+
+            if (Service.class.isAssignableFrom(targetClass))
+               this.setServiceInterface(targetClass.getName());
+         }
+      }
+   }
+
+   private void processHandlerChainAnnotation()
+   {
+      final HandlerChain handlerChainAnnotation = this.getAnnotation(HandlerChain.class);
+
+      if (handlerChainAnnotation != null)
+      {
+         // Set the handlerChain from @HandlerChain on the annotated element
+         String handlerChain = null;
+         if (handlerChainAnnotation.file().length() > 0)
+            handlerChain = handlerChainAnnotation.file();
+
+         // Resolve path to handler chain
+         if (handlerChain != null)
+         {
+            try
+            {
+               new URL(handlerChain);
+            }
+            catch (MalformedURLException ignored)
+            {
+               final Class<?> declaringClass = getDeclaringClass(this.anElement);
+
+               handlerChain = declaringClass.getPackage().getName().replace('.', '/') + "/" + handlerChain;
+            }
+
+            this.setHandlerChain(handlerChain);
+         }
+      }
+   }
+
+   private Class<?> getDeclaringClass(final AnnotatedElement annotatedElement)
+   {
+      Class<?> declaringClass = null;
+      if (annotatedElement instanceof Field)
+         declaringClass = ((Field) annotatedElement).getDeclaringClass();
+      else if (annotatedElement instanceof Method)
+         declaringClass = ((Method) annotatedElement).getDeclaringClass();
+      else if (annotatedElement instanceof Class)
+         declaringClass = (Class<?>) annotatedElement;
+
+      return declaringClass;
+   }
+
+   private <T extends Annotation> T getAnnotation(Class<T> annotationClass)
+   {
+      return this.anElement != null ? (T) this.anElement.getAnnotation(annotationClass) : null;
+   }
+
+   private WebServiceRef getWebServiceRefAnnotation()
+   {
+      final WebServiceRef webServiceRefAnnotation = this.getAnnotation(WebServiceRef.class);
+      final WebServiceRefs webServiceRefsAnnotation = this.getAnnotation(WebServiceRefs.class);
+
+      if (webServiceRefAnnotation == null && webServiceRefsAnnotation == null)
+      {
+         return null;
+      }
+
+      // Build the list of @WebServiceRef relevant annotations
+      final List<WebServiceRef> wsrefList = new ArrayList<WebServiceRef>();
+
+      if (webServiceRefAnnotation != null)
+      {
+         wsrefList.add(webServiceRefAnnotation);
+      }
+
+      if (webServiceRefsAnnotation != null)
+      {
+         for (final WebServiceRef webServiceRefAnn : webServiceRefsAnnotation.value())
+         {
+            wsrefList.add(webServiceRefAnn);
+         }
+      }
+
+      // Return effective @WebServiceRef annotation
+      WebServiceRef returnValue = null;
+      if (wsrefList.size() == 1)
+      {
+         returnValue = wsrefList.get(0);
+      }
+      else
+      {
+         for (WebServiceRef webServiceRefAnn : wsrefList)
+         {
+            if (this.getServiceRefName().endsWith(webServiceRefAnn.name()))
+            {
+               returnValue = webServiceRefAnn;
+               break;
+            }
+         }
+      }
+
+      return returnValue;
+   }
+
+   private Class<?> getTargetClass()
+   {
+      Class<?> targetClass = null;
+
+      if (this.anElement instanceof Field)
+      {
+         targetClass = ((Field) this.anElement).getType();
+      }
+      else if (this.anElement instanceof Method)
+      {
+         targetClass = ((Method) this.anElement).getParameterTypes()[0];
+      }
+      else
+      {
+         final WebServiceRef serviceRefAnnotation = this.getWebServiceRefAnnotation();
+         if (serviceRefAnnotation != null && (serviceRefAnnotation.type() != Object.class))
+            targetClass = serviceRefAnnotation.type();
+      }
+
+      return targetClass;
    }
 }

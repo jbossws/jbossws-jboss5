@@ -1,0 +1,9 @@
+This subproject have been forked from
+jboss-metadata 1.0.1.GA (AS 5.1.0.GA subcomponent).
+The main purpose of this project is
+to enable JBossWS SPI clean up without
+need for deprecated methods.
+
+To build this project, just type:
+
+mvn clean package -Dmaven.test.skip=true

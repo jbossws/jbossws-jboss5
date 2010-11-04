@@ -21,13 +21,12 @@
  */
 package org.jboss.metadata.serviceref;
 
-// $Id: ServiceRefDelegate.java 65538 2007-09-21 17:29:33Z scott.stark@jboss.org $
-
 import java.util.Iterator;
 import java.util.List;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
+import javax.naming.Referenceable;
 import javax.xml.namespace.QName;
 
 import org.jboss.logging.Logger;
@@ -42,6 +41,7 @@ import org.jboss.metadata.javaee.spec.ServiceReferenceHandlerChainsMetaData;
 import org.jboss.metadata.javaee.spec.ServiceReferenceHandlerMetaData;
 import org.jboss.metadata.javaee.spec.ServiceReferenceHandlersMetaData;
 import org.jboss.metadata.javaee.spec.ServiceReferenceMetaData;
+import org.jboss.util.naming.Util;
 import org.jboss.wsf.spi.SPIProvider;
 import org.jboss.wsf.spi.SPIProviderResolver;
 import org.jboss.wsf.spi.deployment.UnifiedVirtualFile;
@@ -55,18 +55,16 @@ import org.jboss.wsf.spi.metadata.j2ee.serviceref.UnifiedServiceRefMetaData;
 import org.jboss.wsf.spi.metadata.j2ee.serviceref.UnifiedStubPropertyMetaData;
 import org.jboss.wsf.spi.serviceref.ServiceRefHandler;
 import org.jboss.wsf.spi.serviceref.ServiceRefHandlerFactory;
-import org.jboss.wsf.spi.serviceref.ServiceRefMetaData;
 
 /**
  * Utility to bind service references to JNDI
  * 
  * @author Thomas.Diesler@jboss.org
- * @since 25-Oct-2007
+ * @author <a href="mailto:ropalka@redhat.com">Richard Opalka</a>
  */
-public class ServiceReferenceHandler
+public final class ServiceReferenceHandler
 {
-   // provide logging
-   private final Logger log = Logger.getLogger(ServiceReferenceHandler.class);
+   private static final Logger log = Logger.getLogger(ServiceReferenceHandler.class);
 
    private ServiceRefHandler delegate;
 
@@ -77,21 +75,18 @@ public class ServiceReferenceHandler
          SPIProvider spiProvider = SPIProviderResolver.getInstance().getProvider();
          delegate = spiProvider.getSPI(ServiceRefHandlerFactory.class).getServiceRefHandler();
       }
-
-      if (delegate == null)
-         log.warn("ServiceRefHandler not available");
    }
 
    public void bindServiceRef(Context encCtx, String encName, UnifiedVirtualFile vfsRoot, ClassLoader loader, ServiceReferenceMetaData sref) throws NamingException
    {
-      if (delegate != null)
+      if (!sref.isProcessed())
       {
-         if (sref.isProcessed() == false)
-         {
-            ServiceRefMetaData spiRef = getUnifiedServiceRefMetaData(vfsRoot, sref);
-            delegate.bindServiceRef(encCtx, encName, vfsRoot, loader, spiRef);
-            sref.setProcessed(true);
-         }
+         final UnifiedServiceRefMetaData spiRef = getUnifiedServiceRefMetaData(vfsRoot, sref);
+         final Referenceable jndiReferenceable = delegate.createReferenceable(spiRef);
+         final String jndiFullName = encCtx.getNameInNamespace() + "/" + encName;
+         log.info("Binding service reference to [jndi=" + jndiFullName + "]");
+         Util.bind(encCtx, encName, jndiReferenceable);
+         sref.setProcessed(true);
       }
    }
 
@@ -99,13 +94,12 @@ public class ServiceReferenceHandler
    {
       UnifiedServiceRefMetaData result = new UnifiedServiceRefMetaData(vfsRoot);
       result.setServiceRefName(sref.getServiceRefName());
-      result.setServiceInterface(sref.getServiceInterface());
       result.setServiceRefType(sref.getServiceRefType());
+      result.setServiceInterface(sref.getServiceInterface());
       result.setWsdlFile(sref.getWsdlFile());
       result.setMappingFile(sref.getJaxrpcMappingFile());
       result.setServiceQName(sref.getServiceQname());
-      result.setAnnotatedElement(sref.getAnnotatedElement());
-      result.setProcessed(sref.isProcessed());
+      result.setHandlerChain(sref.getHandlerChain());
 
       List<? extends PortComponentRef> pcRefs = sref.getPortComponentRef();
       if (pcRefs != null)
@@ -159,12 +153,16 @@ public class ServiceReferenceHandler
       if (sref instanceof JBossServiceReferenceMetaData)
       {
          JBossServiceReferenceMetaData jbRef = (JBossServiceReferenceMetaData)sref;
-         result.setServiceImplClass(jbRef.getServiceClass());
+         if (jbRef.getServiceClass() != null)
+         {
+            result.setServiceImplClass(jbRef.getServiceClass());
+         }
          result.setConfigName(jbRef.getConfigName());
          result.setConfigFile(jbRef.getConfigFile());
          result.setWsdlOverride(jbRef.getWsdlOverride());
          result.setHandlerChain(jbRef.getHandlerChain());
       }
+      
       return result;
    }
 

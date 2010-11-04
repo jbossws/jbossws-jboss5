@@ -32,7 +32,7 @@ import org.jboss.metamodel.descriptor.PersistenceContextRef;
 import org.jboss.metamodel.descriptor.PersistenceUnitRef;
 import org.jboss.metamodel.descriptor.ResourceEnvRef;
 import org.jboss.metamodel.descriptor.ResourceRef;
-import org.jboss.wsf.spi.serviceref.ServiceRefMetaData;
+import org.jboss.wsf.spi.metadata.j2ee.serviceref.UnifiedServiceRefMetaData;
 
 /**
  * 
@@ -50,7 +50,7 @@ public interface Injectable
 
    Collection<ResourceRef> getResourceRefs();
 
-   Collection<ServiceRefMetaData> getServiceRefs();
+   Collection<UnifiedServiceRefMetaData> getServiceRefs();
 
    Collection<MessageDestinationRef> getMessageDestinationRefs();
 

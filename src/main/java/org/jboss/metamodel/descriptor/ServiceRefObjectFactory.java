@@ -45,12 +45,11 @@ public abstract class ServiceRefObjectFactory implements ObjectModelFactory
 
    public Object newChild(ServiceRefElement ref, UnmarshallingContext navigator, String namespaceURI, String localName, Attributes attrs)
    {
-      return new ServiceRefDelegate().newChild(ref, navigator, namespaceURI, localName, attrs);
+      return null;
    }
 
    public void setValue(ServiceRefElement ref, UnmarshallingContext navigator, String namespaceURI, String localName, String value)
    {
-      new ServiceRefDelegate().setValue(ref, navigator, namespaceURI, localName, value);
    }
    
    public static boolean isJ2EE14Descriptor(Element element)

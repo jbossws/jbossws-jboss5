@@ -28,6 +28,7 @@ import java.util.List;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
+import javax.naming.Referenceable;
 
 import org.jboss.logging.Logger;
 import org.jboss.wsf.spi.SPIProvider;
@@ -36,7 +37,7 @@ import org.jboss.wsf.spi.deployment.UnifiedVirtualFile;
 import org.jboss.wsf.spi.serviceref.ServiceRefElement;
 import org.jboss.wsf.spi.serviceref.ServiceRefHandler;
 import org.jboss.wsf.spi.serviceref.ServiceRefHandlerFactory;
-import org.jboss.wsf.spi.serviceref.ServiceRefMetaData;
+import org.jboss.wsf.spi.metadata.j2ee.serviceref.UnifiedServiceRefMetaData;
 import org.jboss.xb.binding.UnmarshallingContext;
 import org.w3c.dom.Element;
 import org.xml.sax.Attributes;
@@ -50,110 +51,16 @@ import org.xml.sax.Attributes;
 @Deprecated
 public class ServiceRefDelegate implements ServiceRefHandler
 {
-   // provide logging
-   private static final Logger log = Logger.getLogger(ServiceRefDelegate.class);
-
-   private static ServiceRefHandler delegate;
-
    public ServiceRefDelegate()
    {
-      if (delegate == null)
-      {
-         SPIProvider spiProvider = SPIProviderResolver.getInstance().getProvider();
-         delegate = spiProvider.getSPI(ServiceRefHandlerFactory.class).getServiceRefHandler();
-      }
-
-      if (delegate == null)
-         log.warn("ServiceRefHandler not available");
    }
 
-   public ServiceRefMetaData newServiceRefMetaData()
+   public Referenceable createReferenceable(UnifiedServiceRefMetaData serviceRefUMDM)
    {
-      ServiceRefMetaData sref;
-      if (delegate != null)
-         sref = delegate.newServiceRefMetaData();
-      else
-         sref = new DummyServiceRef();
-      return sref;
+      throw new UnsupportedOperationException("Not supported in AS 5 MD");
    }
-
-   public Object newChild(ServiceRefElement ref, UnmarshallingContext navigator, String namespaceURI, String localName, Attributes attrs)
+   public UnifiedServiceRefMetaData newServiceRefMetaData()
    {
-      Object child = null;
-      if (delegate != null)
-         child = delegate.newChild(ref, navigator, namespaceURI, localName, attrs);
-      return child;
-   }
-
-   public void setValue(ServiceRefElement ref, UnmarshallingContext navigator, String namespaceURI, String localName, String value)
-   {
-      if (delegate != null)
-         delegate.setValue(ref, navigator, namespaceURI, localName, value);
-   }
-
-   public void bindServiceRef(Context encCtx, String encName, UnifiedVirtualFile vfsRoot, ClassLoader loader, ServiceRefMetaData sref) throws NamingException
-   {
-      if (delegate != null)
-         delegate.bindServiceRef(encCtx, encName, vfsRoot, loader, sref);
-   }
-
-   public static class DummyServiceRef extends ServiceRefMetaData
-   {
-      private String refName;
-
-
-      public List<String[]> getInjectionTargets()
-      {
-         return new ArrayList<String[]>();  
-      }
-
-      @Override
-      public void setServiceRefName(String name)
-      {
-         this.refName = name;
-      }
-
-      @Override
-      public String getServiceRefName()
-      {
-         return refName;
-      }
-
-      @Override
-      public Object getAnnotatedElement()
-      {
-         return null;
-      }
-
-      @Override
-      public void setAnnotatedElement(Object anElement)
-      {
-      }
-
-      @Override
-      public void importJBossXml(Element element)
-      {
-      }
-
-      @Override
-      public void importStandardXml(Element element)
-      {
-      }
-
-      @Override
-      public boolean isProcessed()
-      {
-         return false;
-      }
-
-      @Override
-      public void setProcessed(boolean flag)
-      {
-      }
-
-      @Override
-      public void merge(ServiceRefMetaData serviceRef)
-      {
-      }
+      throw new UnsupportedOperationException("This have been deprecated");
    }
 }
