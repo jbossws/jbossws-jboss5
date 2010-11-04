@@ -37,7 +37,7 @@ import org.jboss.metamodel.descriptor.ResourceEnvRef;
 import org.jboss.metamodel.descriptor.ResourceRef;
 import org.jboss.util.StringPropertyReplacer;
 import org.jboss.util.xml.JBossEntityResolver;
-import org.jboss.wsf.spi.serviceref.ServiceRefMetaData;
+import org.jboss.wsf.spi.metadata.j2ee.serviceref.UnifiedServiceRefMetaData;
 import org.jboss.xb.binding.JBossXBException;
 import org.jboss.xb.binding.ObjectModelFactory;
 import org.jboss.xb.binding.Unmarshaller;
@@ -716,13 +716,13 @@ public class JBossDDObjectFactory extends DDObjectFactory
    /**
     * Called when parsing character is complete.
     */
-   public void addChild(EnterpriseBeans parent, ServiceRefMetaData sref, UnmarshallingContext navigator, String namespaceURI, String localName)
+   public void addChild(EnterpriseBeans parent, UnifiedServiceRefMetaData sref, UnmarshallingContext navigator, String namespaceURI, String localName)
    {
       String refName = sref.getServiceRefName();
       if (refName == null)
          throw new IllegalStateException("Invalid service-ref-name: " + refName);
 
-      ServiceRefMetaData targetRef = parent.getServiceRef(refName);
+      UnifiedServiceRefMetaData targetRef = parent.getServiceRef(refName);
       if (targetRef == null)
       {
          log.debug("Cannot find <service-ref> with name: " + refName);
@@ -730,7 +730,7 @@ public class JBossDDObjectFactory extends DDObjectFactory
       }
       else
       {
-         targetRef.merge(sref);
+         //targetRef.merge(sref);
       }
    }
 

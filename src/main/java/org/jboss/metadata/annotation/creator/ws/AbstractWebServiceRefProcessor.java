@@ -23,9 +23,12 @@ package org.jboss.metadata.annotation.creator.ws;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Set;
 
+import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceRef;
 
 import org.jboss.logging.Logger;
@@ -109,11 +112,32 @@ public abstract class AbstractWebServiceRefProcessor<E extends AnnotatedElement>
       if(annotation.wsdlLocation().length() > 0)
          ref.setWsdlFile(annotation.wsdlLocation());
       if(annotation.type() != Object.class)
+      {
          ref.setServiceRefType(annotation.type().getName());
+      }
       else
          ref.setServiceRefType(getType(element));
-      if(annotation.value() != Object.class)
+
+      if(annotation.value() != Service.class)
+      {
          ref.setServiceInterface(annotation.value().getName());
+      }
+      else if (element instanceof Field)
+      {
+         final Class<?> targetClass = ((Field) element).getType();
+         if (Service.class.isAssignableFrom(targetClass))
+            ref.setServiceInterface(targetClass.getName());
+      }
+      else if (element instanceof Method)
+      {
+         final Class<?> targetClass = ((Method) element).getParameterTypes()[0];
+         if (Service.class.isAssignableFrom(targetClass))
+            ref.setServiceInterface(targetClass.getName());
+      }
+      else
+      {
+         ref.setServiceInterface(Service.class.getName());
+      }
       
       String injectionName = getInjectionName(element);
       Set<ResourceInjectionTargetMetaData> injectionTargets = ProcessorUtils.getInjectionTargets(injectionName, element);

@@ -35,7 +35,7 @@ import org.jboss.metamodel.descriptor.JndiRef;
 import org.jboss.metamodel.descriptor.MessageDestinationRef;
 import org.jboss.metamodel.descriptor.ResourceEnvRef;
 import org.jboss.metamodel.descriptor.ResourceRef;
-import org.jboss.wsf.spi.serviceref.ServiceRefMetaData;
+import org.jboss.wsf.spi.metadata.j2ee.serviceref.UnifiedServiceRefMetaData;
 
 /**
  * Represents EJB elements of the ejb-jar.xml deployment descriptor for the 1.4
@@ -114,12 +114,12 @@ public class EnterpriseBeans
       currentEjb.mergeMessageDestinationRef(ref);
    }
 
-   public void addServiceRef(ServiceRefMetaData ref)
+   public void addServiceRef(UnifiedServiceRefMetaData ref)
    {
       currentEjb.addServiceRef(ref);
    }
 
-   public ServiceRefMetaData getServiceRef(String name)
+   public UnifiedServiceRefMetaData getServiceRef(String name)
    {
       return currentEjb.getServiceRef(name);
    }

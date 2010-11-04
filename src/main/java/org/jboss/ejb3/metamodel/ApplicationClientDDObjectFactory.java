@@ -30,7 +30,7 @@ import org.jboss.metamodel.descriptor.EjbRef;
 import org.jboss.metamodel.descriptor.EnvEntry;
 import org.jboss.metamodel.descriptor.MessageDestinationRef;
 import org.jboss.util.xml.JBossEntityResolver;
-import org.jboss.wsf.spi.serviceref.ServiceRefMetaData;
+import org.jboss.wsf.spi.metadata.j2ee.serviceref.UnifiedServiceRefMetaData;
 import org.jboss.xb.binding.JBossXBException;
 import org.jboss.xb.binding.Unmarshaller;
 import org.jboss.xb.binding.UnmarshallerFactory;
@@ -107,7 +107,7 @@ public class ApplicationClientDDObjectFactory extends DDObjectFactory
       parent.addMessageDestinationRef(ref);
    }
 
-   public void addChild(ApplicationClientDD parent, ServiceRefMetaData serviceref,
+   public void addChild(ApplicationClientDD parent, UnifiedServiceRefMetaData serviceref,
                         UnmarshallingContext navigator, String namespaceURI, String localName)
    {
       parent.addServiceRef(serviceref);

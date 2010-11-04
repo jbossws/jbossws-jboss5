@@ -40,7 +40,7 @@ import org.jboss.metamodel.descriptor.SecurityRole;
 import org.jboss.metamodel.descriptor.SecurityRoleRef;
 import org.jboss.util.StringPropertyReplacer;
 import org.jboss.util.xml.JBossEntityResolver;
-import org.jboss.wsf.spi.serviceref.ServiceRefMetaData;
+import org.jboss.wsf.spi.metadata.j2ee.serviceref.UnifiedServiceRefMetaData;
 import org.jboss.xb.binding.JBossXBException;
 import org.jboss.xb.binding.ObjectModelFactory;
 import org.jboss.xb.binding.Unmarshaller;
@@ -670,7 +670,7 @@ public class EjbJarDDObjectFactory extends DDObjectFactory
       parent.addResourceRef(envRef);
    }
 
-   public void addChild(MessageDrivenBean parent, ServiceRefMetaData envRef, UnmarshallingContext navigator, String namespaceURI, String localName)
+   public void addChild(MessageDrivenBean parent, UnifiedServiceRefMetaData envRef, UnmarshallingContext navigator, String namespaceURI, String localName)
    {
       parent.addServiceRef(envRef);
    }
@@ -771,7 +771,7 @@ public class EjbJarDDObjectFactory extends DDObjectFactory
    /**
     * Called when parsing character is complete.
     */
-   public void addChild(SessionEnterpriseBean parent, ServiceRefMetaData envRef, UnmarshallingContext navigator, String namespaceURI, String localName)
+   public void addChild(SessionEnterpriseBean parent, UnifiedServiceRefMetaData envRef, UnmarshallingContext navigator, String namespaceURI, String localName)
    {
       parent.addServiceRef(envRef);
    }
@@ -1037,7 +1037,7 @@ public class EjbJarDDObjectFactory extends DDObjectFactory
    /**
     * Called when parsing character is complete.
     */
-   public void addChild(Interceptor parent, ServiceRefMetaData ref, UnmarshallingContext navigator, String namespaceURI, String localName)
+   public void addChild(Interceptor parent, UnifiedServiceRefMetaData ref, UnmarshallingContext navigator, String namespaceURI, String localName)
    {
       parent.addServiceRef(ref);
    }

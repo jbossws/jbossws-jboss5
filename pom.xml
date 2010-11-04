@@ -111,7 +111,7 @@
     <dependency>
       <groupId>org.jboss.ws</groupId>
       <artifactId>jbossws-spi</artifactId>
-      <version>1.0.6.GA</version>
+      <version>1.4.0.CR3</version>
     </dependency>
     
     <dependency>

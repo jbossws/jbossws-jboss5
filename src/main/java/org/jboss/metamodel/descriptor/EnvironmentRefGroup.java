@@ -28,7 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.jboss.logging.Logger;
-import org.jboss.wsf.spi.serviceref.ServiceRefMetaData;
+import org.jboss.wsf.spi.metadata.j2ee.serviceref.UnifiedServiceRefMetaData;
 
 /**
  * @author <a href="mailto:bdecoste@jboss.com">William DeCoste</a>
@@ -46,7 +46,7 @@ public abstract class EnvironmentRefGroup
    protected HashMap<String, MessageDestinationRef> messageDestinationRefs = new HashMap<String, MessageDestinationRef>();
    /** An index of MessageDestinationRef keyed by message-destination-link values */
    protected HashMap<String, MessageDestinationRef> messageDestinationRefsByLink = new HashMap<String, MessageDestinationRef>();
-   protected HashMap<String, ServiceRefMetaData> serviceRefs = new LinkedHashMap<String, ServiceRefMetaData>();
+   protected HashMap<String, UnifiedServiceRefMetaData> serviceRefs = new LinkedHashMap<String, UnifiedServiceRefMetaData>();
    protected HashMap<String, JndiRef> jndiRefs = new HashMap<String, JndiRef>();
    protected List<PersistenceContextRef> persistenceContextRefs = new ArrayList<PersistenceContextRef>();
    protected List<PersistenceUnitRef> persistenceUnitRefs = new ArrayList<PersistenceUnitRef>();
@@ -127,17 +127,17 @@ public abstract class EnvironmentRefGroup
       jndiRefs.put(ref.getJndiRefName(), ref);
    }
    
-   public Collection<ServiceRefMetaData> getServiceRefs()
+   public Collection<UnifiedServiceRefMetaData> getServiceRefs()
    {
       return serviceRefs.values();
    }
 
-   public void addServiceRef(ServiceRefMetaData ref)
+   public void addServiceRef(UnifiedServiceRefMetaData ref)
    {
       serviceRefs.put(ref.getServiceRefName(), ref);
    }
    
-   public ServiceRefMetaData getServiceRef(String name)
+   public UnifiedServiceRefMetaData getServiceRef(String name)
    {
       return serviceRefs.get(name);
    }
