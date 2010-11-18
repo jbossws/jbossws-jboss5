@@ -24,8 +24,8 @@
 
   <!-- Properties -->
   <properties>
-    <jbossws.common.version>1.4.0-SNAPSHOT</jbossws.common.version>
-    <jbossws.spi.version>1.4.0-SNAPSHOT</jbossws.spi.version>
+    <jbossws.common.version>1.4.1-SNAPSHOT</jbossws.common.version>
+    <jbossws.spi.version>1.4.1-SNAPSHOT</jbossws.spi.version>
 
     <!--
       JBoss component versions taken from
